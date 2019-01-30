@@ -1,0 +1,561 @@
+{
+	"partitions" : [
+		{
+			"name" : "Top",
+			"pins" : [
+				{
+					"name" : "HEX0_out[0]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX0_out[1]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX0_out[2]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX0_out[3]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX0_out[4]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX0_out[5]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX0_out[6]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX1_out[0]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX1_out[1]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX1_out[2]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX1_out[3]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX1_out[4]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX1_out[5]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX1_out[6]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX2_out[0]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX2_out[1]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX2_out[2]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX2_out[3]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX2_out[4]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX2_out[5]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX2_out[6]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX3_out[0]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX3_out[1]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX3_out[2]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX3_out[3]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX3_out[4]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX3_out[5]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX3_out[6]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX4_out[0]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX4_out[1]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX4_out[2]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX4_out[3]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX4_out[4]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX4_out[5]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX4_out[6]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX5_out[0]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX5_out[1]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX5_out[2]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX5_out[3]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX5_out[4]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX5_out[5]",
+					"strict" : false
+				},
+				{
+					"name" : "HEX5_out[6]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR0_out[0]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR0_out[1]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR0_out[2]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR0_out[3]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR0_out[4]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR0_out[5]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR0_out[6]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR0_out[7]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR1_out[0]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR1_out[1]",
+					"strict" : false
+				},
+				{
+					"name" : "TXD",
+					"strict" : false
+				},
+				{
+					"name" : "FL_RST_N",
+					"strict" : false
+				},
+				{
+					"name" : "FL_WE_N",
+					"strict" : false
+				},
+				{
+					"name" : "FL_OE_N",
+					"strict" : false
+				},
+				{
+					"name" : "FL_CE_N",
+					"strict" : false
+				},
+				{
+					"name" : "TDO",
+					"strict" : false
+				},
+				{
+					"name" : "LCD_RW",
+					"strict" : false
+				},
+				{
+					"name" : "LCD_EN",
+					"strict" : false
+				},
+				{
+					"name" : "LCD_RS",
+					"strict" : false
+				},
+				{
+					"name" : "LCD_ON",
+					"strict" : false
+				},
+				{
+					"name" : "AD7928_MOSI",
+					"strict" : false
+				},
+				{
+					"name" : "AD7928_SCLK",
+					"strict" : false
+				},
+				{
+					"name" : "AD7928_EN",
+					"strict" : false
+				},
+				{
+					"name" : "P0[0]",
+					"strict" : false
+				},
+				{
+					"name" : "P0[1]",
+					"strict" : false
+				},
+				{
+					"name" : "P0[2]",
+					"strict" : false
+				},
+				{
+					"name" : "P0[3]",
+					"strict" : false
+				},
+				{
+					"name" : "P0[4]",
+					"strict" : false
+				},
+				{
+					"name" : "P0[5]",
+					"strict" : false
+				},
+				{
+					"name" : "P0[6]",
+					"strict" : false
+				},
+				{
+					"name" : "P0[7]",
+					"strict" : false
+				},
+				{
+					"name" : "P1[0]",
+					"strict" : false
+				},
+				{
+					"name" : "P1[1]",
+					"strict" : false
+				},
+				{
+					"name" : "P1[2]",
+					"strict" : false
+				},
+				{
+					"name" : "P1[3]",
+					"strict" : false
+				},
+				{
+					"name" : "P1[4]",
+					"strict" : false
+				},
+				{
+					"name" : "P1[5]",
+					"strict" : false
+				},
+				{
+					"name" : "P1[6]",
+					"strict" : false
+				},
+				{
+					"name" : "P1[7]",
+					"strict" : false
+				},
+				{
+					"name" : "P2[0]",
+					"strict" : false
+				},
+				{
+					"name" : "P2[1]",
+					"strict" : false
+				},
+				{
+					"name" : "P2[2]",
+					"strict" : false
+				},
+				{
+					"name" : "P2[3]",
+					"strict" : false
+				},
+				{
+					"name" : "P2[4]",
+					"strict" : false
+				},
+				{
+					"name" : "P2[5]",
+					"strict" : false
+				},
+				{
+					"name" : "P2[6]",
+					"strict" : false
+				},
+				{
+					"name" : "P2[7]",
+					"strict" : false
+				},
+				{
+					"name" : "P3[0]",
+					"strict" : false
+				},
+				{
+					"name" : "P3[1]",
+					"strict" : false
+				},
+				{
+					"name" : "P3[2]",
+					"strict" : false
+				},
+				{
+					"name" : "P3[3]",
+					"strict" : false
+				},
+				{
+					"name" : "P3[4]",
+					"strict" : false
+				},
+				{
+					"name" : "P3[5]",
+					"strict" : false
+				},
+				{
+					"name" : "P3[6]",
+					"strict" : false
+				},
+				{
+					"name" : "P3[7]",
+					"strict" : false
+				},
+				{
+					"name" : "FL_DQ[0]",
+					"strict" : false
+				},
+				{
+					"name" : "FL_DQ[1]",
+					"strict" : false
+				},
+				{
+					"name" : "FL_DQ[2]",
+					"strict" : false
+				},
+				{
+					"name" : "FL_DQ[3]",
+					"strict" : false
+				},
+				{
+					"name" : "FL_DQ[4]",
+					"strict" : false
+				},
+				{
+					"name" : "FL_DQ[5]",
+					"strict" : false
+				},
+				{
+					"name" : "FL_DQ[6]",
+					"strict" : false
+				},
+				{
+					"name" : "FL_DQ[7]",
+					"strict" : false
+				},
+				{
+					"name" : "LCD_DATA[0]",
+					"strict" : false
+				},
+				{
+					"name" : "LCD_DATA[1]",
+					"strict" : false
+				},
+				{
+					"name" : "LCD_DATA[2]",
+					"strict" : false
+				},
+				{
+					"name" : "LCD_DATA[3]",
+					"strict" : false
+				},
+				{
+					"name" : "LCD_DATA[4]",
+					"strict" : false
+				},
+				{
+					"name" : "LCD_DATA[5]",
+					"strict" : false
+				},
+				{
+					"name" : "LCD_DATA[6]",
+					"strict" : false
+				},
+				{
+					"name" : "LCD_DATA[7]",
+					"strict" : false
+				},
+				{
+					"name" : "RstIn",
+					"strict" : false
+				},
+				{
+					"name" : "TCK",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR0_in[0]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR1_in[0]",
+					"strict" : false
+				},
+				{
+					"name" : "KEY[0]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR0_in[1]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR1_in[1]",
+					"strict" : false
+				},
+				{
+					"name" : "KEY[1]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR0_in[2]",
+					"strict" : false
+				},
+				{
+					"name" : "KEY[2]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR0_in[3]",
+					"strict" : false
+				},
+				{
+					"name" : "KEY[3]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR0_in[4]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR0_in[5]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR0_in[6]",
+					"strict" : false
+				},
+				{
+					"name" : "LEDR0_in[7]",
+					"strict" : false
+				},
+				{
+					"name" : "TCS",
+					"strict" : false
+				},
+				{
+					"name" : "INT0",
+					"strict" : false
+				},
+				{
+					"name" : "RXD",
+					"strict" : false
+				},
+				{
+					"name" : "INT1",
+					"strict" : false
+				},
+				{
+					"name" : "T1",
+					"strict" : false
+				},
+				{
+					"name" : "T0",
+					"strict" : false
+				},
+				{
+					"name" : "T2EX",
+					"strict" : false
+				},
+				{
+					"name" : "T2",
+					"strict" : false
+				},
+				{
+					"name" : "TDI",
+					"strict" : false
+				}
+			]
+		}
+	]
+}

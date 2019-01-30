@@ -1,0 +1,192 @@
+<MODULE>
+step
+</MODULE>
+
+<OPTC51>
+--model-small
+</OPTC51>
+
+<SEGMENTS>
+R_GSINIT,code,0000,NO
+R_BSEG,bit,0000,NO
+R_XSEG,xdata,0000,NO
+BIT_BANK,data,0000,OV
+R_CONST,code,0000,NO
+rbank0,data,0000,OV
+R_PSEG,xdata,0000,NO
+R_DINIT,code,0000,NO
+R_DSEG,data,0000,NO
+R_OSEG,data,0000,OV
+R_IXSEG,xdata,0000,NO
+R_ISEG,idata,0000,NO
+R_HOME,code,0000,NO
+R_XINIT,code,0000,NO
+R_CSEG,code,00BB,NO
+</SEGMENTS>
+
+<LOCALS>
+ds_2,R_CSEG,00AF,0000
+ds_l,R_CSEG,0067,0000
+sab_l,R_CSEG,004C,0000
+</LOCALS>
+
+<PUBLICS>
+_dostep,R_CSEG,0062,0000
+_step_and_break,R_CSEG,0000,0000
+</PUBLICS>
+
+<EXTERNALS>
+_PC_save,any,0000,0000
+_main,any,0000,0000
+_A_save,any,0000,0000
+_step_start,any,0000,0000
+__c51_external_startup,any,0000,0000
+_SP_save,any,0000,0000
+_PSW_save,any,0000,0000
+_gotbreak,any,0000,0000
+_gostep,any,0000,0000
+_stack_start,any,0000,0000
+_DPH_save,any,0000,0000
+_IE_save,any,0000,0000
+_DPL_save,any,0000,0000
+_B_save,any,0000,0000
+_iram_save,any,0000,0000
+</EXTERNALS>
+
+<CODE AT 0000>
+</CODE>
+
+<CODE R_HOME>
+</CODE>
+
+<CODE R_GSINIT>
+</CODE>
+
+<CODE R_CSEG>
+</CODE>
+
+<CODE AT C003>
+02 addr16(_step_and_break;)  
+</CODE>
+
+<CODE R_HOME>
+</CODE>
+
+<CODE R_GSINIT>
+</CODE>
+
+<CODE R_GSINIT>
+</CODE>
+
+<CODE R_DINIT>
+</CODE>
+
+<CODE R_CSEG>
+75 FC 00
+C0 A8
+75 A8 00
+C2 AF
+C0 83
+C0 82
+90 data16(_A_save;)  
+F0
+90 data16(_PSW_save;)  
+E5 D0
+F0
+90 data16(_B_save;)  
+E5 F0
+F0
+90 data16(_DPL_save;)  
+D0 E0
+F0
+90 data16(_DPH_save;)  
+D0 E0
+F0
+90 data16(_IE_save;)  
+D0 E0
+F0
+90 data16(_PC_save;0x0001;+;)  
+D0 E0
+F0
+90 data16(_PC_save;)  
+D0 E0
+F0
+90 data16(_SP_save;)  
+E5 81
+F0
+90 data16(_iram_save;)  
+75 D0 00
+E8
+F0
+78 01
+A3
+E6
+F0
+08
+B8 80 rel3(sab_l;)
+90 data16(_gotbreak;)  
+74 01
+F0
+75 81 data8(_stack_start;0x0001;-;)
+12 addr16(__c51_external_startup;)  
+02 addr16(_main;)  
+78 7F
+90 data16(_iram_save;0x007F;+;)  
+E0
+F6
+15 82
+D8 rel2(ds_l;)
+E0
+F6
+90 data16(_IE_save;)  
+E0
+F5 A8
+90 data16(_B_save;)  
+E0
+F5 F0
+90 data16(_PSW_save;)  
+E0
+F5 D0
+90 data16(_SP_save;)  
+E0
+F5 81
+90 data16(_step_start;)  
+E0
+C0 E0
+A3
+E0
+C0 E0
+90 data16(_DPL_save;)  
+E0
+C0 E0
+90 data16(_DPH_save;)  
+E0
+C0 E0
+90 data16(_gostep;)  
+E0
+60 rel2(ds_2;)
+90 data16(_A_save;)  
+E0
+D0 83
+D0 82
+75 FC 10
+32
+90 data16(_A_save;)  
+E0
+D0 83
+D0 82
+75 FC 20
+32
+</CODE>
+
+<CODE R_CSEG>
+</CODE>
+
+<CODE R_XINIT>
+</CODE>
+
+<CODE R_CONST>
+</CODE>
+
+<CODE AT C006>
+</CODE>

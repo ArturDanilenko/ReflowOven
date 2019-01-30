@@ -1,0 +1,1095 @@
+<MODULE>
+CV_Boot_SPI
+</MODULE>
+
+<OPTC51>
+--model-small
+</OPTC51>
+
+<SEGMENTS>
+R_GSINIT,code,071E,NO
+R_BSEG,bit,0001,NO
+R_XSEG,xdata,0000,NO
+BIT_BANK,data,0000,OV
+R_CONST,code,0025,NO
+rbank0,data,0000,OV
+R_PSEG,xdata,0000,NO
+R_DINIT,code,0002,NO
+R_DSEG,data,000E,NO
+R_OSEG,data,0003,OV
+R_IXSEG,xdata,0000,NO
+R_ISEG,idata,0040,NO
+R_HOME,code,0000,NO
+R_XINIT,code,0000,NO
+R_CSEG,code,0000,NO
+</SEGMENTS>
+
+<LOCALS>
+_loadintelhex_n_1_103,R_DSEG,000C,0001
+forever?home?,R_GSINIT,0054,0000
+_str2hex_sloc0_1_0,R_OSEG,0001,0002
+L021017?,R_GSINIT,03FB,0000
+L021013?,R_GSINIT,03F2,0000
+L021012?,R_GSINIT,03ED,0000
+SPIBIT,R_GSINIT,0000,0000
+L006018?,R_GSINIT,00EE,0000
+L006017?,R_GSINIT,00E6,0000
+L025058?,R_GSINIT,0543,0000
+L021025?,R_GSINIT,038E,0000
+L021022?,R_GSINIT,036A,0000
+L021020?,R_GSINIT,030E,0000
+L025067?,R_GSINIT,05A0,0000
+L025066?,R_GSINIT,059D,0000
+L022015?,R_GSINIT,04A5,0000
+L022013?,R_GSINIT,041B,0000
+L022011?,R_GSINIT,047C,0000
+L022010?,R_GSINIT,0443,0000
+L021048?,R_GSINIT,03B6,0000
+L021047?,R_GSINIT,03B1,0000
+L021046?,R_GSINIT,03AC,0000
+L025076?,R_GSINIT,0629,0000
+L022027?,R_GSINIT,042A,0000
+L025075?,R_GSINIT,061D,0000
+L007011?,R_GSINIT,00F6,0000
+XInitLoop?done?,R_GSINIT,0033,0000
+L025073?,R_GSINIT,0611,0000
+XInitLoop?repeat?,R_GSINIT,001D,0000
+L025072?,R_GSINIT,0604,0000
+L021041?,R_GSINIT,031E,0000
+_loadintelhex_type_1_103,R_DSEG,000A,0001
+L025071?,R_GSINIT,05F8,0000
+L021040?,R_GSINIT,031B,0000
+__c51_program_startup,R_GSINIT,0051,0000
+L004001?,R_GSINIT,00C1,0000
+_loadintelhex_address_1_103,R_DSEG,0006,0002
+L022034?,R_GSINIT,04A2,0000
+L026060?,R_GSINIT,06C8,0000
+L017004?,R_GSINIT,026B,0000
+L017001?,R_GSINIT,0246,0000
+L021009?,R_GSINIT,03E6,0000
+L021008?,R_GSINIT,03E2,0000
+L021007?,R_GSINIT,03D7,0000
+L021006?,R_GSINIT,03C0,0000
+L021004?,R_GSINIT,03A1,0000
+L021002?,R_GSINIT,0384,0000
+load_next_byte,R_GSINIT,0290,0000
+_loadintelhex_checksum_1_103,R_DSEG,000B,0001
+L006006?,R_GSINIT,00E9,0000
+L006001?,R_GSINIT,00E1,0000
+L025015?,R_GSINIT,05EC,0000
+L025013?,R_GSINIT,0560,0000
+L025010?,R_GSINIT,0578,0000
+L022006?,R_GSINIT,0465,0000
+L025028?,R_GSINIT,060B,0000
+L010002?,R_GSINIT,014C,0000
+L007005?,R_GSINIT,0104,0000
+L025020?,R_GSINIT,0611,0000
+L007001?,R_GSINIT,00F1,0000
+L025039?,R_GSINIT,05E4,0000
+L025036?,R_GSINIT,05B1,0000
+L025034?,R_GSINIT,04EE,0000
+L026015?,R_GSINIT,0695,0000
+L026014?,R_GSINIT,0686,0000
+XClearLoop?repeat?,R_GSINIT,0040,0000
+L025031?,R_GSINIT,05E9,0000
+L026010?,R_GSINIT,0680,0000
+_loadintelhex_j_1_103,R_DSEG,0008,0001
+L026027?,R_GSINIT,06EC,0000
+__str_0,R_CONST,0011,0000
+L026026?,R_GSINIT,071B,0000
+_loadintelhex_size_1_103,R_DSEG,0009,0001
+L026025?,R_GSINIT,06BC,0000
+L026021?,R_GSINIT,06CC,0000
+L021052?,R_GSINIT,0405,0000
+L021051?,R_GSINIT,0402,0000
+L026030?,R_GSINIT,0717,0000
+_loadintelhex_echo_1_103,R_DSEG,000D,0001
+L009004?,R_GSINIT,0141,0000
+L009001?,R_GSINIT,011C,0000
+XClearLoop?done?,R_GSINIT,004E,0000
+L025007?,R_GSINIT,0593,0000
+L025001?,R_GSINIT,0543,0000
+L026009?,R_GSINIT,066B,0000
+_getbyte_j_1_83,R_DSEG,0000,0001
+L026005?,R_GSINIT,0653,0000
+L026002?,R_GSINIT,063E,0000
+__c51_init_data,R_GSINIT,000D,0000
+</LOCALS>
+
+<PUBLICS>
+_str2hex,R_GSINIT,0411,0000
+_main,R_GSINIT,0630,0000
+_buff,R_ISEG,0000,0040
+_Write_XRAM_PARM_2,R_OSEG,0000,0001
+_loadintelhex,R_GSINIT,030E,0000
+_seven_seg,R_CONST,0015,0000
+_getchare,R_GSINIT,0107,0000
+_inituart,R_GSINIT,00CF,0000
+_OutByte,R_GSINIT,04AA,0000
+_getbyte,R_GSINIT,0152,0000
+_Write_XRAM,R_GSINIT,01C9,0000
+_OutWord,R_GSINIT,04C9,0000
+_Load_Ram_Fast_and_Run,R_GSINIT,02D2,0000
+_sends,R_GSINIT,0116,0000
+_dummy_switch,R_GSINIT,071E,0000
+_FlashBuff,R_GSINIT,0210,0000
+_Copy_Flash_to_RAM,R_GSINIT,0270,0000
+_hexval,R_CONST,0000,0000
+_Check_WIP,R_GSINIT,00B9,0000
+_getchar,R_GSINIT,00F1,0000
+_chartohex,R_GSINIT,0142,0000
+_FlashByte,R_GSINIT,01D1,0000
+_de2_8052_crt0,R_CSEG,0000,0000
+_EraseSector,R_GSINIT,01A0,0000
+_In_Byte_Flash,R_GSINIT,016D,0000
+_getchar_echo,R_BSEG,0000,0001
+_Read_XRAM,R_GSINIT,01CD,0000
+_crt0,R_GSINIT,0000,0000
+_putchar,R_GSINIT,00DC,0000
+_DoSPI,R_GSINIT,0056,0000
+_Load_Ram_Fast_and_Run_Debugger,R_GSINIT,02ED,0000
+_FlashBuff_PARM_2,R_DSEG,0002,0003
+_FlashBuff_PARM_3,R_DSEG,0005,0001
+_FlashByte_PARM_2,R_DSEG,0001,0001
+_Manual_Load,R_GSINIT,04E1,0000
+</PUBLICS>
+
+<EXTERNALS>
+_R_IXSEG_start,any,0000,0000
+__gptrget,any,0000,0000
+_R_IXSEG_size,any,0000,0000
+_R_DINIT_start,any,0000,0000
+__c51_external_startup,any,0000,0000
+_R_XSEG_size,any,0000,0000
+_R_XINIT_start,any,0000,0000
+_stack_start,any,0000,0000
+_R_XSEG_start,any,0000,0000
+</EXTERNALS>
+
+<CODE AT 0000>
+</CODE>
+
+<CODE R_HOME>
+</CODE>
+
+<CODE R_GSINIT>
+</CODE>
+
+<CODE R_CSEG>
+</CODE>
+
+<CODE AT F000>
+02 addr16(_crt0;)  
+</CODE>
+
+<CODE R_HOME>
+</CODE>
+
+<CODE R_GSINIT>
+</CODE>
+
+<CODE R_GSINIT>
+</CODE>
+
+<CODE R_DINIT>
+C2 bit(_getchar_echo;)
+</CODE>
+
+<CODE R_CSEG>
+</CODE>
+
+<CODE R_GSINIT>
+75 81 data8(_stack_start;0x0001;-;)
+12 addr16(__c51_external_startup;)  
+E5 82
+60 rel2(__c51_init_data;)
+02 addr16(__c51_program_startup;)  
+75 82 data8(_R_XINIT_start;)
+75 83 data8(_R_XINIT_start;0x0008;>>;)
+75 84 data8(_R_IXSEG_start;)
+75 85 data8(_R_IXSEG_start;0x0008;>>;)
+78 data8(_R_IXSEG_size;)
+79 data8(_R_IXSEG_size;0x0008;>>;)
+E8
+49
+60 rel2(XInitLoop?done?;)
+E4
+75 86 00
+93
+A3
+75 86 01
+F0
+A3
+18
+B8 FF rel3(XInitLoop?repeat?;)
+19
+80 rel2(XInitLoop?repeat?;)
+75 86 00
+75 82 data8(_R_XSEG_start;)
+75 83 data8(_R_XSEG_start;0x0008;>>;)
+7C data8(_R_XSEG_size;)
+7D data8(_R_XSEG_size;0x0008;>>;)
+EC
+4D
+60 rel2(XClearLoop?done?;)
+E4
+F0
+A3
+1C
+BC FF rel3(XClearLoop?repeat?;)
+1D
+80 rel2(XClearLoop?repeat?;)
+12 addr16(_R_DINIT_start;)  
+12 addr16(_main;)  
+80 rel2(forever?home?;)
+E5 82
+C2 DE
+33
+92 DF
+D2 DE
+A2 DF
+C2 DE
+92 E0
+33
+92 DF
+D2 DE
+A2 DF
+C2 DE
+92 E0
+33
+92 DF
+D2 DE
+A2 DF
+C2 DE
+92 E0
+33
+92 DF
+D2 DE
+A2 DF
+C2 DE
+92 E0
+33
+92 DF
+D2 DE
+A2 DF
+C2 DE
+92 E0
+33
+92 DF
+D2 DE
+A2 DF
+C2 DE
+92 E0
+33
+92 DF
+D2 DE
+A2 DF
+C2 DE
+92 E0
+33
+92 DF
+D2 DE
+A2 DF
+C2 DE
+92 E0
+F5 82
+22
+75 82 00
+22
+C2 DD
+75 82 05
+12 addr16(_DoSPI;)  
+75 82 55
+12 addr16(_DoSPI;)  
+E5 82
+20 E0 rel3(L004001?;)
+D2 DD
+22
+75 CB FF
+75 CA F7
+75 C8 34
+75 98 52
+22
+AA 82
+BA 0A rel3(L006006?;)
+10 99 rel3(L006017?;)
+80 rel2(L006001?;)
+75 99 0D
+10 99 rel3(L006018?;)
+80 rel2(L006006?;)
+8A 99
+22
+10 98 rel3(L007011?;)
+80 rel2(L007001?;)
+AA 99
+30 bit(_getchar_echo;) rel3(L007005?;)
+8A 82
+C0 02
+12 addr16(_putchar;)  
+D0 02
+8A 82
+22
+12 addr16(_getchar;)  
+AA 82
+C0 02
+12 addr16(_putchar;)  
+D0 02
+8A 82
+22
+AA 82
+AB 83
+AC F0
+8A 82
+8B 83
+8C F0
+12 addr16(__gptrget;)  
+FD
+FE
+60 rel2(L009004?;)
+8E 82
+C0 02
+C0 03
+C0 04
+12 addr16(_putchar;)  
+D0 04
+D0 03
+D0 02
+0A
+BA 00 rel3(L009001?;)
+0B
+80 rel2(L009001?;)
+22
+E5 82
+FA
+30 E6 rel3(L010002?;)
+74 09
+2A
+FA
+74 0F
+5A
+F5 82
+22
+12 addr16(_getchare;)  
+12 addr16(_chartohex;)  
+E5 82
+C4
+54 F0
+F5 data8(_getbyte_j_1_83;)
+12 addr16(_getchare;)  
+12 addr16(_chartohex;)  
+E5 82
+42 data8(_getbyte_j_1_83;)
+85 data8(_getbyte_j_1_83;) 82
+22
+AA 82
+AB 83
+C2 DD
+75 82 03
+C0 02
+C0 03
+12 addr16(_DoSPI;)  
+75 82 F8
+12 addr16(_DoSPI;)  
+D0 03
+8B 04
+8C 82
+C0 03
+12 addr16(_DoSPI;)  
+D0 03
+D0 02
+8A 82
+12 addr16(_DoSPI;)  
+75 82 55
+12 addr16(_DoSPI;)  
+D2 DD
+22
+C2 DD
+75 82 06
+12 addr16(_DoSPI;)  
+D2 DD
+C2 DD
+75 82 D8
+12 addr16(_DoSPI;)  
+75 82 F8
+12 addr16(_DoSPI;)  
+75 82 00
+12 addr16(_DoSPI;)  
+75 82 00
+12 addr16(_DoSPI;)  
+D2 DD
+02 addr16(_Check_WIP;)  
+E5 data8(_Write_XRAM_PARM_2;)
+F0
+22
+E0
+F5 82
+22
+AA 82
+AB 83
+C2 DD
+75 82 06
+C0 02
+C0 03
+12 addr16(_DoSPI;)  
+D2 DD
+C2 DD
+75 82 02
+12 addr16(_DoSPI;)  
+75 82 F8
+12 addr16(_DoSPI;)  
+D0 03
+8B 04
+8C 82
+C0 03
+12 addr16(_DoSPI;)  
+D0 03
+D0 02
+8A 82
+12 addr16(_DoSPI;)  
+85 data8(_FlashByte_PARM_2;) 82
+12 addr16(_DoSPI;)  
+D2 DD
+02 addr16(_Check_WIP;)  
+AA 82
+AB 83
+C2 DD
+75 82 06
+C0 02
+C0 03
+12 addr16(_DoSPI;)  
+D2 DD
+C2 DD
+75 82 02
+12 addr16(_DoSPI;)  
+75 82 F8
+12 addr16(_DoSPI;)  
+D0 03
+8B 04
+8C 82
+C0 03
+12 addr16(_DoSPI;)  
+D0 03
+D0 02
+8A 82
+12 addr16(_DoSPI;)  
+7A 00
+C3
+EA
+95 data8(_FlashBuff_PARM_3;)
+50 rel2(L017004?;)
+EA
+25 data8(_FlashBuff_PARM_2;)
+FB
+E4
+35 data8(_FlashBuff_PARM_2;0x0001;+;)
+FC
+AD data8(_FlashBuff_PARM_2;0x0002;+;)
+8B 82
+8C 83
+8D F0
+12 addr16(__gptrget;)  
+F5 82
+C0 02
+12 addr16(_DoSPI;)  
+D0 02
+0A
+80 rel2(L017001?;)
+D2 DD
+02 addr16(_Check_WIP;)  
+75 C3 01
+C2 DD
+75 82 03
+12 addr16(_DoSPI;)  
+75 82 F8
+12 addr16(_DoSPI;)  
+75 82 00
+12 addr16(_DoSPI;)  
+75 82 00
+12 addr16(_DoSPI;)  
+90 00 00
+C2 DE
+A2 DF
+D2 DE
+33
+C2 DE
+A2 DF
+D2 DE
+33
+C2 DE
+A2 DF
+D2 DE
+33
+C2 DE
+A2 DF
+D2 DE
+33
+C2 DE
+A2 DF
+D2 DE
+33
+C2 DE
+A2 DF
+D2 DE
+33
+C2 DE
+A2 DF
+D2 DE
+33
+C2 DE
+A2 DF
+D2 DE
+33
+F0
+A3
+E5 83
+30 E7 rel3(load_next_byte;)
+D2 DD
+22
+12 addr16(_Copy_Flash_to_RAM;)  
+D2 DC
+75 C8 00
+75 98 00
+75 CB 00
+75 CA 00
+75 C3 00
+75 81 07
+02 00 00
+22
+12 addr16(_Copy_Flash_to_RAM;)  
+D2 DC
+75 C8 00
+75 98 00
+75 CB 00
+75 CA 00
+75 E8 FF
+75 95 FF
+75 C3 00
+75 81 07
+02 C0 00
+22
+12 addr16(_getchare;)  
+85 82 data8(_loadintelhex_n_1_103;)
+74 3A
+B5 data8(_loadintelhex_n_1_103;) rel3(L021040?;)
+80 rel2(L021041?;)
+02 addr16(L021017?;)  
+75 data8(_loadintelhex_echo_1_103;) 2E
+12 addr16(_getbyte;)  
+85 82 data8(_loadintelhex_size_1_103;)
+85 data8(_loadintelhex_size_1_103;) data8(_loadintelhex_checksum_1_103;)
+12 addr16(_getbyte;)  
+AA 82
+8A data8(_loadintelhex_address_1_103;)
+75 data8(_loadintelhex_address_1_103;0x0001;+;) 00
+AA data8(_loadintelhex_address_1_103;)
+EA
+25 data8(_loadintelhex_checksum_1_103;)
+F5 data8(_loadintelhex_checksum_1_103;)
+85 data8(_loadintelhex_address_1_103;) data8(_loadintelhex_address_1_103;0x0001;+;)
+75 data8(_loadintelhex_address_1_103;) 00
+12 addr16(_getbyte;)  
+85 82 data8(_loadintelhex_n_1_103;)
+E5 data8(_loadintelhex_n_1_103;)
+25 data8(_loadintelhex_checksum_1_103;)
+F5 data8(_loadintelhex_checksum_1_103;)
+AA data8(_loadintelhex_n_1_103;)
+7B 00
+EA
+25 data8(_loadintelhex_address_1_103;)
+F5 data8(_loadintelhex_address_1_103;)
+EB
+35 data8(_loadintelhex_address_1_103;0x0001;+;)
+F5 data8(_loadintelhex_address_1_103;0x0001;+;)
+12 addr16(_getbyte;)  
+85 82 data8(_loadintelhex_type_1_103;)
+E5 data8(_loadintelhex_type_1_103;)
+25 data8(_loadintelhex_checksum_1_103;)
+F5 data8(_loadintelhex_checksum_1_103;)
+75 data8(_loadintelhex_j_1_103;) 00
+C3
+E5 data8(_loadintelhex_j_1_103;)
+95 data8(_loadintelhex_size_1_103;)
+50 rel2(L021025?;)
+12 addr16(_getbyte;)  
+85 82 data8(_loadintelhex_n_1_103;)
+74 C0
+25 data8(_loadintelhex_j_1_103;)
+40 rel2(L021002?;)
+E5 data8(_loadintelhex_j_1_103;)
+24 data8(_buff;)
+F8
+A6 data8(_loadintelhex_n_1_103;)
+E5 data8(_loadintelhex_n_1_103;)
+25 data8(_loadintelhex_checksum_1_103;)
+F5 data8(_loadintelhex_checksum_1_103;)
+05 data8(_loadintelhex_j_1_103;)
+80 rel2(L021022?;)
+12 addr16(_getbyte;)  
+E5 82
+FA
+25 data8(_loadintelhex_checksum_1_103;)
+F5 data8(_loadintelhex_checksum_1_103;)
+E5 data8(_loadintelhex_size_1_103;)
+24 BF
+50 rel2(L021004?;)
+75 data8(_loadintelhex_checksum_1_103;) 01
+E5 data8(_loadintelhex_checksum_1_103;)
+70 rel2(L021012?;)
+AA data8(_loadintelhex_type_1_103;)
+BA 00 rel3(L021046?;)
+80 rel2(L021006?;)
+BA 01 rel3(L021047?;)
+80 rel2(L021008?;)
+BA 03 rel3(L021048?;)
+80 rel2(L021007?;)
+BA 04 rel3(L021009?;)
+12 addr16(_EraseSector;)  
+D2 E9
+80 rel2(L021013?;)
+75 data8(_FlashBuff_PARM_2;) data8(_buff;)
+75 data8(_FlashBuff_PARM_2;0x0001;+;) 00
+75 data8(_FlashBuff_PARM_2;0x0002;+;) 40
+85 data8(_loadintelhex_j_1_103;) data8(_FlashBuff_PARM_3;)
+85 data8(_loadintelhex_address_1_103;) 82
+85 data8(_loadintelhex_address_1_103;0x0001;+;) 83
+12 addr16(_FlashBuff;)  
+80 rel2(L021013?;)
+90 data16(__str_0;)  
+75 F0 80
+12 addr16(_sends;)  
+80 rel2(L021013?;)
+D2 EA
+80 rel2(L021013?;)
+75 data8(_loadintelhex_echo_1_103;) 3F
+D2 EA
+80 rel2(L021013?;)
+75 data8(_loadintelhex_echo_1_103;) 58
+D2 E9
+85 data8(_loadintelhex_echo_1_103;) 82
+12 addr16(_putchar;)  
+02 addr16(L021020?;)  
+74 55
+B5 data8(_loadintelhex_n_1_103;) rel3(L021051?;)
+80 rel2(L021052?;)
+02 addr16(L021020?;)  
+75 E8 00
+75 95 00
+75 E8 01
+02 addr16(L021020?;)  
+AA 82
+AB 83
+AC F0
+7D 00
+7E 00
+8A 82
+8B 83
+8C F0
+12 addr16(__gptrget;)  
+FF
+70 rel2(L022027?;)
+02 addr16(L022015?;)  
+C3
+EF
+64 80
+94 B0
+40 rel2(L022010?;)
+74 B9
+8F F0
+63 F0 80
+95 F0
+40 rel2(L022010?;)
+EF
+24 D0
+FF
+80 rel2(L022011?;)
+8A 82
+8B 83
+8C F0
+12 addr16(__gptrget;)  
+F8
+C3
+64 80
+94 C1
+40 rel2(L022006?;)
+74 C6
+88 F0
+63 F0 80
+95 F0
+40 rel2(L022006?;)
+74 C9
+28
+FF
+80 rel2(L022011?;)
+C3
+E8
+64 80
+94 E1
+40 rel2(L022015?;)
+74 E6
+88 F0
+63 F0 80
+95 F0
+40 rel2(L022015?;)
+74 A9
+28
+FF
+8D data8(_str2hex_sloc0_1_0;)
+EE
+C4
+54 F0
+C5 data8(_str2hex_sloc0_1_0;)
+C4
+C5 data8(_str2hex_sloc0_1_0;)
+65 data8(_str2hex_sloc0_1_0;)
+C5 data8(_str2hex_sloc0_1_0;)
+54 F0
+C5 data8(_str2hex_sloc0_1_0;)
+65 data8(_str2hex_sloc0_1_0;)
+F5 data8(_str2hex_sloc0_1_0;0x0001;+;)
+78 00
+EF
+25 data8(_str2hex_sloc0_1_0;)
+FD
+E8
+35 data8(_str2hex_sloc0_1_0;0x0001;+;)
+FE
+0A
+BA 00 rel3(L022034?;)
+0B
+02 addr16(L022013?;)  
+8D 82
+8E 83
+22
+E5 82
+FA
+C4
+54 0F
+90 data16(_hexval;)  
+93
+F5 82
+C0 02
+12 addr16(_putchar;)  
+D0 02
+74 0F
+5A
+90 data16(_hexval;)  
+93
+F5 82
+02 addr16(_putchar;)  
+AA 82
+AB 83
+8B 04
+8C 82
+C0 02
+C0 03
+12 addr16(_OutByte;)  
+D0 03
+D0 02
+8A 82
+02 addr16(_OutByte;)  
+12 addr16(_Copy_Flash_to_RAM;)  
+75 E8 00
+75 95 00
+7A 00
+7B 00
+8B 04
+8A 05
+EC
+C4
+54 0F
+90 data16(_seven_seg;)  
+93
+F5 8F
+74 0F
+5C
+90 data16(_seven_seg;)  
+93
+F5 8E
+ED
+C4
+54 0F
+90 data16(_seven_seg;)  
+93
+F5 94
+74 0F
+5D
+90 data16(_seven_seg;)  
+93
+F5 93
+8A 82
+8B 83
+C0 02
+C0 03
+12 addr16(_Read_XRAM;)  
+AC 82
+D0 03
+D0 02
+EC
+C4
+54 0F
+FD
+90 data16(_seven_seg;)  
+93
+F5 92
+74 0F
+5C
+90 data16(_seven_seg;)  
+93
+F5 91
+30 F9 rel3(L025058?;)
+02 addr16(L025031?;)  
+30 F9 rel3(L025001?;)
+74 03
+55 95
+FC
+BC 01 rel3(L025013?;)
+7A 00
+53 03 7F
+AC E8
+7D 00
+EC
+42 02
+ED
+42 03
+02 addr16(L025034?;)  
+74 03
+55 95
+FC
+BC 02 rel3(L025010?;)
+7B 00
+AC E8
+8C 05
+E4
+FC
+42 02
+ED
+42 03
+02 addr16(L025034?;)  
+E5 95
+54 03
+70 rel2(L025007?;)
+85 E8 data8(_Write_XRAM_PARM_2;)
+8A 82
+8B 83
+C0 02
+C0 03
+12 addr16(_Write_XRAM;)  
+D0 03
+D0 02
+02 addr16(L025034?;)  
+74 03
+55 95
+FC
+BC 03 rel3(L025066?;)
+80 rel2(L025067?;)
+02 addr16(L025034?;)  
+C0 02
+C0 03
+12 addr16(_EraseSector;)  
+D0 03
+D0 02
+D2 E9
+7C 00
+7D 00
+74 80
+2D
+40 rel2(L025039?;)
+8C 06
+8D 07
+8E data8(_FlashBuff_PARM_2;)
+8F data8(_FlashBuff_PARM_2;0x0001;+;)
+75 data8(_FlashBuff_PARM_2;0x0002;+;) 00
+75 data8(_FlashBuff_PARM_3;) 40
+8C 82
+8D 83
+C0 02
+C0 03
+C0 04
+C0 05
+12 addr16(_FlashBuff;)  
+D0 05
+D0 04
+D0 03
+D0 02
+74 40
+2C
+FC
+E4
+3D
+FD
+80 rel2(L025036?;)
+D2 EA
+02 addr16(L025034?;)  
+20 FB rel3(L025028?;)
+30 FB rel3(L025015?;)
+C2 E9
+C2 EA
+0A
+BA 00 rel3(L025071?;)
+0B
+C3
+74 FF
+9A
+74 7F
+9B
+40 rel2(L025072?;)
+02 addr16(L025034?;)  
+7A 00
+7B 00
+02 addr16(L025034?;)  
+30 FA rel3(L025073?;)
+02 addr16(L025034?;)  
+30 FA rel3(L025020?;)
+C2 E9
+C2 EA
+1A
+BA FF rel3(L025075?;)
+1B
+C3
+74 FF
+9A
+74 7F
+9B
+40 rel2(L025076?;)
+02 addr16(L025034?;)  
+7A FF
+7B 7F
+02 addr16(L025034?;)  
+C2 DC
+30 F9 rel3(L026002?;)
+30 FA rel3(L026002?;)
+30 FB rel3(L026002?;)
+12 addr16(_Load_Ram_Fast_and_Run;)  
+20 FB rel3(L026009?;)
+75 8F A1
+75 8E 86
+75 94 83
+75 93 C1
+75 92 C2
+75 91 C2
+30 FB rel3(L026005?;)
+75 91 FF
+75 92 FF
+75 93 FF
+75 94 FF
+75 8E FF
+75 8F FF
+12 addr16(_Load_Ram_Fast_and_Run_Debugger;)  
+20 FA rel3(L026014?;)
+75 8F BF
+75 8E BF
+75 94 BF
+75 93 BF
+75 92 BF
+75 91 BF
+30 FA rel3(L026010?;)
+12 addr16(_Manual_Load;)  
+75 C3 01
+75 94 83
+75 93 A3
+75 92 A3
+75 91 87
+30 F9 rel3(L026015?;)
+75 E8 01
+75 95 00
+75 91 FF
+75 92 FF
+75 93 FF
+75 94 FF
+75 8E FF
+75 8F FF
+12 addr16(_inituart;)  
+75 data8(_Write_XRAM_PARM_2;) 00
+90 7F FF
+12 addr16(_Write_XRAM;)  
+30 98 rel3(L026021?;)
+AA 99
+C2 98
+BA 55 rel3(L026060?;)
+80 rel2(L026026?;)
+C2 99
+8A 99
+90 7F FF
+12 addr16(_Read_XRAM;)  
+E5 82
+60 rel2(L026025?;)
+C2 E9
+C2 EA
+75 data8(_Write_XRAM_PARM_2;) 00
+90 7F FF
+12 addr16(_Write_XRAM;)  
+12 addr16(_EraseSector;)  
+D2 E9
+7A 00
+7B 00
+74 80
+2B
+40 rel2(L026030?;)
+8A 04
+8B 05
+8C data8(_FlashBuff_PARM_2;)
+8D data8(_FlashBuff_PARM_2;0x0001;+;)
+75 data8(_FlashBuff_PARM_2;0x0002;+;) 00
+75 data8(_FlashBuff_PARM_3;) 40
+8A 82
+8B 83
+C0 02
+C0 03
+12 addr16(_FlashBuff;)  
+D0 03
+D0 02
+74 40
+2A
+FA
+E4
+3B
+FB
+80 rel2(L026027?;)
+D2 EA
+80 rel2(L026025?;)
+02 addr16(_loadintelhex;)  
+</CODE>
+
+<CODE AT FFE0>
+75 C3 00
+00
+22
+</CODE>
+
+<CODE AT FFE8>
+75 C3 01
+00
+22
+</CODE>
+
+<CODE R_CSEG>
+</CODE>
+
+<CODE R_XINIT>
+</CODE>
+
+<CODE R_CONST>
+30 31 32 33 34 35 36 37 38 39 41 42 43 44 45 46 
+00
+44 45 31 
+00
+C0
+F9
+A4
+B0
+99
+92
+82
+F8
+80
+90
+88
+83
+C6
+A1
+86
+8E
+</CODE>
+
+<CODE AT FFED>
+</CODE>

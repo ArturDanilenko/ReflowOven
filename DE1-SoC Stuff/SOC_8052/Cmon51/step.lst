@@ -1,0 +1,477 @@
+0000              1   ;--------------------------------------------------------
+0000              2   ; File Created by C51
+0000              3   ; Version 1.0.0 #1034 (May  5 2015) (MSVC)
+0000              4   ; This file was generated Wed Oct 21 09:02:15 2015
+0000              5   ;--------------------------------------------------------
+                  5   $name step
+                  6   $optc51 --model-small
+0000              8            R_DSEG    segment data
+0000              9            R_CSEG    segment code
+0000             10            R_BSEG    segment bit
+0000             11            R_XSEG    segment xdata
+0000             12            R_PSEG    segment xdata
+0000             13            R_ISEG    segment idata
+0000             14            R_OSEG    segment data overlay
+0000             15            BIT_BANK  segment data overlay
+0000             16            R_HOME    segment code
+0000             17            R_GSINIT  segment code
+0000             18            R_IXSEG   segment xdata
+0000             19            R_CONST   segment code
+0000             20            R_XINIT   segment code
+0000             21            R_DINIT   segment code
+0000             22   
+0000             23   ;--------------------------------------------------------
+0000             24   ; Public variables in this module
+0000             25   ;--------------------------------------------------------
+0000             26            public _dostep
+0000             27            public _step_and_break
+0000             28   ;--------------------------------------------------------
+0000             29   ; Special Function Registers
+0000             30   ;--------------------------------------------------------
+0000             31   _P0             DATA 0x80
+0000             32   _SP             DATA 0x81
+0000             33   _DPL            DATA 0x82
+0000             34   _DPH            DATA 0x83
+0000             35   _PCON           DATA 0x87
+0000             36   _TCON           DATA 0x88
+0000             37   _TMOD           DATA 0x89
+0000             38   _TL0            DATA 0x8a
+0000             39   _TL1            DATA 0x8b
+0000             40   _TH0            DATA 0x8c
+0000             41   _TH1            DATA 0x8d
+0000             42   _P1             DATA 0x90
+0000             43   _SCON           DATA 0x98
+0000             44   _SBUF           DATA 0x99
+0000             45   _P2             DATA 0xa0
+0000             46   _IE             DATA 0xa8
+0000             47   _P3             DATA 0xb0
+0000             48   _IP             DATA 0xb8
+0000             49   _PSW            DATA 0xd0
+0000             50   _ACC            DATA 0xe0
+0000             51   _B              DATA 0xf0
+0000             52   _T2CON          DATA 0xc8
+0000             53   _RCAP2L         DATA 0xca
+0000             54   _RCAP2H         DATA 0xcb
+0000             55   _TL2            DATA 0xcc
+0000             56   _TH2            DATA 0xcd
+0000             57   _DPS            DATA 0x86
+0000             58   _DPH1           DATA 0x85
+0000             59   _DPL1           DATA 0x84
+0000             60   _HEX0           DATA 0x91
+0000             61   _HEX1           DATA 0x92
+0000             62   _HEX2           DATA 0x93
+0000             63   _HEX3           DATA 0x94
+0000             64   _HEX4           DATA 0x8e
+0000             65   _HEX5           DATA 0x8f
+0000             66   _LEDRA          DATA 0xe8
+0000             67   _LEDRB          DATA 0x95
+0000             68   _SWA            DATA 0xe8
+0000             69   _SWB            DATA 0x95
+0000             70   _KEY            DATA 0xf8
+0000             71   _P0MOD          DATA 0x9a
+0000             72   _P1MOD          DATA 0x9b
+0000             73   _P2MOD          DATA 0x9c
+0000             74   _P3MOD          DATA 0x9d
+0000             75   _LCD_CMD        DATA 0xd8
+0000             76   _LCD_DATA       DATA 0xd9
+0000             77   _LCD_MOD        DATA 0xda
+0000             78   _JCMD           DATA 0xc0
+0000             79   _JBUF           DATA 0xc1
+0000             80   _JCNT           DATA 0xc2
+0000             81   _REP_ADD_L      DATA 0xf1
+0000             82   _REP_ADD_H      DATA 0xf2
+0000             83   _REP_VALUE      DATA 0xf3
+0000             84   _DEBUG_CALL_L   DATA 0xfa
+0000             85   _DEBUG_CALL_H   DATA 0xfb
+0000             86   _BPC            DATA 0xfc
+0000             87   _BPS            DATA 0xfd
+0000             88   _BPAL           DATA 0xfe
+0000             89   _BPAH           DATA 0xff
+0000             90   _LBPAL          DATA 0xfa
+0000             91   _LBPAH          DATA 0xfb
+0000             92   _XRAMUSEDAS     DATA 0xc3
+0000             93   _FLASH_CMD      DATA 0xdb
+0000             94   _FLASH_DATA     DATA 0xdc
+0000             95   _FLASH_MOD      DATA 0xdd
+0000             96   _FLASH_ADD0     DATA 0xe1
+0000             97   _FLASH_ADD1     DATA 0xe2
+0000             98   _FLASH_ADD2     DATA 0xe3
+0000             99   ;--------------------------------------------------------
+0000            100   ; special function bits
+0000            101   ;--------------------------------------------------------
+0000            102   _P0_0           BIT 0x80
+0000            103   _P0_1           BIT 0x81
+0000            104   _P0_2           BIT 0x82
+0000            105   _P0_3           BIT 0x83
+0000            106   _P0_4           BIT 0x84
+0000            107   _P0_5           BIT 0x85
+0000            108   _P0_6           BIT 0x86
+0000            109   _P0_7           BIT 0x87
+0000            110   _IT0            BIT 0x88
+0000            111   _IE0            BIT 0x89
+0000            112   _IT1            BIT 0x8a
+0000            113   _IE1            BIT 0x8b
+0000            114   _TR0            BIT 0x8c
+0000            115   _TF0            BIT 0x8d
+0000            116   _TR1            BIT 0x8e
+0000            117   _TF1            BIT 0x8f
+0000            118   _P1_0           BIT 0x90
+0000            119   _P1_1           BIT 0x91
+0000            120   _P1_2           BIT 0x92
+0000            121   _P1_3           BIT 0x93
+0000            122   _P1_4           BIT 0x94
+0000            123   _P1_5           BIT 0x95
+0000            124   _P1_6           BIT 0x96
+0000            125   _P1_7           BIT 0x97
+0000            126   _RI             BIT 0x98
+0000            127   _TI             BIT 0x99
+0000            128   _RB8            BIT 0x9a
+0000            129   _TB8            BIT 0x9b
+0000            130   _REN            BIT 0x9c
+0000            131   _SM2            BIT 0x9d
+0000            132   _SM1            BIT 0x9e
+0000            133   _SM0            BIT 0x9f
+0000            134   _P2_0           BIT 0xa0
+0000            135   _P2_1           BIT 0xa1
+0000            136   _P2_2           BIT 0xa2
+0000            137   _P2_3           BIT 0xa3
+0000            138   _P2_4           BIT 0xa4
+0000            139   _P2_5           BIT 0xa5
+0000            140   _P2_6           BIT 0xa6
+0000            141   _P2_7           BIT 0xa7
+0000            142   _EX0            BIT 0xa8
+0000            143   _ET0            BIT 0xa9
+0000            144   _EX1            BIT 0xaa
+0000            145   _ET1            BIT 0xab
+0000            146   _ES             BIT 0xac
+0000            147   _ET2            BIT 0xad
+0000            148   _EA             BIT 0xaf
+0000            149   _P3_0           BIT 0xb0
+0000            150   _P3_1           BIT 0xb1
+0000            151   _P3_2           BIT 0xb2
+0000            152   _P3_3           BIT 0xb3
+0000            153   _P3_4           BIT 0xb4
+0000            154   _P3_5           BIT 0xb5
+0000            155   _P3_6           BIT 0xb6
+0000            156   _P3_7           BIT 0xb7
+0000            157   _RXD            BIT 0xb0
+0000            158   _TXD            BIT 0xb1
+0000            159   _INT0           BIT 0xb2
+0000            160   _INT1           BIT 0xb3
+0000            161   _T0             BIT 0xb4
+0000            162   _T1             BIT 0xb5
+0000            163   _WR             BIT 0xb6
+0000            164   _RD             BIT 0xb7
+0000            165   _PX0            BIT 0xb8
+0000            166   _PT0            BIT 0xb9
+0000            167   _PX1            BIT 0xba
+0000            168   _PT1            BIT 0xbb
+0000            169   _PS             BIT 0xbc
+0000            170   _PT2            BIT 0xbd
+0000            171   _P              BIT 0xd0
+0000            172   _F1             BIT 0xd1
+0000            173   _OV             BIT 0xd2
+0000            174   _RS0            BIT 0xd3
+0000            175   _RS1            BIT 0xd4
+0000            176   _F0             BIT 0xd5
+0000            177   _AC             BIT 0xd6
+0000            178   _CY             BIT 0xd7
+0000            179   _T2CON_0        BIT 0xc8
+0000            180   _T2CON_1        BIT 0xc9
+0000            181   _T2CON_2        BIT 0xca
+0000            182   _T2CON_3        BIT 0xcb
+0000            183   _T2CON_4        BIT 0xcc
+0000            184   _T2CON_5        BIT 0xcd
+0000            185   _T2CON_6        BIT 0xce
+0000            186   _T2CON_7        BIT 0xcf
+0000            187   _CP_RL2         BIT 0xc8
+0000            188   _C_T2           BIT 0xc9
+0000            189   _TR2            BIT 0xca
+0000            190   _EXEN2          BIT 0xcb
+0000            191   _TCLK           BIT 0xcc
+0000            192   _RCLK           BIT 0xcd
+0000            193   _EXF2           BIT 0xce
+0000            194   _TF2            BIT 0xcf
+0000            195   _LEDRA_0        BIT 0xe8
+0000            196   _LEDRA_1        BIT 0xe9
+0000            197   _LEDRA_2        BIT 0xea
+0000            198   _LEDRA_3        BIT 0xeb
+0000            199   _LEDRA_4        BIT 0xec
+0000            200   _LEDRA_5        BIT 0xed
+0000            201   _LEDRA_6        BIT 0xee
+0000            202   _LEDRA_7        BIT 0xef
+0000            203   _SWA_0          BIT 0xe8
+0000            204   _SWA_1          BIT 0xe9
+0000            205   _SWA_2          BIT 0xea
+0000            206   _SWA_3          BIT 0xeb
+0000            207   _SWA_4          BIT 0xec
+0000            208   _SWA_5          BIT 0xed
+0000            209   _SWA_6          BIT 0xee
+0000            210   _SWA_7          BIT 0xef
+0000            211   _KEY_0          BIT 0xf8
+0000            212   _KEY_1          BIT 0xf9
+0000            213   _KEY_2          BIT 0xfa
+0000            214   _KEY_3          BIT 0xfb
+0000            215   _LCD_RW         BIT 0xd8
+0000            216   _LCD_EN         BIT 0xd9
+0000            217   _LCD_RS         BIT 0xda
+0000            218   _LCD_ON         BIT 0xdb
+0000            219   _LCD_BLON       BIT 0xdc
+0000            220   _JRXRDY         BIT 0xc0
+0000            221   _JTXRDY         BIT 0xc1
+0000            222   _JRXEN          BIT 0xc2
+0000            223   _JTXEN          BIT 0xc3
+0000            224   _JTXFULL        BIT 0xc4
+0000            225   _JRXFULL        BIT 0xc5
+0000            226   _JTXEMPTY       BIT 0xc6
+0000            227   _JTDI           BIT 0xc7
+0000            228   ;--------------------------------------------------------
+0000            229   ; overlayable register banks
+0000            230   ;--------------------------------------------------------
+0000            231            rbank0 segment data overlay
+0000            232   ;--------------------------------------------------------
+0000            233   ; internal ram data
+0000            234   ;--------------------------------------------------------
+0000            235            rseg R_DSEG
+0000            236   ;--------------------------------------------------------
+0000            237   ; overlayable items in internal ram 
+0000            238   ;--------------------------------------------------------
+0000            239            rseg R_OSEG
+0000            240   ;--------------------------------------------------------
+0000            241   ; indirectly addressable internal ram data
+0000            242   ;--------------------------------------------------------
+0000            243            rseg R_ISEG
+0000            244   ;--------------------------------------------------------
+0000            245   ; absolute internal ram data
+0000            246   ;--------------------------------------------------------
+0000            247            DSEG
+0000            248   ;--------------------------------------------------------
+0000            249   ; bit data
+0000            250   ;--------------------------------------------------------
+0000            251            rseg R_BSEG
+0000            252   ;--------------------------------------------------------
+0000            253   ; paged external ram data
+0000            254   ;--------------------------------------------------------
+0000            255            rseg R_PSEG
+0000            256   ;--------------------------------------------------------
+0000            257   ; external ram data
+0000            258   ;--------------------------------------------------------
+0000            259            rseg R_XSEG
+0000            260   ;--------------------------------------------------------
+0000            261   ; absolute external ram data
+0000            262   ;--------------------------------------------------------
+0000            263            XSEG
+0000            264   ;--------------------------------------------------------
+0000            265   ; external initialized ram data
+0000            266   ;--------------------------------------------------------
+0000            267            rseg R_IXSEG
+0000            268            rseg R_HOME
+0000            269            rseg R_GSINIT
+0000            270            rseg R_CSEG
+0000            271   ;--------------------------------------------------------
+0000            272   ; Interrupt vectors
+0000            273   ;--------------------------------------------------------
+C003            274            CSEG at 0xc003
+C003 020100     275            ljmp    _step_and_break
+C006            276   ;--------------------------------------------------------
+C006            277   ; global & static initialisations
+C006            278   ;--------------------------------------------------------
+0000            279            rseg R_HOME
+0000            280            rseg R_GSINIT
+0000            281            rseg R_GSINIT
+0000            282   ;--------------------------------------------------------
+0000            283   ; data variables initialization
+0000            284   ;--------------------------------------------------------
+0000            285            rseg R_DINIT
+0000            286            ; The linker places a 'ret' at the end of segment R_DINIT.
+0000            287   ;--------------------------------------------------------
+0000            288   ; code
+0000            289   ;--------------------------------------------------------
+0000            290            rseg R_CSEG
+0000            291   ;------------------------------------------------------------
+0000            292   ;Allocation info for local variables in function 'step_and_break'
+0000            293   ;------------------------------------------------------------
+0000            294   ;------------------------------------------------------------
+0000            295   ;        .\step.c:41: void step_and_break (void) interrupt 0 _naked
+0000            296   ;        -----------------------------------------
+0000            297   ;         function step_and_break
+0000            298   ;        -----------------------------------------
+0000            299   _step_and_break:
+0000            300   ;        naked function: no prologue.
+0000            301   ;        .\step.c:43: BPC=0x00; // Dissable breakpoints and single step          
+0000 75FC00     302            mov     _BPC,#0x00
+0003            303   ;        .\step.c:123: _endasm;
+0003            304            
+0003            305        ; Save the IE register and disable interrupts ASAP since the user code
+0003            306        ; may have interrupts running which may modify the internal RAM
+0003 C0A8       307                    push IE
+0005 75A800     308                    mov IE, #0
+0008 C2AF       309              clr EA
+000A            310            
+000A            311           ; Save the user DPTR on the stack so it can be used to address XRAM.
+000A C083       312                    push DPH
+000C C082       313                    push DPL
+000E            314            
+000E            315           ; Save user program registers
+000E 900000     316                    mov DPTR,#_A_save
+0011 F0         317                    movx @DPTR,A
+0012            318            
+0012 900000     319                    mov DPTR,#_PSW_save
+0015 E5D0       320                    mov A,PSW
+0017 F0         321                    movx @DPTR,A
+0018            322            
+0018 900000     323                    mov DPTR,#_B_save
+001B E5F0       324                    mov A,B
+001D F0         325                    movx @DPTR,A
+001E            326            
+001E 900000     327                    mov DPTR,#_DPL_save
+0021 D0E0       328                    pop ACC
+0023 F0         329                    movx @DPTR,A
+0024 900000     330                    mov DPTR,#_DPH_save
+0027 D0E0       331                    pop ACC
+0029 F0         332                    movx @DPTR,A
+002A            333            
+002A 900000     334                    mov DPTR,#_IE_save
+002D D0E0       335                    pop ACC
+002F F0         336                    movx @DPTR,A
+0030            337            
+0030            338           ;The address of the next instruction is in the stack
+0030 900001     339                    mov DPTR,#_PC_save+1
+0033 D0E0       340                    pop ACC
+0035 F0         341                    movx @DPTR,A
+0036 900000     342                    mov DPTR,#_PC_save
+0039 D0E0       343                    pop ACC
+003B F0         344                    movx @DPTR,A
+003C            345            
+003C            346           ;NOW we can save the user stack pointer
+003C 900000     347                    mov DPTR,#_SP_save
+003F E581       348                    mov A,SP
+0041 F0         349                    movx @DPTR,A
+0042            350            
+0042            351           ; Save the user internal ram.
+0042 900000     352                    mov DPTR,#_iram_save
+0045 75D000     353                    mov PSW,#0 ; Select register bank 0.
+0048 E8         354                    mov A,R0 ; Save R0.
+0049 F0         355                    movx @DPTR,A
+004A 7801       356                    mov R0,#1
+004C            357            sab_l:
+004C A3         358                    inc DPTR
+004D E6         359                    mov A,@R0
+004E F0         360                    movx @DPTR,A
+004F 08         361                    inc R0
+0050 B88090     362                    cjne R0,#128,sab_l
+0053            363            
+0053            364           ;Tell the monitor that the code got here
+0053 900000     365                    mov DPTR,#_gotbreak
+0056 7401       366                    mov A,#1
+0058 F0         367                    movx @DPTR,A
+0059            368            
+0059            369           ; Now the tricky part... going back to the monitor
+0059            370            
+0059            371           ; Initialize the monitor stack
+0059 7581FF     372                    mov sp,#_stack_start - 1
+005C            373            
+005C            374           ; Call the monitor hardware initialization
+005C 120100     375                    lcall __c51_external_startup
+005F            376            
+005F            377           ; Notice that crt0 initialization is skiped, otherwise the expanded RAM
+005F            378           ; variables holding important variables will be clear.
+005F            379            
+005F            380           ; Go directly to the main routine
+005F 020100     381                    ljmp _main
+0062            382            
+0062            383                
+0062            384   ;        naked function: no epilogue.
+0062            385   ;------------------------------------------------------------
+0062            386   ;Allocation info for local variables in function 'dostep'
+0062            387   ;------------------------------------------------------------
+0062            388   ;------------------------------------------------------------
+0062            389   ;        .\step.c:127: void dostep (void) _naked
+0062            390   ;        -----------------------------------------
+0062            391   ;         function dostep
+0062            392   ;        -----------------------------------------
+0062            393   _dostep:
+0062            394   ;        naked function: no prologue.
+0062            395   ;        .\step.c:201: _endasm;
+0062            396            
+0062            397           ; Restore the user internal ram.
+0062 787F       398                    mov R0,#127
+0064 90007F     399                    mov DPTR,#(_iram_save+127)
+0067            400            ds_l:
+0067 E0         401                    movx A,@DPTR
+0068 F6         402                    mov @R0,A
+0069 1582       403                    dec DPL
+006B D820       404                    djnz R0,ds_l
+006D E0         405                    movx A,@DPTR
+006E F6         406                    mov @R0,A
+006F            407            
+006F            408           ; Restore user registers
+006F 900000     409                    mov DPTR,#_IE_save
+0072 E0         410                    movx A,@DPTR
+0073 F5A8       411                    mov IE, A
+0075            412            
+0075 900000     413                    mov DPTR,#_B_save
+0078 E0         414                    movx A,@DPTR
+0079 F5F0       415                    mov B,A
+007B            416            
+007B 900000     417                    mov DPTR,#_PSW_save
+007E E0         418                    movx A,@DPTR
+007F F5D0       419                    mov PSW,A
+0081            420            
+0081 900000     421                    mov DPTR,#_SP_save
+0084 E0         422                    movx A,@DPTR
+0085 F581       423                    mov SP,A
+0087            424            
+0087            425     ;Put the user code start in the stack. The reti or ret at the end will get us there.
+0087 900000     426                    mov DPTR,#_step_start
+008A E0         427                    movx A,@DPTR
+008B C0E0       428                    push ACC
+008D A3         429                    inc DPTR
+008E E0         430                    movx A,@DPTR
+008F C0E0       431                    push ACC
+0091            432            
+0091 900000     433                    mov DPTR,#_DPL_save
+0094 E0         434                    movx A,@DPTR
+0095 C0E0       435                    push ACC
+0097 900000     436                    mov DPTR,#_DPH_save
+009A E0         437                    movx A,@DPTR
+009B C0E0       438                    push ACC
+009D            439            
+009D            440           ; Here use the accumulator to check if it is a go or a step
+009D 900000     441                    mov DPTR,#_gostep ; 1 is "go" 0 is step
+00A0 E0         442                    movx A,@DPTR
+00A1 6001       443                    jz ds_2
+00A3            444            
+00A3            445           ; go - restore the user accumulator.
+00A3 900000     446                    mov DPTR,#_A_save
+00A6 E0         447                    movx A,@DPTR
+00A7            448            
+00A7            449           ; and pop the user DPTR from the stack.
+00A7 D083       450                    pop DPH
+00A9 D082       451                    pop DPL
+00AB            452            
+00AB 75FC10     453                    mov _BPC, #0x10 ; Enable break points
+00AE            454            
+00AE 32         455                    reti
+00AF            456            
+00AF            457            ds_2:
+00AF            458           ; step - restore the user accumulator.
+00AF 900000     459                    mov DPTR,#_A_save
+00B2 E0         460                    movx A,@DPTR
+00B3            461            
+00B3            462           ; pop the user DPTR from the user stack.
+00B3 D083       463                    pop DPH
+00B5 D082       464                    pop DPL
+00B7            465            
+00B7 75FC20     466                    mov _BPC, #0x20 ; instructs to execute the reti, the following instruction, and then break
+00BA 32         467                    reti ; 'Return' to the user.
+00BB            468   ;        naked function: no epilogue.
+00BB            469            rseg R_CSEG
+00BB            470   
+0000            471            rseg R_XINIT
+0000            472   
+0000            473            rseg R_CONST
+0000            474   
+C006            475            CSEG
+C006            476   
+C006            477   end

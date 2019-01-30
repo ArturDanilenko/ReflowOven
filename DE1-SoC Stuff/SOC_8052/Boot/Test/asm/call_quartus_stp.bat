@@ -1,0 +1,1 @@
+"C:\Programs\Altera\15.0\quartus\bin64\quartus_stp.exe" -s

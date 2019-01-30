@@ -1,0 +1,1298 @@
+0000              1   ;--------------------------------------------------------
+0000              2   ; File Created by C51
+0000              3   ; Version 1.0.0 #1034 (May  5 2015) (MSVC)
+0000              4   ; This file was generated Wed Oct 21 09:02:15 2015
+0000              5   ;--------------------------------------------------------
+                  5   $name CV_8052
+                  6   $optc51 --model-small
+0000              8            R_DSEG    segment data
+0000              9            R_CSEG    segment code
+0000             10            R_BSEG    segment bit
+0000             11            R_XSEG    segment xdata
+0000             12            R_PSEG    segment xdata
+0000             13            R_ISEG    segment idata
+0000             14            R_OSEG    segment data overlay
+0000             15            BIT_BANK  segment data overlay
+0000             16            R_HOME    segment code
+0000             17            R_GSINIT  segment code
+0000             18            R_IXSEG   segment xdata
+0000             19            R_CONST   segment code
+0000             20            R_XINIT   segment code
+0000             21            R_DINIT   segment code
+0000             22   
+0000             23   ;--------------------------------------------------------
+0000             24   ; Public variables in this module
+0000             25   ;--------------------------------------------------------
+0000             26            public _write_sfr_PARM_2
+0000             27            public _bitn
+0000             28            public _sfrn
+0000             29            public _getchar
+0000             30            public __c51_external_startup
+0000             31            public _main
+0000             32            public _de2_8052_crt0
+0000             33            public _append_txbuff
+0000             34            public _pos
+0000             35            public _putc
+0000             36            public _putnl
+0000             37            public _get_txbuff
+0000             38            public _add_nlcursor_txbuff
+0000             39            public _add_char_txbuff
+0000             40            public _add_cursor_txbuff
+0000             41            public _add_byte_txbuff
+0000             42            public _add_word_txbuff
+0000             43            public _add_wordnl_txbuff
+0000             44            public _add_str_txbuff
+0000             45            public _flush_txbuff
+0000             46            public _update_txbuff
+0000             47            public _read_sfr
+0000             48            public _write_sfr
+0000             49            public _restorePC
+0000             50   ;--------------------------------------------------------
+0000             51   ; Special Function Registers
+0000             52   ;--------------------------------------------------------
+0000             53   _P0             DATA 0x80
+0000             54   _SP             DATA 0x81
+0000             55   _DPL            DATA 0x82
+0000             56   _DPH            DATA 0x83
+0000             57   _PCON           DATA 0x87
+0000             58   _TCON           DATA 0x88
+0000             59   _TMOD           DATA 0x89
+0000             60   _TL0            DATA 0x8a
+0000             61   _TL1            DATA 0x8b
+0000             62   _TH0            DATA 0x8c
+0000             63   _TH1            DATA 0x8d
+0000             64   _P1             DATA 0x90
+0000             65   _SCON           DATA 0x98
+0000             66   _SBUF           DATA 0x99
+0000             67   _P2             DATA 0xa0
+0000             68   _IE             DATA 0xa8
+0000             69   _P3             DATA 0xb0
+0000             70   _IP             DATA 0xb8
+0000             71   _PSW            DATA 0xd0
+0000             72   _ACC            DATA 0xe0
+0000             73   _B              DATA 0xf0
+0000             74   _T2CON          DATA 0xc8
+0000             75   _RCAP2L         DATA 0xca
+0000             76   _RCAP2H         DATA 0xcb
+0000             77   _TL2            DATA 0xcc
+0000             78   _TH2            DATA 0xcd
+0000             79   _DPS            DATA 0x86
+0000             80   _DPH1           DATA 0x85
+0000             81   _DPL1           DATA 0x84
+0000             82   _HEX0           DATA 0x91
+0000             83   _HEX1           DATA 0x92
+0000             84   _HEX2           DATA 0x93
+0000             85   _HEX3           DATA 0x94
+0000             86   _HEX4           DATA 0x8e
+0000             87   _HEX5           DATA 0x8f
+0000             88   _LEDRA          DATA 0xe8
+0000             89   _LEDRB          DATA 0x95
+0000             90   _SWA            DATA 0xe8
+0000             91   _SWB            DATA 0x95
+0000             92   _KEY            DATA 0xf8
+0000             93   _P0MOD          DATA 0x9a
+0000             94   _P1MOD          DATA 0x9b
+0000             95   _P2MOD          DATA 0x9c
+0000             96   _P3MOD          DATA 0x9d
+0000             97   _LCD_CMD        DATA 0xd8
+0000             98   _LCD_DATA       DATA 0xd9
+0000             99   _LCD_MOD        DATA 0xda
+0000            100   _JCMD           DATA 0xc0
+0000            101   _JBUF           DATA 0xc1
+0000            102   _JCNT           DATA 0xc2
+0000            103   _REP_ADD_L      DATA 0xf1
+0000            104   _REP_ADD_H      DATA 0xf2
+0000            105   _REP_VALUE      DATA 0xf3
+0000            106   _DEBUG_CALL_L   DATA 0xfa
+0000            107   _DEBUG_CALL_H   DATA 0xfb
+0000            108   _BPC            DATA 0xfc
+0000            109   _BPS            DATA 0xfd
+0000            110   _BPAL           DATA 0xfe
+0000            111   _BPAH           DATA 0xff
+0000            112   _LBPAL          DATA 0xfa
+0000            113   _LBPAH          DATA 0xfb
+0000            114   _XRAMUSEDAS     DATA 0xc3
+0000            115   _FLASH_CMD      DATA 0xdb
+0000            116   _FLASH_DATA     DATA 0xdc
+0000            117   _FLASH_MOD      DATA 0xdd
+0000            118   _FLASH_ADD0     DATA 0xe1
+0000            119   _FLASH_ADD1     DATA 0xe2
+0000            120   _FLASH_ADD2     DATA 0xe3
+0000            121   ;--------------------------------------------------------
+0000            122   ; special function bits
+0000            123   ;--------------------------------------------------------
+0000            124   _P0_0           BIT 0x80
+0000            125   _P0_1           BIT 0x81
+0000            126   _P0_2           BIT 0x82
+0000            127   _P0_3           BIT 0x83
+0000            128   _P0_4           BIT 0x84
+0000            129   _P0_5           BIT 0x85
+0000            130   _P0_6           BIT 0x86
+0000            131   _P0_7           BIT 0x87
+0000            132   _IT0            BIT 0x88
+0000            133   _IE0            BIT 0x89
+0000            134   _IT1            BIT 0x8a
+0000            135   _IE1            BIT 0x8b
+0000            136   _TR0            BIT 0x8c
+0000            137   _TF0            BIT 0x8d
+0000            138   _TR1            BIT 0x8e
+0000            139   _TF1            BIT 0x8f
+0000            140   _P1_0           BIT 0x90
+0000            141   _P1_1           BIT 0x91
+0000            142   _P1_2           BIT 0x92
+0000            143   _P1_3           BIT 0x93
+0000            144   _P1_4           BIT 0x94
+0000            145   _P1_5           BIT 0x95
+0000            146   _P1_6           BIT 0x96
+0000            147   _P1_7           BIT 0x97
+0000            148   _RI             BIT 0x98
+0000            149   _TI             BIT 0x99
+0000            150   _RB8            BIT 0x9a
+0000            151   _TB8            BIT 0x9b
+0000            152   _REN            BIT 0x9c
+0000            153   _SM2            BIT 0x9d
+0000            154   _SM1            BIT 0x9e
+0000            155   _SM0            BIT 0x9f
+0000            156   _P2_0           BIT 0xa0
+0000            157   _P2_1           BIT 0xa1
+0000            158   _P2_2           BIT 0xa2
+0000            159   _P2_3           BIT 0xa3
+0000            160   _P2_4           BIT 0xa4
+0000            161   _P2_5           BIT 0xa5
+0000            162   _P2_6           BIT 0xa6
+0000            163   _P2_7           BIT 0xa7
+0000            164   _EX0            BIT 0xa8
+0000            165   _ET0            BIT 0xa9
+0000            166   _EX1            BIT 0xaa
+0000            167   _ET1            BIT 0xab
+0000            168   _ES             BIT 0xac
+0000            169   _ET2            BIT 0xad
+0000            170   _EA             BIT 0xaf
+0000            171   _P3_0           BIT 0xb0
+0000            172   _P3_1           BIT 0xb1
+0000            173   _P3_2           BIT 0xb2
+0000            174   _P3_3           BIT 0xb3
+0000            175   _P3_4           BIT 0xb4
+0000            176   _P3_5           BIT 0xb5
+0000            177   _P3_6           BIT 0xb6
+0000            178   _P3_7           BIT 0xb7
+0000            179   _RXD            BIT 0xb0
+0000            180   _TXD            BIT 0xb1
+0000            181   _INT0           BIT 0xb2
+0000            182   _INT1           BIT 0xb3
+0000            183   _T0             BIT 0xb4
+0000            184   _T1             BIT 0xb5
+0000            185   _WR             BIT 0xb6
+0000            186   _RD             BIT 0xb7
+0000            187   _PX0            BIT 0xb8
+0000            188   _PT0            BIT 0xb9
+0000            189   _PX1            BIT 0xba
+0000            190   _PT1            BIT 0xbb
+0000            191   _PS             BIT 0xbc
+0000            192   _PT2            BIT 0xbd
+0000            193   _P              BIT 0xd0
+0000            194   _F1             BIT 0xd1
+0000            195   _OV             BIT 0xd2
+0000            196   _RS0            BIT 0xd3
+0000            197   _RS1            BIT 0xd4
+0000            198   _F0             BIT 0xd5
+0000            199   _AC             BIT 0xd6
+0000            200   _CY             BIT 0xd7
+0000            201   _T2CON_0        BIT 0xc8
+0000            202   _T2CON_1        BIT 0xc9
+0000            203   _T2CON_2        BIT 0xca
+0000            204   _T2CON_3        BIT 0xcb
+0000            205   _T2CON_4        BIT 0xcc
+0000            206   _T2CON_5        BIT 0xcd
+0000            207   _T2CON_6        BIT 0xce
+0000            208   _T2CON_7        BIT 0xcf
+0000            209   _CP_RL2         BIT 0xc8
+0000            210   _C_T2           BIT 0xc9
+0000            211   _TR2            BIT 0xca
+0000            212   _EXEN2          BIT 0xcb
+0000            213   _TCLK           BIT 0xcc
+0000            214   _RCLK           BIT 0xcd
+0000            215   _EXF2           BIT 0xce
+0000            216   _TF2            BIT 0xcf
+0000            217   _LEDRA_0        BIT 0xe8
+0000            218   _LEDRA_1        BIT 0xe9
+0000            219   _LEDRA_2        BIT 0xea
+0000            220   _LEDRA_3        BIT 0xeb
+0000            221   _LEDRA_4        BIT 0xec
+0000            222   _LEDRA_5        BIT 0xed
+0000            223   _LEDRA_6        BIT 0xee
+0000            224   _LEDRA_7        BIT 0xef
+0000            225   _SWA_0          BIT 0xe8
+0000            226   _SWA_1          BIT 0xe9
+0000            227   _SWA_2          BIT 0xea
+0000            228   _SWA_3          BIT 0xeb
+0000            229   _SWA_4          BIT 0xec
+0000            230   _SWA_5          BIT 0xed
+0000            231   _SWA_6          BIT 0xee
+0000            232   _SWA_7          BIT 0xef
+0000            233   _KEY_0          BIT 0xf8
+0000            234   _KEY_1          BIT 0xf9
+0000            235   _KEY_2          BIT 0xfa
+0000            236   _KEY_3          BIT 0xfb
+0000            237   _LCD_RW         BIT 0xd8
+0000            238   _LCD_EN         BIT 0xd9
+0000            239   _LCD_RS         BIT 0xda
+0000            240   _LCD_ON         BIT 0xdb
+0000            241   _LCD_BLON       BIT 0xdc
+0000            242   _JRXRDY         BIT 0xc0
+0000            243   _JTXRDY         BIT 0xc1
+0000            244   _JRXEN          BIT 0xc2
+0000            245   _JTXEN          BIT 0xc3
+0000            246   _JTXFULL        BIT 0xc4
+0000            247   _JRXFULL        BIT 0xc5
+0000            248   _JTXEMPTY       BIT 0xc6
+0000            249   _JTDI           BIT 0xc7
+0000            250   ;--------------------------------------------------------
+0000            251   ; overlayable register banks
+0000            252   ;--------------------------------------------------------
+0000            253            rbank0 segment data overlay
+0000            254   ;--------------------------------------------------------
+0000            255   ; internal ram data
+0000            256   ;--------------------------------------------------------
+0000            257            rseg R_DSEG
+0000            258   _pos:
+0000            259            ds 2
+0002            260   ;--------------------------------------------------------
+0002            261   ; overlayable items in internal ram 
+0002            262   ;--------------------------------------------------------
+0000            263            rseg    R_OSEG
+0000            264   _getchar_c_1_38:
+0000            265            ds 1
+0001            266   _getchar_j_1_38:
+0001            267            ds 1
+0002            268            rseg    R_OSEG
+0002            269            rseg    R_OSEG
+0002            270            rseg    R_OSEG
+0002            271            rseg    R_OSEG
+0002            272            rseg    R_OSEG
+0002            273            rseg    R_OSEG
+0002            274   _write_sfr_PARM_2:
+0002            275            ds 1
+0003            276   ;--------------------------------------------------------
+0003            277   ; indirectly addressable internal ram data
+0003            278   ;--------------------------------------------------------
+0000            279            rseg R_ISEG
+0000            280   ;--------------------------------------------------------
+0000            281   ; absolute internal ram data
+0000            282   ;--------------------------------------------------------
+0000            283            DSEG
+0000            284   ;--------------------------------------------------------
+0000            285   ; bit data
+0000            286   ;--------------------------------------------------------
+0000            287            rseg R_BSEG
+0000            288   _append_txbuff:
+0000            289            DBIT    1
+0001            290   _update_txbuff_saved_append_txbuff_1_64:
+0001            291            DBIT    1
+0002            292   ;--------------------------------------------------------
+0002            293   ; paged external ram data
+0002            294   ;--------------------------------------------------------
+0000            295            rseg R_PSEG
+0000            296   ;--------------------------------------------------------
+0000            297   ; external ram data
+0000            298   ;--------------------------------------------------------
+0000            299            rseg R_XSEG
+0000            300   ;--------------------------------------------------------
+0000            301   ; absolute external ram data
+0000            302   ;--------------------------------------------------------
+0000            303            XSEG
+0000            304   ;--------------------------------------------------------
+0000            305   ; external initialized ram data
+0000            306   ;--------------------------------------------------------
+0000            307            rseg R_IXSEG
+0000            308            rseg R_HOME
+0000            309            rseg R_GSINIT
+0000            310            rseg R_CSEG
+0000            311   ;--------------------------------------------------------
+0000            312   ; Reset entry point and interrupt vectors
+0000            313   ;--------------------------------------------------------
+C000            314            CSEG at 0xc000
+C000 020100     315            ljmp    _crt0
+C003            316   ;--------------------------------------------------------
+C003            317   ; global & static initialisations
+C003            318   ;--------------------------------------------------------
+0000            319            rseg R_HOME
+0000            320            rseg R_GSINIT
+0000            321            rseg R_GSINIT
+0000            322   ;--------------------------------------------------------
+0000            323   ; data variables initialization
+0000            324   ;--------------------------------------------------------
+0000            325            rseg R_DINIT
+0000            326   ;        .\CV_8052.c:30: volatile bit append_txbuff=0;
+0000 C250       327            clr     _append_txbuff
+0002            328            ; The linker places a 'ret' at the end of segment R_DINIT.
+0002            329   ;--------------------------------------------------------
+0002            330   ; code
+0002            331   ;--------------------------------------------------------
+0000            332            rseg R_CSEG
+0000            333   ;------------------------------------------------------------
+0000            334   ;Allocation info for local variables in function 'de2_8052_crt0'
+0000            335   ;------------------------------------------------------------
+0000            336   ;------------------------------------------------------------
+0000            337   ;        c:/source/call51/bin/../include/mcs51/CV_8052.h:303: void de2_8052_crt0 (void) _naked
+0000            338   ;        -----------------------------------------
+0000            339   ;         function de2_8052_crt0
+0000            340   ;        -----------------------------------------
+0000            341   _de2_8052_crt0:
+0000            342   ;        naked function: no prologue.
+0000            343   ;        c:/source/call51/bin/../include/mcs51/CV_8052.h:372: _endasm;
+0000            344            
+0000            345            
+0000            346             rseg R_GSINIT
+0000            347             public _crt0
+0000            348            _crt0:
+0000 7581FF     349             mov sp,#_stack_start-1
+0003 120100     350             lcall __c51_external_startup
+0006 E582       351             mov a,dpl
+0008 6001       352             jz __c51_init_data
+000A 020100     353             ljmp __c51_program_startup
+000D            354            __c51_init_data:
+000D            355            
+000D            356   ; Initialize xdata variables
+000D            357            
+000D 758200     358             mov dpl, #_R_XINIT_start
+0010 758300     359             mov dph, #(_R_XINIT_start>>8)
+0013 758400     360             mov _DPL1, #_R_IXSEG_start
+0016 758500     361             mov _DPH1, #(_R_IXSEG_start>>8)
+0019 7800       362             mov r0, #_R_IXSEG_size
+001B 7900       363             mov r1, #(_R_IXSEG_size>>8)
+001D            364            
+001D            365            XInitLoop?repeat?:
+001D E8         366             mov a, r0
+001E 49         367             orl a, r1
+001F 6001       368             jz XInitLoop?done?
+0021 E4         369             clr a
+0022 758600     370             mov _DPS, #0 ; Using dpl, dph
+0025 93         371             movc a,@a+dptr
+0026 A3         372             inc dptr
+0027 758601     373             mov _DPS, #1 ; Using DPL1, DPH1
+002A F0         374             movx @dptr, a
+002B A3         375             inc dptr
+002C 18         376             dec r0
+002D B8FFD8     377             cjne r0, #0xff, XInitLoop?repeat?
+0030 19         378             dec r1
+0031 8001       379             sjmp XInitLoop?repeat?
+0033            380            
+0033            381            XInitLoop?done?:
+0033            382            
+0033            383   ; Clear xdata variables
+0033 758600     384             mov _DPS, #0 ; Make sure we are using dpl, dph
+0036 758200     385             mov dpl, #_R_XSEG_start
+0039 758300     386             mov dph, #(_R_XSEG_start>>8)
+003C 7C00       387             mov r4, #_R_XSEG_size
+003E 7D00       388             mov r5, #(_R_XSEG_size>>8)
+0040            389            
+0040            390            XClearLoop?repeat?:
+0040 EC         391             mov a, r4
+0041 4D         392             orl a, r5
+0042 6001       393             jz XClearLoop?done?
+0044 E4         394             clr a
+0045 F0         395             movx @dptr, a
+0046 A3         396             inc dptr
+0047 1C         397             dec r4
+0048 BCFFE8     398             cjne r4, #0xff, XClearLoop?repeat?
+004B 1D         399             dec r5
+004C 8001       400             sjmp XClearLoop?repeat?
+004E            401            
+004E            402            XClearLoop?done?:
+004E 120100     403             lcall _R_DINIT_start ; Initialize data/idata variables
+0051            404            
+0051            405            __c51_program_startup:
+0051 120100     406             lcall _main
+0054            407            
+0054            408            forever?home?:
+0054 8001       409             sjmp forever?home?
+0056            410            
+0056            411             
+0056            412   ;        naked function: no epilogue.
+0056            413   ;------------------------------------------------------------
+0056            414   ;Allocation info for local variables in function 'main'
+0056            415   ;------------------------------------------------------------
+0056            416   ;------------------------------------------------------------
+0056            417   ;        .\CV_8052.c:144: void main (void)
+0056            418   ;        -----------------------------------------
+0056            419   ;         function main
+0056            420   ;        -----------------------------------------
+0056            421   _main:
+0056            422            using   0
+0056            423   ;        .\CV_8052.c:148: _endasm; //All the work is done in cmon51.c
+0056            424            
+0056 020100     425              ljmp _do_cmd
+0059            426             
+0059 22         427            ret
+005A            428   ;------------------------------------------------------------
+005A            429   ;Allocation info for local variables in function '_c51_external_startup'
+005A            430   ;------------------------------------------------------------
+005A            431   ;------------------------------------------------------------
+005A            432   ;        .\CV_8052.c:151: unsigned char _c51_external_startup(void)
+005A            433   ;        -----------------------------------------
+005A            434   ;         function _c51_external_startup
+005A            435   ;        -----------------------------------------
+005A            436   __c51_external_startup:
+005A            437   ;        .\CV_8052.c:158: _endasm;
+005A            438            
+005A 75FA00     439              mov _DEBUG_CALL_L,#(_step_and_break)
+005D 75FB00     440              mov _DEBUG_CALL_H,#(_step_and_break >> 8)
+0060            441     ;lcall _R_DINIT_start ; Initialize data/idata variables
+0060            442             
+0060            443   ;        .\CV_8052.c:160: return 0;
+0060 758200     444            mov     dpl,#0x00
+0063 22         445            ret
+0064            446   ;------------------------------------------------------------
+0064            447   ;Allocation info for local variables in function 'getchar'
+0064            448   ;------------------------------------------------------------
+0064            449   ;c                         Allocated with name '_getchar_c_1_38'
+0064            450   ;j                         Allocated with name '_getchar_j_1_38'
+0064            451   ;------------------------------------------------------------
+0064            452   ;        .\CV_8052.c:163: char getchar(void)
+0064            453   ;        -----------------------------------------
+0064            454   ;         function getchar
+0064            455   ;        -----------------------------------------
+0064            456   _getchar:
+0064            457   ;        .\CV_8052.c:167: while(rxcount==0); // Wait for data to arrive
+0064            458   L005001?:
+0064 900000     459            mov     dptr,#_rxcount
+0067 E0         460            movx    a,@dptr
+0068 FA         461            mov     r2,a
+0069 6001       462            jz      L005001?
+006B            463   ;        .\CV_8052.c:168: c=rxbuff[0];
+006B 900000     464            mov     dptr,#_rxbuff
+006E E0         465            movx    a,@dptr
+006F F558       466            mov     _getchar_c_1_38,a
+0071            467   ;        .\CV_8052.c:169: for(j=1; rxbuff[j]!=0; j++) rxbuff[j-1]=rxbuff[j];
+0071 759801     468            mov     _getchar_j_1_38,#0x01
+0074            469   L005004?:
+0074 E598       470            mov     a,_getchar_j_1_38
+0076 2400       471            add     a,#_rxbuff
+0078 F582       472            mov     dpl,a
+007A E4         473            clr     a
+007B 3400       474            addc    a,#(_rxbuff >> 8)
+007D F583       475            mov     dph,a
+007F E0         476            movx    a,@dptr
+0080 FA         477            mov     r2,a
+0081 6001       478            jz      L005007?
+0083 E598       479            mov     a,_getchar_j_1_38
+0085 14         480            dec     a
+0086 2400       481            add     a,#_rxbuff
+0088 FA         482            mov     r2,a
+0089 E4         483            clr     a
+008A 3400       484            addc    a,#(_rxbuff >> 8)
+008C FB         485            mov     r3,a
+008D E598       486            mov     a,_getchar_j_1_38
+008F 2400       487            add     a,#_rxbuff
+0091 F582       488            mov     dpl,a
+0093 E4         489            clr     a
+0094 3400       490            addc    a,#(_rxbuff >> 8)
+0096 F583       491            mov     dph,a
+0098 E0         492            movx    a,@dptr
+0099 FC         493            mov     r4,a
+009A 8A82       494            mov     dpl,r2
+009C 8B83       495            mov     dph,r3
+009E F0         496            movx    @dptr,a
+009F 0598       497            inc     _getchar_j_1_38
+00A1 8001       498            sjmp    L005004?
+00A3            499   L005007?:
+00A3            500   ;        .\CV_8052.c:170: rxbuff[j-1]=0;
+00A3 E598       501            mov     a,_getchar_j_1_38
+00A5 14         502            dec     a
+00A6 2400       503            add     a,#_rxbuff
+00A8 F582       504            mov     dpl,a
+00AA E4         505            clr     a
+00AB 3400       506            addc    a,#(_rxbuff >> 8)
+00AD F583       507            mov     dph,a
+00AF E4         508            clr     a
+00B0 F0         509            movx    @dptr,a
+00B1            510   ;        .\CV_8052.c:171: rxcount--;
+00B1 900000     511            mov     dptr,#_rxcount
+00B4 E0         512            movx    a,@dptr
+00B5 14         513            dec     a
+00B6 900000     514            mov     dptr,#_rxcount
+00B9 F0         515            movx    @dptr,a
+00BA            516   ;        .\CV_8052.c:173: return c;
+00BA 855882     517            mov     dpl,_getchar_c_1_38
+00BD 22         518            ret
+00BE            519   ;------------------------------------------------------------
+00BE            520   ;Allocation info for local variables in function 'putc'
+00BE            521   ;------------------------------------------------------------
+00BE            522   ;c                         Allocated to registers r2 
+00BE            523   ;------------------------------------------------------------
+00BE            524   ;        .\CV_8052.c:176: void putc (unsigned char c)
+00BE            525   ;        -----------------------------------------
+00BE            526   ;         function putc
+00BE            527   ;        -----------------------------------------
+00BE            528   _putc:
+00BE AA82       529            mov     r2,dpl
+00C0            530   ;        .\CV_8052.c:178: while(txcount!=0);
+00C0            531   L006001?:
+00C0 900000     532            mov     dptr,#_txcount
+00C3 E0         533            movx    a,@dptr
+00C4 FB         534            mov     r3,a
+00C5 7001       535            jnz     L006001?
+00C7            536   ;        .\CV_8052.c:179: txbuff[0]=c;
+00C7 900000     537            mov     dptr,#_txbuff
+00CA EA         538            mov     a,r2
+00CB F0         539            movx    @dptr,a
+00CC            540   ;        .\CV_8052.c:180: txbuff[1]=0;
+00CC 900001     541            mov     dptr,#(_txbuff + 0x0001)
+00CF E4         542            clr     a
+00D0 F0         543            movx    @dptr,a
+00D1            544   ;        .\CV_8052.c:181: txcount=2;     
+00D1 900000     545            mov     dptr,#_txcount
+00D4 7402       546            mov     a,#0x02
+00D6 F0         547            movx    @dptr,a
+00D7 22         548            ret
+00D8            549   ;------------------------------------------------------------
+00D8            550   ;Allocation info for local variables in function 'putnl'
+00D8            551   ;------------------------------------------------------------
+00D8            552   ;------------------------------------------------------------
+00D8            553   ;        .\CV_8052.c:184: void putnl (void)
+00D8            554   ;        -----------------------------------------
+00D8            555   ;         function putnl
+00D8            556   ;        -----------------------------------------
+00D8            557   _putnl:
+00D8            558   ;        .\CV_8052.c:186: while(txcount!=0);
+00D8            559   L007001?:
+00D8 900000     560            mov     dptr,#_txcount
+00DB E0         561            movx    a,@dptr
+00DC FA         562            mov     r2,a
+00DD 7001       563            jnz     L007001?
+00DF            564   ;        .\CV_8052.c:187: txbuff[0]='\r';
+00DF 900000     565            mov     dptr,#_txbuff
+00E2 740D       566            mov     a,#0x0D
+00E4 F0         567            movx    @dptr,a
+00E5            568   ;        .\CV_8052.c:188: txbuff[1]='\n';
+00E5 900001     569            mov     dptr,#(_txbuff + 0x0001)
+00E8 740A       570            mov     a,#0x0A
+00EA F0         571            movx    @dptr,a
+00EB            572   ;        .\CV_8052.c:189: txbuff[2]=0;
+00EB 900002     573            mov     dptr,#(_txbuff + 0x0002)
+00EE E4         574            clr     a
+00EF F0         575            movx    @dptr,a
+00F0            576   ;        .\CV_8052.c:190: txcount=3;     
+00F0 900000     577            mov     dptr,#_txcount
+00F3 7403       578            mov     a,#0x03
+00F5 F0         579            movx    @dptr,a
+00F6 22         580            ret
+00F7            581   ;------------------------------------------------------------
+00F7            582   ;Allocation info for local variables in function 'get_txbuff'
+00F7            583   ;------------------------------------------------------------
+00F7            584   ;------------------------------------------------------------
+00F7            585   ;        .\CV_8052.c:193: void get_txbuff (void)
+00F7            586   ;        -----------------------------------------
+00F7            587   ;         function get_txbuff
+00F7            588   ;        -----------------------------------------
+00F7            589   _get_txbuff:
+00F7            590   ;        .\CV_8052.c:195: if(append_txbuff==1) return;
+00F7 3050B8     591            jnb     _append_txbuff,L008003?
+00FA            592   ;        .\CV_8052.c:196: while(txcount!=0);
+00FA 22         593            ret
+00FB            594   L008003?:
+00FB 900000     595            mov     dptr,#_txcount
+00FE E0         596            movx    a,@dptr
+00FF FA         597            mov     r2,a
+0100            598   ;        .\CV_8052.c:197: pos=0;
+0100 7001       599            jnz     L008003?
+0102 F590       600            mov     _pos,a
+0104 F591       601            mov     (_pos + 1),a
+0106 22         602            ret
+0107            603   ;------------------------------------------------------------
+0107            604   ;Allocation info for local variables in function 'add_nlcursor_txbuff'
+0107            605   ;------------------------------------------------------------
+0107            606   ;------------------------------------------------------------
+0107            607   ;        .\CV_8052.c:200: void add_nlcursor_txbuff (void)
+0107            608   ;        -----------------------------------------
+0107            609   ;         function add_nlcursor_txbuff
+0107            610   ;        -----------------------------------------
+0107            611   _add_nlcursor_txbuff:
+0107            612   ;        .\CV_8052.c:202: txbuff[pos++]='\r';
+0107 AA90       613            mov     r2,_pos
+0109 AB91       614            mov     r3,(_pos + 1)
+010B 7401       615            mov     a,#0x01
+010D 2590       616            add     a,_pos
+010F F590       617            mov     _pos,a
+0111 E4         618            clr     a
+0112 3591       619            addc    a,(_pos + 1)
+0114 F591       620            mov     (_pos + 1),a
+0116 EA         621            mov     a,r2
+0117 2400       622            add     a,#_txbuff
+0119 F582       623            mov     dpl,a
+011B EB         624            mov     a,r3
+011C 3400       625            addc    a,#(_txbuff >> 8)
+011E F583       626            mov     dph,a
+0120 740D       627            mov     a,#0x0D
+0122 F0         628            movx    @dptr,a
+0123            629   ;        .\CV_8052.c:203: txbuff[pos++]='\n';
+0123 AA90       630            mov     r2,_pos
+0125 AB91       631            mov     r3,(_pos + 1)
+0127 7401       632            mov     a,#0x01
+0129 2590       633            add     a,_pos
+012B F590       634            mov     _pos,a
+012D E4         635            clr     a
+012E 3591       636            addc    a,(_pos + 1)
+0130 F591       637            mov     (_pos + 1),a
+0132 EA         638            mov     a,r2
+0133 2400       639            add     a,#_txbuff
+0135 F582       640            mov     dpl,a
+0137 EB         641            mov     a,r3
+0138 3400       642            addc    a,#(_txbuff >> 8)
+013A F583       643            mov     dph,a
+013C 740A       644            mov     a,#0x0A
+013E F0         645            movx    @dptr,a
+013F            646   ;        .\CV_8052.c:204: txbuff[pos++]='>';
+013F AA90       647            mov     r2,_pos
+0141 AB91       648            mov     r3,(_pos + 1)
+0143 7401       649            mov     a,#0x01
+0145 2590       650            add     a,_pos
+0147 F590       651            mov     _pos,a
+0149 E4         652            clr     a
+014A 3591       653            addc    a,(_pos + 1)
+014C F591       654            mov     (_pos + 1),a
+014E EA         655            mov     a,r2
+014F 2400       656            add     a,#_txbuff
+0151 F582       657            mov     dpl,a
+0153 EB         658            mov     a,r3
+0154 3400       659            addc    a,#(_txbuff >> 8)
+0156 F583       660            mov     dph,a
+0158 743E       661            mov     a,#0x3E
+015A F0         662            movx    @dptr,a
+015B            663   ;        .\CV_8052.c:205: txbuff[pos++]=' ';
+015B AA90       664            mov     r2,_pos
+015D AB91       665            mov     r3,(_pos + 1)
+015F 7401       666            mov     a,#0x01
+0161 2590       667            add     a,_pos
+0163 F590       668            mov     _pos,a
+0165 E4         669            clr     a
+0166 3591       670            addc    a,(_pos + 1)
+0168 F591       671            mov     (_pos + 1),a
+016A EA         672            mov     a,r2
+016B 2400       673            add     a,#_txbuff
+016D F582       674            mov     dpl,a
+016F EB         675            mov     a,r3
+0170 3400       676            addc    a,#(_txbuff >> 8)
+0172 F583       677            mov     dph,a
+0174 7420       678            mov     a,#0x20
+0176 F0         679            movx    @dptr,a
+0177 22         680            ret
+0178            681   ;------------------------------------------------------------
+0178            682   ;Allocation info for local variables in function 'add_char_txbuff'
+0178            683   ;------------------------------------------------------------
+0178            684   ;c                         Allocated to registers r2 
+0178            685   ;------------------------------------------------------------
+0178            686   ;        .\CV_8052.c:208: void add_char_txbuff (char c)
+0178            687   ;        -----------------------------------------
+0178            688   ;         function add_char_txbuff
+0178            689   ;        -----------------------------------------
+0178            690   _add_char_txbuff:
+0178 AA82       691            mov     r2,dpl
+017A            692   ;        .\CV_8052.c:210: txbuff[pos++]=c;
+017A AB90       693            mov     r3,_pos
+017C AC91       694            mov     r4,(_pos + 1)
+017E 7401       695            mov     a,#0x01
+0180 2590       696            add     a,_pos
+0182 F590       697            mov     _pos,a
+0184 E4         698            clr     a
+0185 3591       699            addc    a,(_pos + 1)
+0187 F591       700            mov     (_pos + 1),a
+0189 EB         701            mov     a,r3
+018A 2400       702            add     a,#_txbuff
+018C F582       703            mov     dpl,a
+018E EC         704            mov     a,r4
+018F 3400       705            addc    a,#(_txbuff >> 8)
+0191 F583       706            mov     dph,a
+0193 EA         707            mov     a,r2
+0194 F0         708            movx    @dptr,a
+0195 22         709            ret
+0196            710   ;------------------------------------------------------------
+0196            711   ;Allocation info for local variables in function 'add_cursor_txbuff'
+0196            712   ;------------------------------------------------------------
+0196            713   ;------------------------------------------------------------
+0196            714   ;        .\CV_8052.c:213: void add_cursor_txbuff (void)
+0196            715   ;        -----------------------------------------
+0196            716   ;         function add_cursor_txbuff
+0196            717   ;        -----------------------------------------
+0196            718   _add_cursor_txbuff:
+0196            719   ;        .\CV_8052.c:215: txbuff[pos++]='>';
+0196 AA90       720            mov     r2,_pos
+0198 AB91       721            mov     r3,(_pos + 1)
+019A 7401       722            mov     a,#0x01
+019C 2590       723            add     a,_pos
+019E F590       724            mov     _pos,a
+01A0 E4         725            clr     a
+01A1 3591       726            addc    a,(_pos + 1)
+01A3 F591       727            mov     (_pos + 1),a
+01A5 EA         728            mov     a,r2
+01A6 2400       729            add     a,#_txbuff
+01A8 F582       730            mov     dpl,a
+01AA EB         731            mov     a,r3
+01AB 3400       732            addc    a,#(_txbuff >> 8)
+01AD F583       733            mov     dph,a
+01AF 743E       734            mov     a,#0x3E
+01B1 F0         735            movx    @dptr,a
+01B2            736   ;        .\CV_8052.c:216: txbuff[pos++]=' ';
+01B2 AA90       737            mov     r2,_pos
+01B4 AB91       738            mov     r3,(_pos + 1)
+01B6 7401       739            mov     a,#0x01
+01B8 2590       740            add     a,_pos
+01BA F590       741            mov     _pos,a
+01BC E4         742            clr     a
+01BD 3591       743            addc    a,(_pos + 1)
+01BF F591       744            mov     (_pos + 1),a
+01C1 EA         745            mov     a,r2
+01C2 2400       746            add     a,#_txbuff
+01C4 F582       747            mov     dpl,a
+01C6 EB         748            mov     a,r3
+01C7 3400       749            addc    a,#(_txbuff >> 8)
+01C9 F583       750            mov     dph,a
+01CB 7420       751            mov     a,#0x20
+01CD F0         752            movx    @dptr,a
+01CE 22         753            ret
+01CF            754   ;------------------------------------------------------------
+01CF            755   ;Allocation info for local variables in function 'add_byte_txbuff'
+01CF            756   ;------------------------------------------------------------
+01CF            757   ;c                         Allocated to registers r2 
+01CF            758   ;------------------------------------------------------------
+01CF            759   ;        .\CV_8052.c:219: void add_byte_txbuff (unsigned char c)
+01CF            760   ;        -----------------------------------------
+01CF            761   ;         function add_byte_txbuff
+01CF            762   ;        -----------------------------------------
+01CF            763   _add_byte_txbuff:
+01CF AA82       764            mov     r2,dpl
+01D1            765   ;        .\CV_8052.c:221: txbuff[pos++]=hexval[c/0x10];
+01D1 AB90       766            mov     r3,_pos
+01D3 AC91       767            mov     r4,(_pos + 1)
+01D5 7401       768            mov     a,#0x01
+01D7 2590       769            add     a,_pos
+01D9 F590       770            mov     _pos,a
+01DB E4         771            clr     a
+01DC 3591       772            addc    a,(_pos + 1)
+01DE F591       773            mov     (_pos + 1),a
+01E0 EB         774            mov     a,r3
+01E1 2400       775            add     a,#_txbuff
+01E3 FB         776            mov     r3,a
+01E4 EC         777            mov     a,r4
+01E5 3400       778            addc    a,#(_txbuff >> 8)
+01E7 FC         779            mov     r4,a
+01E8 EA         780            mov     a,r2
+01E9 C4         781            swap    a
+01EA 540F       782            anl     a,#0x0f
+01EC 900000     783            mov     dptr,#_hexval
+01EF 93         784            movc    a,@a+dptr
+01F0 8B82       785            mov     dpl,r3
+01F2 8C83       786            mov     dph,r4
+01F4 F0         787            movx    @dptr,a
+01F5            788   ;        .\CV_8052.c:222: txbuff[pos++]=hexval[c&0x0f];
+01F5 AB90       789            mov     r3,_pos
+01F7 AC91       790            mov     r4,(_pos + 1)
+01F9 7401       791            mov     a,#0x01
+01FB 2590       792            add     a,_pos
+01FD F590       793            mov     _pos,a
+01FF E4         794            clr     a
+0200 3591       795            addc    a,(_pos + 1)
+0202 F591       796            mov     (_pos + 1),a
+0204 EB         797            mov     a,r3
+0205 2400       798            add     a,#_txbuff
+0207 FB         799            mov     r3,a
+0208 EC         800            mov     a,r4
+0209 3400       801            addc    a,#(_txbuff >> 8)
+020B FC         802            mov     r4,a
+020C 740F       803            mov     a,#0x0F
+020E 5A         804            anl     a,r2
+020F 900000     805            mov     dptr,#_hexval
+0212 93         806            movc    a,@a+dptr
+0213 8B82       807            mov     dpl,r3
+0215 8C83       808            mov     dph,r4
+0217 F0         809            movx    @dptr,a
+0218 22         810            ret
+0219            811   ;------------------------------------------------------------
+0219            812   ;Allocation info for local variables in function 'add_word_txbuff'
+0219            813   ;------------------------------------------------------------
+0219            814   ;w                         Allocated to registers r2 r3 
+0219            815   ;------------------------------------------------------------
+0219            816   ;        .\CV_8052.c:225: void add_word_txbuff (unsigned int w)
+0219            817   ;        -----------------------------------------
+0219            818   ;         function add_word_txbuff
+0219            819   ;        -----------------------------------------
+0219            820   _add_word_txbuff:
+0219 AA82       821            mov     r2,dpl
+021B AB83       822            mov     r3,dph
+021D            823   ;        .\CV_8052.c:227: add_byte_txbuff(w/0x100);
+021D 8B04       824            mov     ar4,r3
+021F 8C82       825            mov     dpl,r4
+0221 C002       826            push    ar2
+0223 C003       827            push    ar3
+0225 120100     828            lcall   _add_byte_txbuff
+0228 D003       829            pop     ar3
+022A D002       830            pop     ar2
+022C            831   ;        .\CV_8052.c:228: add_byte_txbuff(w%0x100);
+022C 8A82       832            mov     dpl,r2
+022E 020100     833            ljmp    _add_byte_txbuff
+0231            834   ;------------------------------------------------------------
+0231            835   ;Allocation info for local variables in function 'add_wordnl_txbuff'
+0231            836   ;------------------------------------------------------------
+0231            837   ;w                         Allocated to registers r2 r3 
+0231            838   ;------------------------------------------------------------
+0231            839   ;        .\CV_8052.c:231: void add_wordnl_txbuff (unsigned int w)
+0231            840   ;        -----------------------------------------
+0231            841   ;         function add_wordnl_txbuff
+0231            842   ;        -----------------------------------------
+0231            843   _add_wordnl_txbuff:
+0231 AA82       844            mov     r2,dpl
+0233 AB83       845            mov     r3,dph
+0235            846   ;        .\CV_8052.c:233: add_byte_txbuff(w/0x100);
+0235 8B04       847            mov     ar4,r3
+0237 8C82       848            mov     dpl,r4
+0239 C002       849            push    ar2
+023B C003       850            push    ar3
+023D 120100     851            lcall   _add_byte_txbuff
+0240 D003       852            pop     ar3
+0242 D002       853            pop     ar2
+0244            854   ;        .\CV_8052.c:234: add_byte_txbuff(w%0x100);
+0244 8A82       855            mov     dpl,r2
+0246 120100     856            lcall   _add_byte_txbuff
+0249            857   ;        .\CV_8052.c:235: add_char_txbuff('\r');
+0249 75820D     858            mov     dpl,#0x0D
+024C 120100     859            lcall   _add_char_txbuff
+024F            860   ;        .\CV_8052.c:236: add_char_txbuff('\n');
+024F 75820A     861            mov     dpl,#0x0A
+0252 020100     862            ljmp    _add_char_txbuff
+0255            863   ;------------------------------------------------------------
+0255            864   ;Allocation info for local variables in function 'add_str_txbuff'
+0255            865   ;------------------------------------------------------------
+0255            866   ;s                         Allocated to registers r2 r3 r4 
+0255            867   ;------------------------------------------------------------
+0255            868   ;        .\CV_8052.c:240: void add_str_txbuff (unsigned char * s)
+0255            869   ;        -----------------------------------------
+0255            870   ;         function add_str_txbuff
+0255            871   ;        -----------------------------------------
+0255            872   _add_str_txbuff:
+0255 AA82       873            mov     r2,dpl
+0257 AB83       874            mov     r3,dph
+0259 ACF0       875            mov     r4,b
+025B            876   ;        .\CV_8052.c:242: while(*s!=0)
+025B            877   L015001?:
+025B 8A82       878            mov     dpl,r2
+025D 8B83       879            mov     dph,r3
+025F 8CF0       880            mov     b,r4
+0261 120100     881            lcall   __gptrget
+0264 FD         882            mov     r5,a
+0265 6001       883            jz      L015004?
+0267            884   ;        .\CV_8052.c:244: txbuff[pos++]=*s;
+0267 AE90       885            mov     r6,_pos
+0269 AF91       886            mov     r7,(_pos + 1)
+026B 7401       887            mov     a,#0x01
+026D 2590       888            add     a,_pos
+026F F590       889            mov     _pos,a
+0271 E4         890            clr     a
+0272 3591       891            addc    a,(_pos + 1)
+0274 F591       892            mov     (_pos + 1),a
+0276 EE         893            mov     a,r6
+0277 2400       894            add     a,#_txbuff
+0279 F582       895            mov     dpl,a
+027B EF         896            mov     a,r7
+027C 3400       897            addc    a,#(_txbuff >> 8)
+027E F583       898            mov     dph,a
+0280 ED         899            mov     a,r5
+0281 F0         900            movx    @dptr,a
+0282            901   ;        .\CV_8052.c:245: s++;
+0282 0A         902            inc     r2
+0283 BA0078     903            cjne    r2,#0x00,L015001?
+0286 0B         904            inc     r3
+0287 8001       905            sjmp    L015001?
+0289            906   L015004?:
+0289 22         907            ret
+028A            908   ;------------------------------------------------------------
+028A            909   ;Allocation info for local variables in function 'flush_txbuff'
+028A            910   ;------------------------------------------------------------
+028A            911   ;------------------------------------------------------------
+028A            912   ;        .\CV_8052.c:249: void flush_txbuff (void)
+028A            913   ;        -----------------------------------------
+028A            914   ;         function flush_txbuff
+028A            915   ;        -----------------------------------------
+028A            916   _flush_txbuff:
+028A            917   ;        .\CV_8052.c:251: if(append_txbuff==1) return;
+028A 305038     918            jnb     _append_txbuff,L016002?
+028D 22         919            ret
+028E            920   L016002?:
+028E            921   ;        .\CV_8052.c:252: if(pos>0)
+028E E590       922            mov     a,_pos
+0290 4591       923            orl     a,(_pos + 1)
+0292 6001       924            jz      L016008?
+0294            925   ;        .\CV_8052.c:254: txbuff[pos++]=0;
+0294 AA90       926            mov     r2,_pos
+0296 AB91       927            mov     r3,(_pos + 1)
+0298 7401       928            mov     a,#0x01
+029A 2590       929            add     a,_pos
+029C F590       930            mov     _pos,a
+029E E4         931            clr     a
+029F 3591       932            addc    a,(_pos + 1)
+02A1 F591       933            mov     (_pos + 1),a
+02A3 EA         934            mov     a,r2
+02A4 2400       935            add     a,#_txbuff
+02A6 F582       936            mov     dpl,a
+02A8 EB         937            mov     a,r3
+02A9 3400       938            addc    a,#(_txbuff >> 8)
+02AB F583       939            mov     dph,a
+02AD E4         940            clr     a
+02AE F0         941            movx    @dptr,a
+02AF            942   ;        .\CV_8052.c:255: txcount=(pos<0x100)?pos:0xff;
+02AF 74FF       943            mov     a,#0x100 - 0x01
+02B1 2591       944            add     a,(_pos + 1)
+02B3 4001       945            jc      L016010?
+02B5 AA90       946            mov     r2,_pos
+02B7 AB91       947            mov     r3,(_pos + 1)
+02B9 8001       948            sjmp    L016011?
+02BB            949   L016010?:
+02BB 7AFF       950            mov     r2,#0xFF
+02BD 7B00       951            mov     r3,#0x00
+02BF            952   L016011?:
+02BF 900000     953            mov     dptr,#_txcount
+02C2 EA         954            mov     a,r2
+02C3 F0         955            movx    @dptr,a
+02C4            956   ;        .\CV_8052.c:256: pos=0;
+02C4 E4         957            clr     a
+02C5 F590       958            mov     _pos,a
+02C7 F591       959            mov     (_pos + 1),a
+02C9            960   ;        .\CV_8052.c:257: while(txcount!=0);
+02C9            961   L016003?:
+02C9 900000     962            mov     dptr,#_txcount
+02CC E0         963            movx    a,@dptr
+02CD FA         964            mov     r2,a
+02CE 7001       965            jnz     L016003?
+02D0            966   L016008?:
+02D0 22         967            ret
+02D1            968   ;------------------------------------------------------------
+02D1            969   ;Allocation info for local variables in function 'update_txbuff'
+02D1            970   ;------------------------------------------------------------
+02D1            971   ;------------------------------------------------------------
+02D1            972   ;        .\CV_8052.c:261: void update_txbuff (void)
+02D1            973   ;        -----------------------------------------
+02D1            974   ;         function update_txbuff
+02D1            975   ;        -----------------------------------------
+02D1            976   _update_txbuff:
+02D1            977   ;        .\CV_8052.c:265: if(pos>8191) 
+02D1 C3         978            clr     c
+02D2 74FF       979            mov     a,#0xFF
+02D4 9590       980            subb    a,_pos
+02D6 741F       981            mov     a,#0x1F
+02D8 9591       982            subb    a,(_pos + 1)
+02DA 5001       983            jnc     L017003?
+02DC            984   ;        .\CV_8052.c:267: saved_append_txbuff=append_txbuff;
+02DC A250       985            mov     c,_append_txbuff
+02DE 92F8       986            mov     _update_txbuff_saved_append_txbuff_1_64,c
+02E0            987   ;        .\CV_8052.c:268: append_txbuff=0;
+02E0 C250       988            clr     _append_txbuff
+02E2            989   ;        .\CV_8052.c:269: flush_txbuff();
+02E2 120100     990            lcall   _flush_txbuff
+02E5            991   ;        .\CV_8052.c:270: append_txbuff=saved_append_txbuff;
+02E5 A2F8       992            mov     c,_update_txbuff_saved_append_txbuff_1_64
+02E7 9250       993            mov     _append_txbuff,c
+02E9            994   L017003?:
+02E9 22         995            ret
+02EA            996   ;------------------------------------------------------------
+02EA            997   ;Allocation info for local variables in function 'read_sfr'
+02EA            998   ;------------------------------------------------------------
+02EA            999   ;loc                       Allocated to registers 
+02EA           1000   ;------------------------------------------------------------
+02EA           1001   ;        .\CV_8052.c:274: unsigned char read_sfr (unsigned char loc)
+02EA           1002   ;        -----------------------------------------
+02EA           1003   ;         function read_sfr
+02EA           1004   ;        -----------------------------------------
+02EA           1005   _read_sfr:
+02EA 8582F3    1006            mov     _REP_VALUE,dpl
+02ED           1007   ;        .\CV_8052.c:289: _endasm;
+02ED           1008            
+02ED 75F1C4    1009              mov _REP_ADD_L,#(_asm_read_sfr+4)
+02F0 75F280    1010              mov _REP_ADD_H,#((_asm_read_sfr+4) >> 8)
+02F3 43C302    1011              orl _XRAMUSEDAS, #00000010B ; Enable byte replacement at the given address
+02F6           1012             _asm_read_sfr:
+02F6           1013              read_sfr_0xff data 0xff ; To avoid warning
+02F6 00        1014                 nop ; Account for delay
+02F7 00        1015                 nop
+02F8 00        1016                 nop
+02F9 85FF82    1017              mov dpl, read_sfr_0xff
+02FC 53C3FD    1018              anl _XRAMUSEDAS, #not(00000010B) ; Disable byte replacement at the given address
+02FF 22        1019              ret
+0300           1020                
+0300           1021   ;        .\CV_8052.c:291: return 0; //Dummy return. DPL has the value
+0300 758200    1022            mov     dpl,#0x00
+0303 22        1023            ret
+0304           1024   ;------------------------------------------------------------
+0304           1025   ;Allocation info for local variables in function 'write_sfr'
+0304           1026   ;------------------------------------------------------------
+0304           1027   ;val                       Allocated with name '_write_sfr_PARM_2'
+0304           1028   ;loc                       Allocated to registers 
+0304           1029   ;------------------------------------------------------------
+0304           1030   ;        .\CV_8052.c:294: void write_sfr (unsigned char loc, unsigned char val)
+0304           1031   ;        -----------------------------------------
+0304           1032   ;         function write_sfr
+0304           1033   ;        -----------------------------------------
+0304           1034   _write_sfr:
+0304 8582F3    1035            mov     _REP_VALUE,dpl
+0307           1036   ;        .\CV_8052.c:297: DPL= val;
+0307 858082    1037            mov     _DPL,_write_sfr_PARM_2
+030A           1038   ;        .\CV_8052.c:309: _endasm;
+030A           1039            
+030A 75F145    1040              mov _REP_ADD_L,#(_asm_write_sfr+5)
+030D 75F281    1041              mov _REP_ADD_H,#((_asm_write_sfr+5) >> 8)
+0310 43C302    1042              orl _XRAMUSEDAS, #00000010B
+0313           1043                _asm_write_sfr:
+0313 00        1044                 nop
+0314 00        1045                 nop
+0315 00        1046                 nop
+0316 8582FF    1047              mov 0xff, dpl
+0319 53C3FD    1048              anl _XRAMUSEDAS, #not(00000010B)
+031C 22        1049              ret
+031D           1050                
+031D 22        1051            ret
+031E           1052   ;------------------------------------------------------------
+031E           1053   ;Allocation info for local variables in function 'restorePC'
+031E           1054   ;------------------------------------------------------------
+031E           1055   ;------------------------------------------------------------
+031E           1056   ;        .\CV_8052.c:312: void restorePC (void)
+031E           1057   ;        -----------------------------------------
+031E           1058   ;         function restorePC
+031E           1059   ;        -----------------------------------------
+031E           1060   _restorePC:
+031E           1061   ;        .\CV_8052.c:314: PC_save=0;
+031E 900000    1062            mov     dptr,#_PC_save
+0321 E4        1063            clr     a
+0322 F0        1064            movx    @dptr,a
+0323 A3        1065            inc     dptr
+0324 F0        1066            movx    @dptr,a
+0325 22        1067            ret
+0000           1068            rseg R_CSEG
+0000           1069   
+0000           1070            rseg R_XINIT
+0000           1071   
+0000           1072            rseg R_CONST
+0000           1073   _sfrn:
+0000 80        1074            db 0x80
+0001 5030      1075            db 'P0'
+0003 81        1076            db 0x81
+0004 5350      1077            db 'SP'
+0006 82        1078            db 0x82
+0007 44504C    1079            db 'DPL'
+000A 83        1080            db 0x83
+000B 445048    1081            db 'DPH'
+000E 87        1082            db 0x87
+000F 50434F4E  1083            db 'PCON'
+0013 88        1084            db 0x88
+0014 54434F4E  1085            db 'TCON'
+0018 89        1086            db 0x89
+0019 544D4F44  1087            db 'TMOD'
+001D 8A        1088            db 0x8A
+001E 544C30    1089            db 'TL0'
+0021 8B        1090            db 0x8B
+0022 544C31    1091            db 'TL1'
+0025 8C        1092            db 0x8C
+0026 544830    1093            db 'TH0'
+0029 8D        1094            db 0x8D
+002A 544831    1095            db 'TH1'
+002D 8E        1096            db 0x8E
+002E 48455834  1097            db 'HEX4'
+0032 8F        1098            db 0x8F
+0033 48455835  1099            db 'HEX5'
+0037 90        1100            db 0x90
+0038 5031      1101            db 'P1'
+003A 91        1102            db 0x91
+003B 48        1103            db 'H'
+003C 455830    1104            db 'EX0'
+003F 92        1105            db 0x92
+0040 48455831  1106            db 'HEX1'
+0044 93        1107            db 0x93
+0045 48455832  1108            db 'HEX2'
+0049 94        1109            db 0x94
+004A 48455833  1110            db 'HEX3'
+004E 95        1111            db 0x95
+004F 4C454452  1112            db 'LEDRB'
+     42
+0054 95        1113            db 0x95
+0055 535742    1114            db 'SWB'
+0058 96        1115            db 0x96
+0059 48455836  1116            db 'HEX6'
+005D 97        1117            db 0x97
+005E 48455837  1118            db 'HEX7'
+0062 98        1119            db 0x98
+0063 53434F4E  1120            db 'SCON'
+0067 99        1121            db 0x99
+0068 53425546  1122            db 'SBUF'
+006C 9A        1123            db 0x9A
+006D 50304D4F  1124            db 'P0MOD'
+     44
+0072 9B        1125            db 0x9B
+0073 50314D4F  1126            db 'P1MOD'
+     44
+0078 9C        1127            db 0x9C
+0079 50324D4F  1128            db 'P2MOD'
+     44
+007E 9D        1129            db 0x9D
+007F 50334D4F  1130            db 'P3MOD'
+     44
+0084 A0        1131            db 0xA0
+0085 5032      1132            db 'P2'
+0087 A8        1133            db 0xA8
+0088 4945      1134            db 'IE'
+008A B0        1135            db 0xB0
+008B 5033      1136            db 'P3'
+008D B8        1137            db 0xB8
+008E 4950      1138            db 'IP'
+0090 C8        1139            db 0xC8
+0091 5432434F  1140            db 'T2CON'
+     4E
+0096 C9        1141            db 0xC9
+0097 54324D4F  1142            db 'T2MOD'
+     44
+009C CA        1143            db 0xCA
+009D 52434150  1144            db 'RCAP2L'
+     324C
+00A3 CB        1145            db 0xCB
+00A4 52434150  1146            db 'RCAP2H'
+     3248
+00AA CC        1147            db 0xCC
+00AB 544C32    1148            db 'TL2'
+00AE CD        1149            db 0xCD
+00AF 544832    1150            db 'TH2'
+00B2 D0        1151            db 0xD0
+00B3 50        1152            db 'P'
+00B4 5357      1153            db 'SW'
+00B6 D8        1154            db 0xD8
+00B7 4C434443  1155            db 'LCDCMD'
+     4D44
+00BD D9        1156            db 0xD9
+00BE 4C434444  1157            db 'LCDDATA'
+     415441
+00C5 DA        1158            db 0xDA
+00C6 4C43444D  1159            db 'LCDMOD'
+     4F44
+00CC E0        1160            db 0xE0
+00CD 414343    1161            db 'ACC'
+00D0 E0        1162            db 0xE0
+00D1 41        1163            db 'A'
+00D2 E8        1164            db 0xE8
+00D3 4C454452  1165            db 'LEDRA'
+     41
+00D8 E8        1166            db 0xE8
+00D9 535741    1167            db 'SWA'
+00DC F0        1168            db 0xF0
+00DD 42        1169            db 'B'
+00DE F8        1170            db 0xF8
+00DF 4B4559    1171            db 'KEY'
+00E2 80        1172            db 0x80
+00E3 00        1173            db 0x00
+00E4 00        1174            db 0x00
+00E5           1175   _bitn:
+00E5 88        1176            db 0x88
+00E6 495430    1177            db 'IT0'
+00E9 89        1178            db 0x89
+00EA 494530    1179            db 'IE0'
+00ED 8A        1180            db 0x8A
+00EE 495431    1181            db 'IT1'
+00F1 8B        1182            db 0x8B
+00F2 494531    1183            db 'IE1'
+00F5 8C        1184            db 0x8C
+00F6 545230    1185            db 'TR0'
+00F9 8D        1186            db 0x8D
+00FA 544630    1187            db 'TF0'
+00FD 8E        1188            db 0x8E
+00FE 545231    1189            db 'TR1'
+0101 8F        1190            db 0x8F
+0102 544631    1191            db 'TF1'
+0105 98        1192            db 0x98
+0106 5249      1193            db 'RI'
+0108 99        1194            db 0x99
+0109 5449      1195            db 'TI'
+010B 9A        1196            db 0x9A
+010C 524238    1197            db 'RB8'
+010F 9B        1198            db 0x9B
+0110 544238    1199            db 'TB8'
+0113 9C        1200            db 0x9C
+0114 52454E    1201            db 'REN'
+0117 A8        1202            db 0xA8
+0118 455830    1203            db 'EX0'
+011B A9        1204            db 0xA9
+011C 455430    1205            db 'ET0'
+011F AA        1206            db 0xAA
+0120 45        1207            db 'E'
+0121 5831      1208            db 'X1'
+0123 AB        1209            db 0xAB
+0124 455431    1210            db 'ET1'
+0127 AC        1211            db 0xAC
+0128 4553      1212            db 'ES'
+012A AD        1213            db 0xAD
+012B 455432    1214            db 'ET2'
+012E AF        1215            db 0xAF
+012F 4541      1216            db 'EA'
+0131 B8        1217            db 0xB8
+0132 505830    1218            db 'PX0'
+0135 B9        1219            db 0xB9
+0136 505430    1220            db 'PT0'
+0139 BA        1221            db 0xBA
+013A 505831    1222            db 'PX1'
+013D BB        1223            db 0xBB
+013E 505431    1224            db 'PT1'
+0141 BC        1225            db 0xBC
+0142 5053      1226            db 'PS'
+0144 BD        1227            db 0xBD
+0145 505432    1228            db 'PT2'
+0148 D0        1229            db 0xD0
+0149 50        1230            db 'P'
+014A D1        1231            db 0xD1
+014B 4631      1232            db 'F1'
+014D D2        1233            db 0xD2
+014E 4F56      1234            db 'OV'
+0150 D3        1235            db 0xD3
+0151 525330    1236            db 'RS0'
+0154 D4        1237            db 0xD4
+0155 525331    1238            db 'RS1'
+0158 D5        1239            db 0xD5
+0159 4630      1240            db 'F0'
+015B D6        1241            db 0xD6
+015C 41        1242            db 'A'
+015D 43        1243            db 'C'
+015E D7        1244            db 0xD7
+015F 4359      1245            db 'CY'
+0161 C8        1246            db 0xC8
+0162 4350524C  1247            db 'CPRL2'
+     32
+0167 C9        1248            db 0xC9
+0168 435432    1249            db 'CT2'
+016B CA        1250            db 0xCA
+016C 545232    1251            db 'TR2'
+016F CB        1252            db 0xCB
+0170 4558454E  1253            db 'EXEN2'
+     32
+0175 CC        1254            db 0xCC
+0176 54434C4B  1255            db 'TCLK'
+017A CD        1256            db 0xCD
+017B 52434C4B  1257            db 'RCLK'
+017F CE        1258            db 0xCE
+0180 45584632  1259            db 'EXF2'
+0184 CF        1260            db 0xCF
+0185 544632    1261            db 'TF2'
+0188 D8        1262            db 0xD8
+0189 4C434452  1263            db 'LCDRW'
+     57
+018E D9        1264            db 0xD9
+018F 4C434445  1265            db 'LCDEN'
+     4E
+0194 DA        1266            db 0xDA
+0195 4C434452  1267            db 'LCDR'
+0199 53        1268            db 'S'
+019A DB        1269            db 0xDB
+019B 4C43444F  1270            db 'LCDON'
+     4E
+01A0 DC        1271            db 0xDC
+01A1 4C434442  1272            db 'LCDBLON'
+     4C4F4E
+01A8 FF        1273            db 0xFF
+01A9 00        1274            db 0x00
+01AA 00        1275            db 0x00
+01AB           1276   
+C003           1277            CSEG
+C003           1278   
+C003           1279   end
