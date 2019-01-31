@@ -65,6 +65,8 @@ org 0x0023
 ; Timer/Counter 2 overflow interrupt vector (not used in this code)
 org 0x002B
 	reti
+	
+BJTBase equ P0.0
 
 Initialize_Serial_Port:
     ; Initialize serial port and baud rate using timer 2
@@ -314,6 +316,15 @@ MyDelay:
 	
 InitialString: db '\r\nLTC2308 test program\r\n', 0
 
+WaitHalfSec:
+	mov R2, #90
+L3: mov R1, #250
+L2: mov R0, #250
+L1: djnz R0, L1 ; 3 machine cycles-> 3*30ns*250=22.5us
+	djnz R1, L2 ; 22.5us*250=5.625ms
+	djnz R2, L3 ; 5.625ms*90=0.506s (approximately)
+	ret
+
 MainProgram:
     mov sp, #0x7f
     lcall Initialize_LEDs
@@ -322,6 +333,13 @@ MainProgram:
     
     mov dptr, #InitialString
     lcall SendString
+    ;
+;	setb BJTBase
+;	cpl BJTBase 
+	mov P0MOD, #1
+	mov LEDRA, #0 ;
+	mov LEDRB, #0
+;	cpl LEDRA.4
 
 forever:
 	mov a, SWA ; read the channel to convert from the switches
@@ -331,10 +349,18 @@ forever:
 	lcall hex2bcd16   ; Convert to bcd
 	lcall Display_BCD ; Display using the 7-segment displays
 	lcall SendNumber  ; Send to serial port
-	
+;	jnb BJTBase, pinpressed
 	mov R2, #250
 	lcall MyDelay
 	
+;	sjmp forever
+;pinpressed:
+	;cpl LEDRA.4
+	;sjmp forever
+	
+M0:
+	cpl LEDRA.4
+	lcall WaitHalfSec
 	sjmp forever
 
 end
