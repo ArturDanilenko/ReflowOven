@@ -1,18 +1,21 @@
+;  LCD routines adapted for the DE1 SoC configured as a CV_8052 processor
 cseg
 
-; When using a 22.1184MHz crystal in fast mode
-; one cycle takes 1.0/22.1184MHz = 45.21123 ns
+; When using a 33.333333MHz crystal clock
+; one cycle takes 1.0/33.333333MHz = 30 ns
 
 ;---------------------------------;
 ; Wait 40 microseconds            ;
 ;---------------------------------;
 Wait40uSec:
 	push AR0
-	mov R0, #177
+	mov R0, #190
 L0: 
 	nop
 	nop
-	djnz R0, L0 ; 1+1+3 cycles->5*45.21123ns*177=40us
+	nop
+	nop
+	djnz R0, L0 ; 1+1+1+1+3 cycles->7*30ns*190=40us
 	pop AR0
     ret
 
@@ -29,10 +32,10 @@ endmac
 ?Wait_Milli_Seconds:
 	push AR0
 	push AR1
-L3: mov R1, #45
-L2: mov R0, #166
-L1: djnz R0, L1 ; 3 cycles->3*45.21123ns*166=22.51519us
-    djnz R1, L2 ; 22.51519us*45=1.013ms
+L3: mov R1, #50
+L2: mov R0, #223
+L1: djnz R0, L1 ; 3 cycles->3*30ns*250=20.07us
+    djnz R1, L2 ; 20.07us*50=1.004ms
     djnz R2, L3 ; number of millisecons to wait passed in R2
     pop AR1
     pop AR0
@@ -41,37 +44,37 @@ L1: djnz R0, L1 ; 3 cycles->3*45.21123ns*166=22.51519us
 ;---------------------------------;
 ; Toggles the 'E' pin in the LCD  ;
 ;---------------------------------;
-LCD_pulse:
-	setb LCD_E
+ELCD_pulse:
+	setb ELCD_E
 	lcall Wait40uSec
-	clr LCD_E
+	clr ELCD_E
+    lcall Wait40uSec ; This line is needed in the DE1SoC running an 8051 because it is much faster than the AT89LP51RC2
     ret
 
 ;---------------------------------;
 ; Writes acc to LCD in 4-bit mode ;
 ;---------------------------------;
-LCD_byte:
+ELCD_byte:
 	; Write high 4 bits first
 	mov c, ACC.7
-	mov LCD_D7, c
+	mov ELCD_D7, c
 	mov c, ACC.6
-	mov LCD_D6, c
+	mov ELCD_D6, c
 	mov c, ACC.5
-	mov LCD_D5, c
+	mov ELCD_D5, c
 	mov c, ACC.4
-	mov LCD_D4, c
-    lcall LCD_pulse
-    lcall Wait40uSec
+	mov ELCD_D4, c
+    lcall ELCD_pulse
 	; Write low 4 bits next
 	mov c, ACC.3
-	mov LCD_D7, c
+	mov ELCD_D7, c
 	mov c, ACC.2
-	mov LCD_D6, c
+	mov ELCD_D6, c
 	mov c, ACC.1
-	mov LCD_D5, c
+	mov ELCD_D5, c
 	mov c, ACC.0
-	mov LCD_D4, c
-    lcall LCD_pulse
+	mov ELCD_D4, c
+    lcall ELCD_pulse
 	ret
 
 ;---------------------------------;
@@ -83,8 +86,8 @@ WriteData mac
 endmac
 	
 ?WriteData:
-	setb LCD_RS
-	ljmp LCD_byte
+	setb ELCD_RS
+	ljmp ELCD_byte
 
 ;---------------------------------;
 ; Write command to LCD            ;
@@ -95,20 +98,18 @@ WriteCommand mac
 endmac
 
 ?WriteCommand:
-	clr LCD_RS
-	ljmp LCD_byte
+	clr ELCD_RS
+	ljmp ELCD_byte
 
 ;---------------------------------;
 ; Configure LCD in 4-bit mode     ;
 ;---------------------------------;
-LCD_4BIT:
-	clr LCD_E   ; Resting state of LCD's enable pin is zero
-	clr LCD_RW  ; We are only writing to the LCD in this program
+ELCD_4BIT:
+	clr ELCD_E   ; Resting state of LCD's enable pin is zero
+	clr ELCD_RW  ; We are only writing to the LCD in this program
 	
 	; After power on, let the LCD start up before initializing
-	; NOTE: the preprogrammed power-on delay of 16 ms on the AT89LP52
-	; seems to be enough.  That is why this line is commented out.
-	; Wait_Milli_Seconds(#40)
+	Wait_Milli_Seconds(#40)
 	
 	; First make sure the LCD is in 8-bit mode and then change to 4-bit mode
 	WriteCommand(#0x33)
@@ -136,10 +137,12 @@ Send_Constant_String mac
 	pop acc
 	pop dpl
 	pop dph
+ 	cpl LEDRA.1
 endmac
 
 ?Send_Constant_String:
     clr a
+    cpl LEDRA.4
     movc a, @a+dptr
     jz ?Send_Constant_String_Done
     lcall ?WriteData
@@ -168,6 +171,28 @@ endmac
 ;---------------------------------;
 ; Display a BCD number in the LCD ;
 ;---------------------------------;
+Display_BCD mac
+	push ar0
+	mov r0, %0
+	lcall ?Display_BCD
+	pop ar0
+endmac
+
+?Display_BCD:
+	push acc
+	; Write most significant digit
+	mov a, r0
+	swap a
+	anl a, #0fh
+	orl a, #30h
+	lcall ?WriteData
+	; write least significant digit
+	mov a, r0
+	anl a, #0fh
+	orl a, #30h
+	lcall ?WriteData
+	pop acc
+	ret
 
 ;------------------------------------;
 ; Display a char in the LCD          ;

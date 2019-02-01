@@ -65,8 +65,20 @@ org 0x0023
 ; Timer/Counter 2 overflow interrupt vector (not used in this code)
 org 0x002B
 	reti
-	
+
+cseg	
 BJTBase equ P0.0
+ELCD_RS equ p1.0
+ELCD_RW equ p0.7
+ELCD_E  equ p0.6
+ELCD_D4 equ p0.5
+ELCD_D5 equ p0.4
+ELCD_D6 equ p0.3
+ELCD_D7 equ p0.2
+
+$NOLIST
+$include(LCD_4bit_DE1SoC.inc) ; A library of LCD related functions and utility macros
+$LIST
 
 Initialize_Serial_Port:
     ; Initialize serial port and baud rate using timer 2
@@ -234,7 +246,7 @@ T_7seg:
     DB 40H, 79H, 24H, 30H, 19H, 12H, 02H, 78H, 00H, 10H
 
 ; Display the 4-digit bcd stored in [R3,R2] using the 7-segment displays
-Display_BCD:
+Display_BCD1:
 	mov dptr, #T_7seg
 	; Display the channel in HEX5
 	mov a, b
@@ -315,21 +327,14 @@ MyDelay:
 	ret
 	
 InitialString: db '\r\nLTC2308 test program\r\n', 0
-
-WaitHalfSec:
-	mov R2, #90
-L3: mov R1, #250
-L2: mov R0, #250
-L1: djnz R0, L1 ; 3 machine cycles-> 3*30ns*250=22.5us
-	djnz R1, L2 ; 22.5us*250=5.625ms
-	djnz R2, L3 ; 5.625ms*90=0.506s (approximately)
-	ret
+MyString: db 'Hello', 0
 
 MainProgram:
     mov sp, #0x7f
     lcall Initialize_LEDs
     lcall Initialize_Serial_Port
     lcall Initialize_ADC
+    lcall ELCD_4BIT
     
     mov dptr, #InitialString
     lcall SendString
@@ -340,6 +345,9 @@ MainProgram:
 	mov LEDRA, #0 ;
 	mov LEDRB, #0
 ;	cpl LEDRA.4
+	Set_Cursor(1,1)
+	Send_Constant_String(#MyString)
+
 
 forever:
 	mov a, SWA ; read the channel to convert from the switches
@@ -347,7 +355,7 @@ forever:
 	mov b, a
 	lcall LTC2308_RW  ; Read the channel from the ADC
 	lcall hex2bcd16   ; Convert to bcd
-	lcall Display_BCD ; Display using the 7-segment displays
+	lcall Display_BCD1 ; Display using the 7-segment displays
 	lcall SendNumber  ; Send to serial port
 ;	jnb BJTBase, pinpressed
 	mov R2, #250
@@ -359,8 +367,10 @@ forever:
 	;sjmp forever
 	
 M0:
-	cpl LEDRA.4
-	lcall WaitHalfSec
+;	cpl LEDRA.4
+;	lcall WaitHalfSec
 	sjmp forever
+	
+
 
 end
