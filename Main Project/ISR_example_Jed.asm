@@ -153,7 +153,7 @@ Inc_Done:
 	; 500 milliseconds have passed.  Set a flag so the main program knows
 	setb half_seconds_flag ; Let the main program know half second had passed
 	; Toggle LEDR0 so it blinks
-	cpl LEDRA.0
+;	cpl LEDRA.0
 	cpl TR0 ; Enable/disable timer/counter 0. This line creates a beep-silence-beep-silence sound.
 	; Reset to zero the milli-seconds counter, it is a 16-bit variable
 	clr a
@@ -245,5 +245,12 @@ loop_b:
 	Set_Cursor(1, 14)     ; the place in the LCD where we want the BCD counter value
 	Display_BCD(BCD_counter) ; This macro is also in 'LCD_4bit_DE1SoC.inc'
 	lcall Display_BCD_7_Seg ; Also display the counter using the 7-segment displays.
+	
+	cpl LEDRA.0
+	cpl LEDRA.2
+	cpl LEDRA.4
+	cpl LEDRA.6
+	cpl LEDRA.7
+	
     ljmp loop
 END
