@@ -137,12 +137,10 @@ Send_Constant_String mac
 	pop acc
 	pop dpl
 	pop dph
- 	cpl LEDRA.1
 endmac
 
 ?Send_Constant_String:
     clr a
-    cpl LEDRA.4
     movc a, @a+dptr
     jz ?Send_Constant_String_Done
     lcall ?WriteData

@@ -38,6 +38,14 @@ BAUD EQU 115200
 TIMER_2_RELOAD EQU (65536-(CLK/(32*BAUD)))
 TIMER_0_1ms EQU (65536-(CLK/(12*1000)))
 
+;;
+;;
+;; PUSH BUTTON DEFINITIONS
+;;
+;;
+
+
+
 ; Reset vector
 org 0x0000
 	ljmp MainProgram
@@ -68,13 +76,13 @@ org 0x002B
 
 cseg	
 BJTBase equ P0.0
-ELCD_RS equ p1.0
-ELCD_RW equ p0.7
-ELCD_E  equ p0.6
-ELCD_D4 equ p0.5
-ELCD_D5 equ p0.4
-ELCD_D6 equ p0.3
-ELCD_D7 equ p0.2
+ELCD_RS equ LCD_RS
+ELCD_RW equ LCD_RW
+ELCD_E  equ LCD_EN
+ELCD_D4 equ P0.4
+ELCD_D5 equ P0.3
+ELCD_D6 equ P0.2
+ELCD_D7 equ P0.1
 
 $NOLIST
 $include(LCD_4bit_DE1SoC.inc) ; A library of LCD related functions and utility macros
@@ -347,6 +355,7 @@ MainProgram:
 ;	cpl LEDRA.4
 	Set_Cursor(1,1)
 	Send_Constant_String(#MyString)
+	cpl LEDRA.4
 
 
 forever:
@@ -361,14 +370,10 @@ forever:
 	mov R2, #250
 	lcall MyDelay
 	
-;	sjmp forever
-;pinpressed:
-	;cpl LEDRA.4
-	;sjmp forever
 	
 M0:
-;	cpl LEDRA.4
-;	lcall WaitHalfSec
+
+	cpl LEDRA.4
 	sjmp forever
 	
 

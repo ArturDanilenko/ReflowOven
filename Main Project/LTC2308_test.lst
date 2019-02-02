@@ -36,358 +36,363 @@
 0000             38   TIMER_2_RELOAD EQU (65536-(CLK/(32*BAUD)))
 0000             39   TIMER_0_1ms EQU (65536-(CLK/(12*1000)))
 0000             40   
-0000             41   ; Reset vector
-0000             42   org 0x0000
-0000 020233      43            ljmp MainProgram
-0003             44   
-0003             45   ; External interrupt 0 vector (not used in this code)
-0003             46   org 0x0003
-0003 32          47            reti
-0004             48   
-0004             49   ; Timer/Counter 0 overflow interrupt vector (not used in this code)
-000B             50   org 0x000B
-000B 32          51            reti
-000C             52   
-000C             53   ; External interrupt 1 vector (not used in this code)
-0013             54   org 0x0013
-0013 32          55            reti
-0014             56   
-0014             57   ; Timer/Counter 1 overflow interrupt vector (not used in this code)
-001B             58   org 0x001B
-001B 32          59            reti
-001C             60   
-001C             61   ; Serial port receive/transmit interrupt vector (not used in this code)
-0023             62   org 0x0023 
-0023 32          63            reti
-0024             64            
-0024             65   ; Timer/Counter 2 overflow interrupt vector (not used in this code)
-002B             66   org 0x002B
-002B 32          67            reti
-002C             68   
-002C             69   cseg     
-002C             70   BJTBase equ P0.0
-002C             71   ELCD_RS equ p1.0
-002C             72   ELCD_RW equ p0.7
-002C             73   ELCD_E  equ p0.6
-002C             74   ELCD_D4 equ p0.5
-002C             75   ELCD_D5 equ p0.4
-002C             76   ELCD_D6 equ p0.3
-002C             77   ELCD_D7 equ p0.2
-002C             78   
-                 80   	$LIST
-00E7             82   
-00E7             83   Initialize_Serial_Port:
-00E7             84       ; Initialize serial port and baud rate using timer 2
-00E7 75CBFF      85            mov RCAP2H, #high(TIMER_2_RELOAD)
-00EA 75CAF7      86            mov RCAP2L, #low(TIMER_2_RELOAD)
-00ED 75C834      87            mov T2CON, #0x34 ; #00110100B
-00F0 759852      88            mov SCON, #0x52 ; Serial port in mode 1, ren, txrdy, rxempty
-00F3 22          89            ret
-00F4             90   
-00F4             91   putchar:
-00F4 109902      92            jbc     TI,putchar_L1
-00F7 80FB        93            sjmp putchar
-00F9             94   putchar_L1:
-00F9 F599        95            mov     SBUF,a
-00FB 22          96            ret
-00FC             97            
-00FC             98   getchar:
-00FC 109802      99            jbc     RI,getchar_L1
-00FF 80FB       100            sjmp getchar
-0101            101   getchar_L1:
-0101 E599       102            mov     a,SBUF
-0103 22         103            ret
-0104            104   
-0104            105   SendString:
-0104 E4         106       clr a
-0105 93         107       movc a, @a+dptr
-0106 6006       108       jz SendString_L1
-0108 1200F4     109       lcall putchar
-010B A3         110       inc dptr
-010C 80F6       111       sjmp SendString  
-010E            112   SendString_L1:
-010E 22         113            ret
-010F            114            
-010F            115   Initialize_LEDs:
-010F            116       ; Turn off LEDs
-010F 75E800     117            mov     LEDRA,#0x00
-0112 759500     118            mov     LEDRB,#0x00
-0115 22         119            ret
-0116            120            
-0116            121   Initialize_ADC:
-0116            122            ; Initialize SPI pins connected to LTC2308
-0116 C2F9       123            clr     LTC2308_MOSI
-0118 C2FA       124            clr     LTC2308_SCLK
-011A D2FB       125            setb LTC2308_ENN
-011C 22         126            ret
-011D            127   
-011D            128   LTC2308_Toggle_Pins:
-011D 92F9       129       mov LTC2308_MOSI, c
-011F D2FA       130       setb LTC2308_SCLK
-0121 A2F8       131       mov c, LTC2308_MISO
-0123 C2FA       132       clr LTC2308_SCLK
-0125 22         133       ret
-0126            134   
-0126            135   ; Bit-bang communication with LTC2308.  Check Figure 8 in datasheet (page 18):
-0126            136   ; https://www.analog.com/media/en/technical-documentation/data-sheets/2308fc.pdf
-0126            137   ; The VREF for this 12-bit ADC is 4.096V
-0126            138   ; Warning: we are reading the previously converted channel! If you want to read the
-0126            139   ; channel 'now' call this function twice.
-0126            140   ;
-0126            141   ; Channel to read passed in register 'b'.  Result in R1 (bits 11 downto 8) and R0 (bits 7 downto 0).
-0126            142   ; Notice the weird order of the channel select bits!
-0126            143   LTC2308_RW:
-0126 E4         144       clr a 
-0127 C2FB       145            clr     LTC2308_ENN ; Enable ADC
-0129            146   
-0129            147       ; Send 'S/D', get bit 11
-0129 D3         148       setb c ; S/D=1 for single ended conversion
-012A 12011D     149       lcall LTC2308_Toggle_Pins
-012D 92E3       150       mov acc.3, c
-012F            151       ; Send channel bit 0, get bit 10
-012F A2F2       152       mov c, b.2 ; O/S odd channel select
-0131 12011D     153       lcall LTC2308_Toggle_Pins
-0134 92E2       154       mov acc.2, c 
-0136            155       ; Send channel bit 1, get bit 9
-0136 A2F0       156       mov c, b.0 ; S1
-0138 12011D     157       lcall LTC2308_Toggle_Pins
-013B 92E1       158       mov acc.1, c
-013D            159       ; Send channel bit 2, get bit 8
-013D A2F1       160       mov c, b.1 ; S0
-013F 12011D     161       lcall LTC2308_Toggle_Pins
-0142 92E0       162       mov acc.0, c
-0144 F9         163       mov R1, a
-0145            164       
-0145            165       ; Now receive the lest significant eight bits
-0145 E4         166       clr a 
-0146            167       ; Send 'UNI', get bit 7
-0146 D3         168       setb c ; UNI=1 for unipolar output mode
-0147 12011D     169       lcall LTC2308_Toggle_Pins
-014A 92E7       170       mov acc.7, c
-014C            171       ; Send 'SLP', get bit 6
-014C C3         172       clr c ; SLP=0 for NAP mode
-014D 12011D     173       lcall LTC2308_Toggle_Pins
-0150 92E6       174       mov acc.6, c
-0152            175       ; Send '0', get bit 5
-0152 C3         176       clr c
-0153 12011D     177       lcall LTC2308_Toggle_Pins
-0156 92E5       178       mov acc.5, c
-0158            179       ; Send '0', get bit 4
-0158 C3         180       clr c
-0159 12011D     181       lcall LTC2308_Toggle_Pins
-015C 92E4       182       mov acc.4, c
-015E            183       ; Send '0', get bit 3
-015E C3         184       clr c
-015F 12011D     185       lcall LTC2308_Toggle_Pins
-0162 92E3       186       mov acc.3, c
-0164            187       ; Send '0', get bit 2
-0164 C3         188       clr c
-0165 12011D     189       lcall LTC2308_Toggle_Pins
-0168 92E2       190       mov acc.2, c
-016A            191       ; Send '0', get bit 1
-016A C3         192       clr c
-016B 12011D     193       lcall LTC2308_Toggle_Pins
-016E 92E1       194       mov acc.1, c
-0170            195       ; Send '0', get bit 0
-0170 C3         196       clr c
-0171 12011D     197       lcall LTC2308_Toggle_Pins
-0174 92E0       198       mov acc.0, c
-0176 F8         199       mov R0, a
-0177            200   
-0177 D2FB       201            setb LTC2308_ENN ; Disable ADC
-0179            202   
-0179 22         203            ret
-017A            204   
-017A            205   ; Converts the 16-bit hex number in [R1,R0] to a 
-017A            206   ; 5-digit packed BCD in [R4,R3,R2] using the
-017A            207   ; double-dabble algorithm.
-017A            208   hex2bcd16:
-017A E4         209            clr a
-017B FC         210            mov R4, a ; Initialize BCD to 00-00-00 
-017C FB         211            mov R3, a
-017D FA         212            mov R2, a
-017E 7D10       213            mov R5, #16  ; Loop counter.
-0180            214   
-0180            215   hex2bcd16_L1:
-0180            216            ; Shift binary left     
-0180 E9         217            mov a, R1
-0181 A2E7       218            mov c, acc.7 ; This way [R1,R0] remains unchanged!
-0183 E8         219            mov a, R0
-0184 33         220            rlc a
-0185 F8         221            mov R0, a
-0186 E9         222            mov a, R1
-0187 33         223            rlc a
-0188 F9         224            mov R1, a
-0189            225       
-0189            226            ; Perform bcd + bcd + carry using BCD arithmetic
-0189 EA         227            mov a, R2
-018A 3A         228            addc a, R2
-018B D4         229            da a
-018C FA         230            mov R2, a
-018D EB         231            mov a, R3
-018E 3B         232            addc a, R3
-018F D4         233            da a
-0190 FB         234            mov R3, a
-0191 EC         235            mov a, R4
-0192 3C         236            addc a, R4
-0193 D4         237            da a
-0194 FC         238            mov R4, a
-0195            239   
-0195 DDE9       240            djnz R5, hex2bcd16_L1
-0197            241   
-0197 22         242            ret
-0198            243   
-0198            244   ; Look-up table for the 7-seg displays. (Segments are turn on with zero) 
-0198            245   T_7seg:
-0198 40792430   246       DB 40H, 79H, 24H, 30H, 19H, 12H, 02H, 78H, 00H, 10H
+0000             41   ;;
+0000             42   ;;
+0000             43   ;; PUSH BUTTON DEFINITIONS
+0000             44   ;;
+0000             45   ;;
+0000             46   
+0000             47   
+0000             48   
+0000             49   ; Reset vector
+0000             50   org 0x0000
+0000 020233      51            ljmp MainProgram
+0003             52   
+0003             53   ; External interrupt 0 vector (not used in this code)
+0003             54   org 0x0003
+0003 32          55            reti
+0004             56   
+0004             57   ; Timer/Counter 0 overflow interrupt vector (not used in this code)
+000B             58   org 0x000B
+000B 32          59            reti
+000C             60   
+000C             61   ; External interrupt 1 vector (not used in this code)
+0013             62   org 0x0013
+0013 32          63            reti
+0014             64   
+0014             65   ; Timer/Counter 1 overflow interrupt vector (not used in this code)
+001B             66   org 0x001B
+001B 32          67            reti
+001C             68   
+001C             69   ; Serial port receive/transmit interrupt vector (not used in this code)
+0023             70   org 0x0023 
+0023 32          71            reti
+0024             72            
+0024             73   ; Timer/Counter 2 overflow interrupt vector (not used in this code)
+002B             74   org 0x002B
+002B 32          75            reti
+002C             76   
+002C             77   cseg     
+002C             78   BJTBase equ P0.0
+002C             79   ELCD_RS equ LCD_RS
+002C             80   ELCD_RW equ LCD_RW
+002C             81   ELCD_E  equ LCD_EN
+002C             82   ELCD_D4 equ P0.4
+002C             83   ELCD_D5 equ P0.3
+002C             84   ELCD_D6 equ P0.2
+002C             85   ELCD_D7 equ P0.1
+002C             86   
+                 88   	$LIST
+00E7             90   
+00E7             91   Initialize_Serial_Port:
+00E7             92       ; Initialize serial port and baud rate using timer 2
+00E7 75CBFF      93            mov RCAP2H, #high(TIMER_2_RELOAD)
+00EA 75CAF7      94            mov RCAP2L, #low(TIMER_2_RELOAD)
+00ED 75C834      95            mov T2CON, #0x34 ; #00110100B
+00F0 759852      96            mov SCON, #0x52 ; Serial port in mode 1, ren, txrdy, rxempty
+00F3 22          97            ret
+00F4             98   
+00F4             99   putchar:
+00F4 109902     100            jbc     TI,putchar_L1
+00F7 80FB       101            sjmp putchar
+00F9            102   putchar_L1:
+00F9 F599       103            mov     SBUF,a
+00FB 22         104            ret
+00FC            105            
+00FC            106   getchar:
+00FC 109802     107            jbc     RI,getchar_L1
+00FF 80FB       108            sjmp getchar
+0101            109   getchar_L1:
+0101 E599       110            mov     a,SBUF
+0103 22         111            ret
+0104            112   
+0104            113   SendString:
+0104 E4         114       clr a
+0105 93         115       movc a, @a+dptr
+0106 6006       116       jz SendString_L1
+0108 1200F4     117       lcall putchar
+010B A3         118       inc dptr
+010C 80F6       119       sjmp SendString  
+010E            120   SendString_L1:
+010E 22         121            ret
+010F            122            
+010F            123   Initialize_LEDs:
+010F            124       ; Turn off LEDs
+010F 75E800     125            mov     LEDRA,#0x00
+0112 759500     126            mov     LEDRB,#0x00
+0115 22         127            ret
+0116            128            
+0116            129   Initialize_ADC:
+0116            130            ; Initialize SPI pins connected to LTC2308
+0116 C2F9       131            clr     LTC2308_MOSI
+0118 C2FA       132            clr     LTC2308_SCLK
+011A D2FB       133            setb LTC2308_ENN
+011C 22         134            ret
+011D            135   
+011D            136   LTC2308_Toggle_Pins:
+011D 92F9       137       mov LTC2308_MOSI, c
+011F D2FA       138       setb LTC2308_SCLK
+0121 A2F8       139       mov c, LTC2308_MISO
+0123 C2FA       140       clr LTC2308_SCLK
+0125 22         141       ret
+0126            142   
+0126            143   ; Bit-bang communication with LTC2308.  Check Figure 8 in datasheet (page 18):
+0126            144   ; https://www.analog.com/media/en/technical-documentation/data-sheets/2308fc.pdf
+0126            145   ; The VREF for this 12-bit ADC is 4.096V
+0126            146   ; Warning: we are reading the previously converted channel! If you want to read the
+0126            147   ; channel 'now' call this function twice.
+0126            148   ;
+0126            149   ; Channel to read passed in register 'b'.  Result in R1 (bits 11 downto 8) and R0 (bits 7 downto 0).
+0126            150   ; Notice the weird order of the channel select bits!
+0126            151   LTC2308_RW:
+0126 E4         152       clr a 
+0127 C2FB       153            clr     LTC2308_ENN ; Enable ADC
+0129            154   
+0129            155       ; Send 'S/D', get bit 11
+0129 D3         156       setb c ; S/D=1 for single ended conversion
+012A 12011D     157       lcall LTC2308_Toggle_Pins
+012D 92E3       158       mov acc.3, c
+012F            159       ; Send channel bit 0, get bit 10
+012F A2F2       160       mov c, b.2 ; O/S odd channel select
+0131 12011D     161       lcall LTC2308_Toggle_Pins
+0134 92E2       162       mov acc.2, c 
+0136            163       ; Send channel bit 1, get bit 9
+0136 A2F0       164       mov c, b.0 ; S1
+0138 12011D     165       lcall LTC2308_Toggle_Pins
+013B 92E1       166       mov acc.1, c
+013D            167       ; Send channel bit 2, get bit 8
+013D A2F1       168       mov c, b.1 ; S0
+013F 12011D     169       lcall LTC2308_Toggle_Pins
+0142 92E0       170       mov acc.0, c
+0144 F9         171       mov R1, a
+0145            172       
+0145            173       ; Now receive the lest significant eight bits
+0145 E4         174       clr a 
+0146            175       ; Send 'UNI', get bit 7
+0146 D3         176       setb c ; UNI=1 for unipolar output mode
+0147 12011D     177       lcall LTC2308_Toggle_Pins
+014A 92E7       178       mov acc.7, c
+014C            179       ; Send 'SLP', get bit 6
+014C C3         180       clr c ; SLP=0 for NAP mode
+014D 12011D     181       lcall LTC2308_Toggle_Pins
+0150 92E6       182       mov acc.6, c
+0152            183       ; Send '0', get bit 5
+0152 C3         184       clr c
+0153 12011D     185       lcall LTC2308_Toggle_Pins
+0156 92E5       186       mov acc.5, c
+0158            187       ; Send '0', get bit 4
+0158 C3         188       clr c
+0159 12011D     189       lcall LTC2308_Toggle_Pins
+015C 92E4       190       mov acc.4, c
+015E            191       ; Send '0', get bit 3
+015E C3         192       clr c
+015F 12011D     193       lcall LTC2308_Toggle_Pins
+0162 92E3       194       mov acc.3, c
+0164            195       ; Send '0', get bit 2
+0164 C3         196       clr c
+0165 12011D     197       lcall LTC2308_Toggle_Pins
+0168 92E2       198       mov acc.2, c
+016A            199       ; Send '0', get bit 1
+016A C3         200       clr c
+016B 12011D     201       lcall LTC2308_Toggle_Pins
+016E 92E1       202       mov acc.1, c
+0170            203       ; Send '0', get bit 0
+0170 C3         204       clr c
+0171 12011D     205       lcall LTC2308_Toggle_Pins
+0174 92E0       206       mov acc.0, c
+0176 F8         207       mov R0, a
+0177            208   
+0177 D2FB       209            setb LTC2308_ENN ; Disable ADC
+0179            210   
+0179 22         211            ret
+017A            212   
+017A            213   ; Converts the 16-bit hex number in [R1,R0] to a 
+017A            214   ; 5-digit packed BCD in [R4,R3,R2] using the
+017A            215   ; double-dabble algorithm.
+017A            216   hex2bcd16:
+017A E4         217            clr a
+017B FC         218            mov R4, a ; Initialize BCD to 00-00-00 
+017C FB         219            mov R3, a
+017D FA         220            mov R2, a
+017E 7D10       221            mov R5, #16  ; Loop counter.
+0180            222   
+0180            223   hex2bcd16_L1:
+0180            224            ; Shift binary left     
+0180 E9         225            mov a, R1
+0181 A2E7       226            mov c, acc.7 ; This way [R1,R0] remains unchanged!
+0183 E8         227            mov a, R0
+0184 33         228            rlc a
+0185 F8         229            mov R0, a
+0186 E9         230            mov a, R1
+0187 33         231            rlc a
+0188 F9         232            mov R1, a
+0189            233       
+0189            234            ; Perform bcd + bcd + carry using BCD arithmetic
+0189 EA         235            mov a, R2
+018A 3A         236            addc a, R2
+018B D4         237            da a
+018C FA         238            mov R2, a
+018D EB         239            mov a, R3
+018E 3B         240            addc a, R3
+018F D4         241            da a
+0190 FB         242            mov R3, a
+0191 EC         243            mov a, R4
+0192 3C         244            addc a, R4
+0193 D4         245            da a
+0194 FC         246            mov R4, a
+0195            247   
+0195 DDE9       248            djnz R5, hex2bcd16_L1
+0197            249   
+0197 22         250            ret
+0198            251   
+0198            252   ; Look-up table for the 7-seg displays. (Segments are turn on with zero) 
+0198            253   T_7seg:
+0198 40792430   254       DB 40H, 79H, 24H, 30H, 19H, 12H, 02H, 78H, 00H, 10H
      19120278
      0010
-01A2            247   
-01A2            248   ; Display the 4-digit bcd stored in [R3,R2] using the 7-segment displays
-01A2            249   Display_BCD1:
-01A2 900198     250            mov dptr, #T_7seg
-01A5            251            ; Display the channel in HEX5
-01A5 E5F0       252            mov a, b
-01A7 540F       253            anl a, #0x0f
-01A9 93         254            movc a, @a+dptr
-01AA F58F       255            mov HEX5, a
-01AC            256            
-01AC            257            ; Display [R3,R2] in HEX3, HEX2, HEX1, HEX0
-01AC EB         258            mov a, R3
-01AD C4         259            swap a
-01AE 540F       260            anl a, #0x0f
-01B0 93         261            movc a, @a+dptr
-01B1 F594       262            mov HEX3, a
-01B3            263            
-01B3 EB         264            mov a, R3
-01B4 540F       265            anl a, #0x0f
-01B6 93         266            movc a, @a+dptr
-01B7 F593       267            mov HEX2, a
-01B9            268            
-01B9 EA         269            mov a, R2
-01BA C4         270            swap a
-01BB 540F       271            anl a, #0x0f
-01BD 93         272            movc a, @a+dptr
-01BE F592       273            mov HEX1, a
-01C0            274            
-01C0 EA         275            mov a, R2
-01C1 540F       276            anl a, #0x0f
-01C3 93         277            movc a, @a+dptr
-01C4 F591       278            mov HEX0, a
-01C6            279            
-01C6 22         280            ret
-01C7            281   
-01C7            282   ; Send a 4-digit BCD number stored in [R3,R2] to the serial port         
-01C7            283   SendNumber:
-01C7 740D       284            mov a, #'\r'
-01C9 1200F4     285            lcall putchar
-01CC EB         286            mov a, R3
-01CD C4         287            swap a
-01CE 540F       288            anl a, #0x0f
-01D0 4430       289            orl a, #'0'
-01D2 1200F4     290            lcall putchar
-01D5 742E       291            mov a, #'.'
-01D7 1200F4     292            lcall putchar
-01DA EB         293            mov a, R3
-01DB 540F       294            anl a, #0x0f
-01DD 4430       295            orl a, #'0'
-01DF 1200F4     296            lcall putchar
-01E2 EA         297            mov a, R2
-01E3 C4         298            swap a
-01E4 540F       299            anl a, #0x0f
-01E6 4430       300            orl a, #'0'
-01E8 1200F4     301            lcall putchar
-01EB EA         302            mov a, R2
-01EC 540F       303            anl a, #0x0f
-01EE 4430       304            orl a, #'0'
-01F0 1200F4     305            lcall putchar
-01F3 22         306            ret
-01F4            307            
-01F4            308   ; Wait 1 millisecond using Timer 0
-01F4            309   Wait1ms:
-01F4 C28C       310            clr     TR0
-01F6 74F0       311            mov     a,#0xF0
-01F8 5589       312            anl     a,TMOD
-01FA 4401       313            orl     a,#0x01
-01FC F589       314            mov     TMOD,a
-01FE 758CF5     315            mov     TH0, #high(TIMER_0_1ms)
-0201 758A27     316            mov     TL0, #low(TIMER_0_1ms)
-0204 C28D       317            clr     TF0
-0206 D28C       318            setb TR0
-0208 308DFD     319            jnb     TF0,$
-020B C28C       320            clr     TR0
-020D 22         321            ret
-020E            322            
-020E            323   ; Wait R2 milliseconds
-020E            324   MyDelay:
-020E 1201F4     325            lcall Wait1ms
-0211 DAFB       326       djnz R2, MyDelay
-0213 22         327            ret
-0214            328            
-0214 0D0A4C54   329   InitialString: db '\r\nLTC2308 test program\r\n', 0
+01A2            255   
+01A2            256   ; Display the 4-digit bcd stored in [R3,R2] using the 7-segment displays
+01A2            257   Display_BCD1:
+01A2 900198     258            mov dptr, #T_7seg
+01A5            259            ; Display the channel in HEX5
+01A5 E5F0       260            mov a, b
+01A7 540F       261            anl a, #0x0f
+01A9 93         262            movc a, @a+dptr
+01AA F58F       263            mov HEX5, a
+01AC            264            
+01AC            265            ; Display [R3,R2] in HEX3, HEX2, HEX1, HEX0
+01AC EB         266            mov a, R3
+01AD C4         267            swap a
+01AE 540F       268            anl a, #0x0f
+01B0 93         269            movc a, @a+dptr
+01B1 F594       270            mov HEX3, a
+01B3            271            
+01B3 EB         272            mov a, R3
+01B4 540F       273            anl a, #0x0f
+01B6 93         274            movc a, @a+dptr
+01B7 F593       275            mov HEX2, a
+01B9            276            
+01B9 EA         277            mov a, R2
+01BA C4         278            swap a
+01BB 540F       279            anl a, #0x0f
+01BD 93         280            movc a, @a+dptr
+01BE F592       281            mov HEX1, a
+01C0            282            
+01C0 EA         283            mov a, R2
+01C1 540F       284            anl a, #0x0f
+01C3 93         285            movc a, @a+dptr
+01C4 F591       286            mov HEX0, a
+01C6            287            
+01C6 22         288            ret
+01C7            289   
+01C7            290   ; Send a 4-digit BCD number stored in [R3,R2] to the serial port         
+01C7            291   SendNumber:
+01C7 740D       292            mov a, #'\r'
+01C9 1200F4     293            lcall putchar
+01CC EB         294            mov a, R3
+01CD C4         295            swap a
+01CE 540F       296            anl a, #0x0f
+01D0 4430       297            orl a, #'0'
+01D2 1200F4     298            lcall putchar
+01D5 742E       299            mov a, #'.'
+01D7 1200F4     300            lcall putchar
+01DA EB         301            mov a, R3
+01DB 540F       302            anl a, #0x0f
+01DD 4430       303            orl a, #'0'
+01DF 1200F4     304            lcall putchar
+01E2 EA         305            mov a, R2
+01E3 C4         306            swap a
+01E4 540F       307            anl a, #0x0f
+01E6 4430       308            orl a, #'0'
+01E8 1200F4     309            lcall putchar
+01EB EA         310            mov a, R2
+01EC 540F       311            anl a, #0x0f
+01EE 4430       312            orl a, #'0'
+01F0 1200F4     313            lcall putchar
+01F3 22         314            ret
+01F4            315            
+01F4            316   ; Wait 1 millisecond using Timer 0
+01F4            317   Wait1ms:
+01F4 C28C       318            clr     TR0
+01F6 74F0       319            mov     a,#0xF0
+01F8 5589       320            anl     a,TMOD
+01FA 4401       321            orl     a,#0x01
+01FC F589       322            mov     TMOD,a
+01FE 758CF5     323            mov     TH0, #high(TIMER_0_1ms)
+0201 758A27     324            mov     TL0, #low(TIMER_0_1ms)
+0204 C28D       325            clr     TF0
+0206 D28C       326            setb TR0
+0208 308DFD     327            jnb     TF0,$
+020B C28C       328            clr     TR0
+020D 22         329            ret
+020E            330            
+020E            331   ; Wait R2 milliseconds
+020E            332   MyDelay:
+020E 1201F4     333            lcall Wait1ms
+0211 DAFB       334       djnz R2, MyDelay
+0213 22         335            ret
+0214            336            
+0214 0D0A4C54   337   InitialString: db '\r\nLTC2308 test program\r\n', 0
      43323330
      38207465
      73742070
      726F6772
      616D0D0A
      00
-022D 48656C6C   330   MyString: db 'Hello', 0
+022D 48656C6C   338   MyString: db 'Hello', 0
      6F00
-0233            331   
-0233            332   MainProgram:
-0233 75817F     333       mov sp, #0x7f
-0236 12010F     334       lcall Initialize_LEDs
-0239 1200E7     335       lcall Initialize_Serial_Port
-023C 120116     336       lcall Initialize_ADC
-023F 120088     337       lcall ELCD_4BIT
-0242            338       
-0242 900214     339       mov dptr, #InitialString
-0245 120104     340       lcall SendString
-0248            341       ;
-0248            342   ;        setb BJTBase
-0248            343   ;        cpl BJTBase 
-0248 759A01     344            mov P0MOD, #1
-024B 75E800     345            mov LEDRA, #0 ;
-024E 759500     346            mov LEDRB, #0
-0251            347   ;        cpl LEDRA.4
-0251 C0E0       348            push acc
-0253 7401       348            mov a, #1
-0255 14         348            dec a
-0256 1200CC     348            lcall ?Set_Cursor_1 ; Select column and row
-0259 D0E0       348            pop acc
-025B C083       349            push dph
-025D C082       349            push dpl
-025F C0E0       349            push acc
-0261 90022D     349            mov dptr, #MyString
-0264 1200BD     349            lcall ?Send_Constant_String
-0267 D0E0       349            pop acc
-0269 D082       349            pop dpl
-026B D083       349            pop dph
-026D B2E9       349            cpl LEDRA.1
-026F            350   
-026F            351   
-026F            352   forever:
-026F E5E8       353            mov a, SWA ; read the channel to convert from the switches
-0271 5407       354            anl a, #00000111B ; We need only the last three bits since there are only eight channels
-0273 F5F0       355            mov b, a
-0275 120126     356            lcall LTC2308_RW  ; Read the channel from the ADC
-0278 12017A     357            lcall hex2bcd16   ; Convert to bcd
-027B 1201A2     358            lcall Display_BCD1 ; Display using the 7-segment displays
-027E 1201C7     359            lcall SendNumber  ; Send to serial port
-0281            360   ;        jnb BJTBase, pinpressed
-0281 7AFA       361            mov R2, #250
-0283 12020E     362            lcall MyDelay
-0286            363            
-0286            364   ;        sjmp forever
-0286            365   ;pinpressed:
-0286            366            ;cpl LEDRA.4
-0286            367            ;sjmp forever
-0286            368            
-0286            369   M0:
-0286            370   ;        cpl LEDRA.4
-0286            371   ;        lcall WaitHalfSec
-0286 80E7       372            sjmp forever
+0233            339   
+0233            340   MainProgram:
+0233 75817F     341       mov sp, #0x7f
+0236 12010F     342       lcall Initialize_LEDs
+0239 1200E7     343       lcall Initialize_Serial_Port
+023C 120116     344       lcall Initialize_ADC
+023F 120088     345       lcall ELCD_4BIT
+0242            346       
+0242 900214     347       mov dptr, #InitialString
+0245 120104     348       lcall SendString
+0248            349       ;
+0248            350   ;        setb BJTBase
+0248            351   ;        cpl BJTBase 
+0248 759A01     352            mov P0MOD, #1
+024B 75E800     353            mov LEDRA, #0 ;
+024E 759500     354            mov LEDRB, #0
+0251            355   ;        cpl LEDRA.4
+0251 C0E0       356            push acc
+0253 7401       356            mov a, #1
+0255 14         356            dec a
+0256 1200CC     356            lcall ?Set_Cursor_1 ; Select column and row
+0259 D0E0       356            pop acc
+025B C083       357            push dph
+025D C082       357            push dpl
+025F C0E0       357            push acc
+0261 90022D     357            mov dptr, #MyString
+0264 1200BD     357            lcall ?Send_Constant_String
+0267 D0E0       357            pop acc
+0269 D082       357            pop dpl
+026B D083       357            pop dph
+026D B2E9       357            cpl LEDRA.1
+026F B2EC       358            cpl LEDRA.4
+0271            359   
+0271            360   
+0271            361   forever:
+0271 E5E8       362            mov a, SWA ; read the channel to convert from the switches
+0273 5407       363            anl a, #00000111B ; We need only the last three bits since there are only eight channels
+0275 F5F0       364            mov b, a
+0277 120126     365            lcall LTC2308_RW  ; Read the channel from the ADC
+027A 12017A     366            lcall hex2bcd16   ; Convert to bcd
+027D 1201A2     367            lcall Display_BCD1 ; Display using the 7-segment displays
+0280 1201C7     368            lcall SendNumber  ; Send to serial port
+0283            369   ;        jnb BJTBase, pinpressed
+0283 7AFA       370            mov R2, #250
+0285 12020E     371            lcall MyDelay
+0288            372            
 0288            373            
-0288            374   
+0288            374   M0:
 0288            375   
-0288            376   end
+0288 B2EC       376            cpl LEDRA.4
+028A 80E5       377            sjmp forever
+028C            378            
+028C            379   
+028C            380   
+028C            381   end
