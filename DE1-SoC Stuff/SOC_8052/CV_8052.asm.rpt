@@ -1,5 +1,5 @@
 Assembler report for CV_8052
-Tue Jan 29 13:36:24 2019
+Sat Feb 02 13:55:40 2019
 Quartus II 64-Bit Version 15.0.0 Build 145 04/22/2015 SJ Web Edition
 
 
@@ -11,8 +11,8 @@ Quartus II 64-Bit Version 15.0.0 Build 145 04/22/2015 SJ Web Edition
   3. Assembler Settings
   4. Assembler Encrypted IP Cores Summary
   5. Assembler Generated Files
-  6. Assembler Device Options: C:/Users/jed32/Desktop/School/UBC 2018W2/ReflowOven/DE1-SoC/SOC_8052/SOC_8052/CV_8052.sof
-  7. Assembler Device Options: C:/Users/jed32/Desktop/School/UBC 2018W2/ReflowOven/DE1-SoC/SOC_8052/SOC_8052/CV_8052.pof
+  6. Assembler Device Options: D:/School/UBC 2018W2/ReflowOven/DE1-SoC Stuff/SOC_8052/CV_8052.sof
+  7. Assembler Device Options: D:/School/UBC 2018W2/ReflowOven/DE1-SoC Stuff/SOC_8052/CV_8052.pof
   8. Assembler Messages
 
 
@@ -40,7 +40,7 @@ agreement for further details.
 +---------------------------------------------------------------+
 ; Assembler Summary                                             ;
 +-----------------------+---------------------------------------+
-; Assembler Status      ; Successful - Tue Jan 29 13:36:24 2019 ;
+; Assembler Status      ; Successful - Sat Feb 02 13:55:40 2019 ;
 ; Revision Name         ; CV_8052                               ;
 ; Top-level Entity Name ; CV_8052                               ;
 ; Family                ; Cyclone V                             ;
@@ -65,37 +65,37 @@ agreement for further details.
 +--------+------------------------+--------------+
 
 
-+-------------------------------------------------------------------------------------------+
-; Assembler Generated Files                                                                 ;
-+-------------------------------------------------------------------------------------------+
-; File Name                                                                                 ;
-+-------------------------------------------------------------------------------------------+
-; C:/Users/jed32/Desktop/School/UBC 2018W2/ReflowOven/DE1-SoC/SOC_8052/SOC_8052/CV_8052.sof ;
-; C:/Users/jed32/Desktop/School/UBC 2018W2/ReflowOven/DE1-SoC/SOC_8052/SOC_8052/CV_8052.pof ;
-+-------------------------------------------------------------------------------------------+
++--------------------------------------------------------------------+
+; Assembler Generated Files                                          ;
++--------------------------------------------------------------------+
+; File Name                                                          ;
++--------------------------------------------------------------------+
+; D:/School/UBC 2018W2/ReflowOven/DE1-SoC Stuff/SOC_8052/CV_8052.sof ;
+; D:/School/UBC 2018W2/ReflowOven/DE1-SoC Stuff/SOC_8052/CV_8052.pof ;
++--------------------------------------------------------------------+
 
 
-+---------------------------------------------------------------------------------------------------------------------+
-; Assembler Device Options: C:/Users/jed32/Desktop/School/UBC 2018W2/ReflowOven/DE1-SoC/SOC_8052/SOC_8052/CV_8052.sof ;
-+----------------+----------------------------------------------------------------------------------------------------+
-; Option         ; Setting                                                                                            ;
-+----------------+----------------------------------------------------------------------------------------------------+
-; Device         ; 5CSEMA5F31C6                                                                                       ;
-; JTAG usercode  ; 0x030AF72C                                                                                         ;
-; Checksum       ; 0x030AF72C                                                                                         ;
-+----------------+----------------------------------------------------------------------------------------------------+
++----------------------------------------------------------------------------------------------+
+; Assembler Device Options: D:/School/UBC 2018W2/ReflowOven/DE1-SoC Stuff/SOC_8052/CV_8052.sof ;
++----------------+-----------------------------------------------------------------------------+
+; Option         ; Setting                                                                     ;
++----------------+-----------------------------------------------------------------------------+
+; Device         ; 5CSEMA5F31C6                                                                ;
+; JTAG usercode  ; 0x030A924A                                                                  ;
+; Checksum       ; 0x030A924A                                                                  ;
++----------------+-----------------------------------------------------------------------------+
 
 
-+---------------------------------------------------------------------------------------------------------------------+
-; Assembler Device Options: C:/Users/jed32/Desktop/School/UBC 2018W2/ReflowOven/DE1-SoC/SOC_8052/SOC_8052/CV_8052.pof ;
-+--------------------+------------------------------------------------------------------------------------------------+
-; Option             ; Setting                                                                                        ;
-+--------------------+------------------------------------------------------------------------------------------------+
-; Device             ; EPCS128                                                                                        ;
-; JTAG usercode      ; 0x00000000                                                                                     ;
-; Checksum           ; 0xE2004F21                                                                                     ;
-; Compression Ratio  ; 2                                                                                              ;
-+--------------------+------------------------------------------------------------------------------------------------+
++----------------------------------------------------------------------------------------------+
+; Assembler Device Options: D:/School/UBC 2018W2/ReflowOven/DE1-SoC Stuff/SOC_8052/CV_8052.pof ;
++--------------------+-------------------------------------------------------------------------+
+; Option             ; Setting                                                                 ;
++--------------------+-------------------------------------------------------------------------+
+; Device             ; EPCS128                                                                 ;
+; JTAG usercode      ; 0x00000000                                                              ;
+; Checksum           ; 0xE1CAFC01                                                              ;
+; Compression Ratio  ; 2                                                                       ;
++--------------------+-------------------------------------------------------------------------+
 
 
 +--------------------+
@@ -104,13 +104,13 @@ agreement for further details.
 Info: *******************************************************************
 Info: Running Quartus II 64-Bit Assembler
     Info: Version 15.0.0 Build 145 04/22/2015 SJ Web Edition
-    Info: Processing started: Tue Jan 29 13:35:36 2019
+    Info: Processing started: Sat Feb 02 13:55:27 2019
 Info: Command: quartus_asm --read_settings_files=off --write_settings_files=off CV_8052 -c CV_8052
 Info (115030): Assembler is generating device programming files
 Info: Quartus II 64-Bit Assembler was successful. 0 errors, 0 warnings
-    Info: Peak virtual memory: 4972 megabytes
-    Info: Processing ended: Tue Jan 29 13:36:24 2019
-    Info: Elapsed time: 00:00:48
-    Info: Total CPU time (on all processors): 00:00:34
+    Info: Peak virtual memory: 4955 megabytes
+    Info: Processing ended: Sat Feb 02 13:55:40 2019
+    Info: Elapsed time: 00:00:13
+    Info: Total CPU time (on all processors): 00:00:11
 
 
