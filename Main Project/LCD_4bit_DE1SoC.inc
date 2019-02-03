@@ -398,7 +398,6 @@ endmac
 	orl a, #01000000B
 ?Set_Cursor_1:
 	orl a, #10000000B
-	cpl LEDRA.3
 	ljmp ?WriteCommand ; Select column and row
 
 ;---------------------------------;
