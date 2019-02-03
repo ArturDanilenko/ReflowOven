@@ -110,82 +110,12 @@ $LIST
 InitialString: db '\r\nLTC2308 test program\r\n', 0
 MyString: db 'Hello213', 0
 
-Initialize_Serial_Port:
-    ; Initialize serial port and baud rate using timer 2
-	mov RCAP2H, #high(TIMER_2_RELOAD)
-	mov RCAP2L, #low(TIMER_2_RELOAD)
-	mov T2CON, #0x34 ; #00110100B
-	mov SCON, #0x52 ; Serial port in mode 1, ren, txrdy, rxempty
-	ret
-
-
-	
-Initialize_LEDs:
-    ; Turn off LEDs
-	mov	LEDRA,#0x00
-	mov	LEDRB,#0x00
-	ret
-	
-Initialize_ADC:
-	; Initialize SPI pins connected to LTC2308
-	clr	LTC2308_MOSI
-	clr	LTC2308_SCLK
-	setb LTC2308_ENN
-	ret
-
-LTC2308_Toggle_Pins:
-    mov LTC2308_MOSI, c
-    setb LTC2308_SCLK
-    mov c, LTC2308_MISO
-    clr LTC2308_SCLK
-    ret
-
-; Bit-bang communication with LTC2308.  Check Figure 8 in datasheet (page 18):
-; https://www.analog.com/media/en/technical-documentation/data-sheets/2308fc.pdf
-; The VREF for this 12-bit ADC is 4.096V
-; Warning: we are reading the previously converted channel! If you want to read the
-; channel 'now' call this function twice.
-;
-; Channel to read passed in register 'b'.  Result in R1 (bits 11 downto 8) and R0 (bits 7 downto 0).
-; Notice the weird order of the channel select bits!
-
-
-; Converts the 16-bit hex number in [R1,R0] to a 
-; 5-digit packed BCD in [R4,R3,R2] using the
-; double-dabble algorithm.
-
-
-
 ; Look-up table for the 7-seg displays. (Segments are turn on with zero) 
 T_7seg:
     DB 40H, 79H, 24H, 30H, 19H, 12H, 02H, 78H, 00H, 10H
 
-; Display the 4-digit bcd stored in [R3,R2] using the 7-segment displays
 
-
-; Send a 4-digit BCD number stored in [R3,R2] to the serial port	
-
-	
 ; Wait 1 millisecond using Timer 0
-Wait1ms:
-	clr	TR0
-	mov	a,#0xF0
-	anl	a,TMOD
-	orl	a,#0x01
-	mov	TMOD,a
-	mov	TH0, #high(TIMER_0_1ms)
-	mov	TL0, #low(TIMER_0_1ms)
-	clr	TF0
-	setb TR0
-	jnb	TF0,$
-	clr	TR0
-	ret
-	
-; Wait R2 milliseconds
-MyDelay:
-	lcall Wait1ms
-    djnz R2, MyDelay
-	ret
 	
 Timer0_Init:
 	mov a, TMOD

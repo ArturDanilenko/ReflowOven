@@ -40,7 +40,222 @@ L1: djnz R0, L1 ; 3 cycles->3*30ns*250=20.07us
     pop AR1
     pop AR0
     ret
+
+
+
+SendNumber:
+	mov a, #'\r'
+	lcall putchar
+	mov a, R3
+	swap a
+	anl a, #0x0f
+	orl a, #'0'
+	lcall putchar
+	mov a, #'.'
+	lcall putchar
+	mov a, R3
+	anl a, #0x0f
+	orl a, #'0'
+	lcall putchar
+	mov a, R2
+	swap a
+	anl a, #0x0f
+	orl a, #'0'
+	lcall putchar
+	mov a, R2
+	anl a, #0x0f
+	orl a, #'0'
+	lcall putchar
+	ret
+
+ 
+Display_BCD1:
+	mov dptr, #T_7seg
+	; Display the channel in HEX5
+	mov a, b
+	anl a, #0x0f
+	movc a, @a+dptr
+	mov HEX5, a
 	
+	; Display [R3,R2] in HEX3, HEX2, HEX1, HEX0
+	mov a, R3
+	swap a
+	anl a, #0x0f
+	movc a, @a+dptr
+	mov HEX3, a
+	
+	mov a, R3
+	anl a, #0x0f
+	movc a, @a+dptr
+	mov HEX2, a
+	
+	mov a, R2
+	swap a
+	anl a, #0x0f
+	movc a, @a+dptr
+	mov HEX1, a
+	
+	mov a, R2
+	anl a, #0x0f
+	movc a, @a+dptr
+	mov HEX0, a
+	
+	ret 
+ 
+
+hex2bcd16:
+	clr a
+	mov R4, a ; Initialize BCD to 00-00-00 
+	mov R3, a
+	mov R2, a
+	mov R5, #16  ; Loop counter.
+    
+hex2bcd16_L1:
+	; Shift binary left	
+	mov a, R1
+	mov c, acc.7 ; This way [R1,R0] remains unchanged!
+	mov a, R0
+	rlc a
+	mov R0, a
+	mov a, R1
+	rlc a
+	mov R1, a
+    
+	; Perform bcd + bcd + carry using BCD arithmetic
+	mov a, R2
+	addc a, R2
+	da a
+	mov R2, a
+	mov a, R3
+	addc a, R3
+	da a
+	mov R3, a
+	mov a, R4
+	addc a, R4
+	da a
+	mov R4, a
+
+	djnz R5, hex2bcd16_L1
+
+	ret
+
+
+LTC2308_RW:
+    clr a 
+	clr	LTC2308_ENN ; Enable ADC
+
+    ; Send 'S/D', get bit 11
+    setb c ; S/D=1 for single ended conversion
+    lcall LTC2308_Toggle_Pins
+    mov acc.3, c
+    ; Send channel bit 0, get bit 10
+    mov c, b.2 ; O/S odd channel select
+    lcall LTC2308_Toggle_Pins
+    mov acc.2, c 
+    ; Send channel bit 1, get bit 9
+    mov c, b.0 ; S1
+    lcall LTC2308_Toggle_Pins
+    mov acc.1, c
+    ; Send channel bit 2, get bit 8
+    mov c, b.1 ; S0
+    lcall LTC2308_Toggle_Pins
+    mov acc.0, c
+    mov R1, a
+    
+    ; Now receive the lest significant eight bits
+    clr a 
+    ; Send 'UNI', get bit 7
+    setb c ; UNI=1 for unipolar output mode
+    lcall LTC2308_Toggle_Pins
+    mov acc.7, c
+    ; Send 'SLP', get bit 6
+    clr c ; SLP=0 for NAP mode
+    lcall LTC2308_Toggle_Pins
+    mov acc.6, c
+    ; Send '0', get bit 5
+    clr c
+    lcall LTC2308_Toggle_Pins
+    mov acc.5, c
+    ; Send '0', get bit 4
+    clr c
+    lcall LTC2308_Toggle_Pins
+    mov acc.4, c
+    ; Send '0', get bit 3
+    clr c
+    lcall LTC2308_Toggle_Pins
+    mov acc.3, c
+    ; Send '0', get bit 2
+    clr c
+    lcall LTC2308_Toggle_Pins
+    mov acc.2, c
+    ; Send '0', get bit 1
+    clr c
+    lcall LTC2308_Toggle_Pins
+    mov acc.1, c
+    ; Send '0', get bit 0
+    clr c
+    lcall LTC2308_Toggle_Pins
+    mov acc.0, c
+    mov R0, a
+
+	setb LTC2308_ENN ; Disable ADC
+
+	ret	
+	
+putchar:
+	jbc	TI,putchar_L1
+	sjmp putchar
+putchar_L1:
+	mov	SBUF,a
+	ret
+	
+getchar:
+	jbc	RI,getchar_L1
+	sjmp getchar
+getchar_L1:
+	mov	a,SBUF
+	ret
+
+SendString:
+    clr a
+    movc a, @a+dptr
+    jz SendString_L1
+    lcall putchar
+    inc dptr
+    sjmp SendString  
+SendString_L1:
+	ret
+	
+Initialize_Serial_Port:
+    ; Initialize serial port and baud rate using timer 2
+	mov RCAP2H, #high(TIMER_2_RELOAD)
+	mov RCAP2L, #low(TIMER_2_RELOAD)
+	mov T2CON, #0x34 ; #00110100B
+	mov SCON, #0x52 ; Serial port in mode 1, ren, txrdy, rxempty
+	ret
+
+
+	
+Initialize_LEDs:
+    ; Turn off LEDs
+	mov	LEDRA,#0x00
+	mov	LEDRB,#0x00
+	ret
+	
+Initialize_ADC:
+	; Initialize SPI pins connected to LTC2308
+	clr	LTC2308_MOSI
+	clr	LTC2308_SCLK
+	setb LTC2308_ENN
+	ret
+
+LTC2308_Toggle_Pins:
+    mov LTC2308_MOSI, c
+    setb LTC2308_SCLK
+    mov c, LTC2308_MISO
+    clr LTC2308_SCLK
+    ret
+    
 ;---------------------------------;
 ; Toggles the 'E' pin in the LCD  ;
 ;---------------------------------;
@@ -125,6 +340,25 @@ ELCD_4BIT:
 	Wait_Milli_Seconds(#2)
     ret
 
+Wait1ms:
+	clr	TR0
+	mov	a,#0xF0
+	anl	a,TMOD
+	orl	a,#0x01
+	mov	TMOD,a
+	mov	TH0, #high(TIMER_0_1ms)
+	mov	TL0, #low(TIMER_0_1ms)
+	clr	TF0
+	setb TR0
+	jnb	TF0,$
+	clr	TR0
+	ret
+	
+; Wait R2 milliseconds
+MyDelay:
+	lcall Wait1ms
+    djnz R2, MyDelay
+	ret
 ;---------------------------------;
 ; Send a constant string to LCD   ;
 ;---------------------------------;
