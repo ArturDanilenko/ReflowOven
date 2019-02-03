@@ -77,6 +77,7 @@ $LIST
 
 ;                     1234567890123456    <- This helps determine the location of the counter
 Initial_Message:  db 'BCD_counter: xx ', 0
+Initial_Message1:  db 'MorituriTeSaluta', 0
 
 ;---------------------------------;
 ; Routine to initialize the ISR   ;
@@ -101,9 +102,9 @@ Timer0_Init:
 ;---------------------------------;
 Timer0_ISR:
 	;clr TF0  ; According to the data sheet this is done for us already.
-	mov TH0, #high(TIMER0_RELOAD) ; Timer 0 doesn't have autoreload in the CV-8052
-	mov TL0, #low(TIMER0_RELOAD)
-	cpl SOUND_OUT ; Connect speaker to P3.7!
+;	mov TH0, #high(TIMER0_RELOAD) ; Timer 0 doesn't have autoreload in the CV-8052
+;	mov TL0, #low(TIMER0_RELOAD)
+;	cpl SOUND_OUT ; Connect speaker to P3.7!
 	reti
 
 ;---------------------------------;
@@ -131,7 +132,7 @@ Timer2_Init:
 ;---------------------------------;
 Timer2_ISR:
 	clr TF2  ; Timer 2 doesn't clear TF2 automatically. Do it in ISR
-	cpl P1.1 ; To check the interrupt rate with oscilloscope. It must be precisely a 1 ms pulse.
+;	cpl P1.1 ; To check the interrupt rate with oscilloscope. It must be precisely a 1 ms pulse.
 	
 	; The two registers used in the ISR must be saved in the stack
 	push acc
@@ -224,7 +225,6 @@ main:
 	
 	; After initialization the program stays in this 'forever' loop
 loop:
-	;Send_Constant_String(#Initial_Message)
 	jb KEY.1, loop_a  ; if the KEY1 button is not pressed skip
 	Wait_Milli_Seconds(#50)	; Debounce delay.  This macro is also in 'LCD_4bit_DE1SoC.inc'
 	jb KEY.1, loop_a  ; if the KEY1 button is not pressed skip
@@ -243,6 +243,7 @@ loop_a:
 	jnb half_seconds_flag, loop
 loop_b:
     clr half_seconds_flag ; We clear this flag in the main loop, but it is set in the ISR for timer 2
+  ;Send_Constant_String(#Initial_Message1)
 	Set_Cursor(1, 14)     ; the place in the LCD where we want the BCD counter value
 	Display_BCD(BCD_counter) ; This macro is also in 'LCD_4bit_DE1SoC.inc'
 	lcall Display_BCD_7_Seg ; Also display the counter using the 7-segment displays.
