@@ -543,5 +543,44 @@ Load_y MAC
 	mov y+2, #low (%0 / 0x10000) 
 	mov y+3, #high(%0 / 0x10000) 
 ENDMAC
+
+	
+;---------------------------------;
+; Do some math with ADC calc      ;
+;---------------------------------;
+volt2temp mac 
+	push aR0
+	push aR1
+	mov R0, %0
+	mov R1, %1
+	lcall _volt2temp
+	pop aR1
+	pop aR0
+	endmac
+	
+_volt2temp:
+	push acc
+	
+	mov x, vResult
+	mov x+1, vResult+1
+	mov x+2, #0
+	mov x+3, #0
+	
+	; Kelvin
+	Load_Y(410)
+	lcall mul32	
+	Load_Y(1023)
+	lcall div32
+	lcall Bcd2Hex
+	
+	; Celsius
+	Load_Y(273)
+	lcall sub32
+	lcall Hex2bcd
+	mov Temp, bcd
+
+	
+	pop acc
+	ret	
 	
 $LIST
