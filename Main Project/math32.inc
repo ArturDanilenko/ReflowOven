@@ -550,11 +550,8 @@ ENDMAC
 ;---------------------------------;
 volt2temp mac 
 	push aR0
-	push aR1
 	mov R0, %0
-	mov R1, %1
 	lcall _volt2temp
-	pop aR1
 	pop aR0
 	endmac
 	
@@ -577,7 +574,7 @@ _volt2temp:
 	Load_Y(273)
 	lcall sub32
 	lcall Hex2bcd
-	mov Temp, bcd
+	mov ar0, bcd
 
 	
 	pop acc
