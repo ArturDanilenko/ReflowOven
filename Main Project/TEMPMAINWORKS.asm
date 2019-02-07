@@ -104,7 +104,7 @@ ELCD_D6 equ P1.7
 ELCD_D7 equ P0.6
 
 $NOLIST
-$include(LCD_4bit_DE1SoC.inc) ; A library of LCD related functions and utility macros
+$include(LCD_4bit_DE1SoCbasic - copy.inc) ; A library of LCD related functions and utility macros
 $LIST
 
 InitialString: db '\r\nLTC2308 test program\r\n', 0

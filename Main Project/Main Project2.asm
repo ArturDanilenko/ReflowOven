@@ -164,7 +164,7 @@ Timer0_ISR:
 ;---------------------------------;
 Timer2_Init:
  
-	mov T2CON, #0x0  ; Stop timer/counter.  Autoreload mode.
+	mov T2CON, #0x00  ; Stop timer/counter.  Autoreload mode.
 	mov TH2, #high(TIMER2_RELOAD)
 	mov TL2, #low(TIMER2_RELOAD)
 	; Set the reload value
@@ -177,7 +177,7 @@ Timer2_Init:
 	; Enable the timer and interrupts
     setb ET2  ; Enable timer 2 interrupt
     setb TR2  ; Enable timer 2
-   	cpl LEDRA.0
+   	;cpl LEDRA.0
 	ret
 
 ;---------------------------------;
@@ -236,11 +236,10 @@ MainProgram:
 
     lcall Initialize_LEDs
 
-   ; lcall Initialize_Serial_Port
-
-   ; lcall Initialize_ADC
+    lcall Initialize_Serial_Port
     lcall Timer0_Init
     lcall Timer2_Init
+    lcall Initialize_ADC
     setb EA
     mov P0MOD, #11111111b ; P0.0 to P0.6 are outputs.  ('1' makes the pin output)
     ; We use pins P1.0 and P1.1 as outputs also.  Configure accordingly.
@@ -265,10 +264,10 @@ forever:
 	mov a, SWA ; read the channel to convert from the switches
 	anl a, #00000111B ; We need only the last three bits since there are only eight channels
 	mov b, a
-;	lcall LTC2308_RW  ; Read the channel from the ADC
-;	lcall hex2bcd16   ; Convert to bcd
-;	lcall Display_BCD1 ; Display using the 7-segment displays
-;	lcall SendNumber  ; Send to serial port
+	lcall LTC2308_RW  ; Read the channel from the ADC
+	lcall hex2bcd16   ; Convert to bcd
+	lcall Display_BCD1 ; Display using the 7-segment displays
+	lcall SendNumber  ; Send to serial port
 	
 	clr TR2 ; Stop timer 2
 	clr a

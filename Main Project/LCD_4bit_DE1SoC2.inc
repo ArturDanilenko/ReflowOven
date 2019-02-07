@@ -225,16 +225,36 @@ SendString:
     sjmp SendString  
 SendString_L1:
 	ret
-	
+
 Initialize_Serial_Port:
     ; Initialize serial port and baud rate using timer 2
 	mov RCAP2H, #high(TIMER_2_RELOAD)
 	mov RCAP2L, #low(TIMER_2_RELOAD)
-	mov TCON, #0x34 ; #00110000B
+	mov T2CON, #0x34 ; #00110100B
 	mov SCON, #0x52 ; Serial port in mode 1, ren, txrdy, rxempty
 	ret
 
 
+	
+Initialize_LEDs:
+    ; Turn off LEDs
+	mov	LEDRA,#0x00
+	mov	LEDRB,#0x00
+	ret
+	
+Initialize_ADC:
+	; Initialize SPI pins connected to LTC2308
+	clr	LTC2308_MOSI
+	clr	LTC2308_SCLK
+	setb LTC2308_ENN
+	ret
+
+LTC2308_Toggle_Pins:
+    mov LTC2308_MOSI, c
+    setb LTC2308_SCLK
+    mov c, LTC2308_MISO
+    clr LTC2308_SCLK
+    ret
 	
 Initialize_LEDs:
     ; Turn off LEDs

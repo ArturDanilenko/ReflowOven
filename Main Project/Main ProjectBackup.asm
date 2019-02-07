@@ -98,7 +98,7 @@ half_seconds_flag: dbit 1 ; Set to one in the ISR every time 500 ms had passed
 mf: dbit 1
 
 cseg	
-BJTBase equ P0.0;Reasign LATEER S:DGILSBGLISFGL:SFGLR!!!
+BJTBase equ P0.0
 ELCD_RS equ P1.2
 ELCD_RW equ P1.3
 ELCD_E  equ P1.4
@@ -106,11 +106,6 @@ ELCD_D4 equ P1.5
 ELCD_D5 equ P1.6
 ELCD_D6 equ P1.7
 ELCD_D7 equ P0.6
-
-CE_ADC EQU P0.2 ;out
-MY_MOSI EQU P0.0;out
-MY_MISO EQU P2.0;in
-MY_SCLK EQU P0.1;out
 
 $NOLIST
 $include(LCD_4bit_DE1SoC.inc) ; A library of LCD related functions and utility macros
@@ -122,9 +117,6 @@ $LIST
 
 InitialString: db '\r\nLTC2308 test program\r\n', 0
 MyString: db 'Hello213', 0
-indent: ;indent to separate numbers in the putty
-    DB  '\r','\n', 0
-ret
 
 ; Look-up table for the 7-seg displays. (Segments are turn on with zero) 
 T_7seg:
@@ -134,7 +126,6 @@ T_7seg:
 ; Wait 1 millisecond using Timer 0
 	
 Timer0_Init:
-	;cpl LEDRA.7
 	mov a, TMOD
 	anl a, #0xf0 ; Clear the bits for timer 0
 	orl a, #0x01 ; Configure timer 0 as 16-timer
@@ -152,10 +143,10 @@ Timer0_Init:
 ; 2048 Hz square wave at pin P3.7 ;
 ;---------------------------------;
 Timer0_ISR:
-	clr TF0  ; According to the data sheet this is done for us already.
-	mov TH0, #high(TIMER0_RELOAD) ; Timer 0 doesn't have autoreload in the CV-8052
-	mov TL0, #low(TIMER0_RELOAD)
-	cpl SOUND_OUT ; Connect speaker to P3.7!
+	;clr TF0  ; According to the data sheet this is done for us already.
+;	mov TH0, #high(TIMER0_RELOAD) ; Timer 0 doesn't have autoreload in the CV-8052
+;	mov TL0, #low(TIMER0_RELOAD)
+;	cpl SOUND_OUT ; Connect speaker to P3.7!
 	reti
 
 ;---------------------------------;
@@ -163,8 +154,7 @@ Timer0_ISR:
 ; for timer 2                     ;
 ;---------------------------------;
 Timer2_Init:
- 
-	mov T2CON, #0x0  ; Stop timer/counter.  Autoreload mode.
+	mov T2CON, #0 ; Stop timer/counter.  Autoreload mode.
 	mov TH2, #high(TIMER2_RELOAD)
 	mov TL2, #low(TIMER2_RELOAD)
 	; Set the reload value
@@ -177,14 +167,12 @@ Timer2_Init:
 	; Enable the timer and interrupts
     setb ET2  ; Enable timer 2 interrupt
     setb TR2  ; Enable timer 2
-   	cpl LEDRA.0
 	ret
 
 ;---------------------------------;
 ; ISR for timer 2                 ;
 ;---------------------------------;
 Timer2_ISR:
-	
 	clr TF2  ; Timer 2 doesn't clear TF2 automatically. Do it in ISR
 ;	cpl P1.1 ; To check the interrupt rate with oscilloscope. It must be precisely a 1 ms pulse.
 	
@@ -233,43 +221,40 @@ Timer2_ISR_done:
 
 MainProgram:
     mov sp, #0x7f
-
     lcall Initialize_LEDs
-
-   ; lcall Initialize_Serial_Port
-
+  ;  lcall Initialize_Serial_Port
    ; lcall Initialize_ADC
-    lcall Timer0_Init
+   lcall Timer0_Init
     lcall Timer2_Init
-    setb EA
-    mov P0MOD, #11111111b ; P0.0 to P0.6 are outputs.  ('1' makes the pin output)
+     	mov P0MOD, #11111111b ; P0.0 to P0.6 are outputs.  ('1' makes the pin output)
     ; We use pins P1.0 and P1.1 as outputs also.  Configure accordingly.
     mov P1MOD, #11111111b ; P1.0 and P1.0 are outputs
-
- 
+    setb EA
     lcall ELCD_4BIT
-    setb half_seconds_flag
-    mov BCD_counter, #0x00
+    
    ; mov dptr, #InitialString
    ; lcall SendString
     ;
 ;	setb BJTBase
 ;	cpl BJTBase 
-
+setb half_seconds_flag
 	Set_Cursor(1,1)
 	Send_Constant_String(#MyString)
-;	cpl LEDRA.4
+	cpl LEDRA.4
 
 
 forever:
 	mov a, SWA ; read the channel to convert from the switches
 	anl a, #00000111B ; We need only the last three bits since there are only eight channels
 	mov b, a
-;	lcall LTC2308_RW  ; Read the channel from the ADC
-;	lcall hex2bcd16   ; Convert to bcd
-;	lcall Display_BCD1 ; Display using the 7-segment displays
-;	lcall SendNumber  ; Send to serial port
-	
+	lcall LTC2308_RW  ; Read the channel from the ADC
+	lcall hex2bcd16   ; Convert to bcd
+	lcall Display_BCD1 ; Display using the 7-segment displays
+	lcall SendNumber  ; Send to serial port
+	Set_Cursor(1,1)
+	Send_Constant_String(#MyString)
+;	jnb BJTBase, pinpressed
+	mov R2, #250
 	clr TR2 ; Stop timer 2
 	clr a
 	mov Count1ms+0, a
@@ -277,19 +262,15 @@ forever:
 	; Now clear the BCD counter
 	mov BCD_counter, a
 	setb TR2    ; Start timer 2
-	 clr half_seconds_flag ; We clear this flag in the main loop, but it is set in the ISR for timer 2
+	lcall MyDelay
+	clr half_seconds_flag ; We clear this flag in the main loop, but it is set in the ISR for timer 2
   ;Send_Constant_String(#Initial_Message1)
 	Set_Cursor(1, 14)     ; the place in the LCD where we want the BCD counter value
-	Display_BCD(BCD_counter) ; This macro is also in 'LCD_4bit_DE1SoC.inc'
-;	lcall Display_BCD_7_Seg 
-;	jnb BJTBase, pinpressed
-	mov R2, #250
-	lcall MyDelay
-	
+	Display_BCD(BCD_counter)
 	
 M0:
 
-;	cpl LEDRA.4
+	cpl LEDRA.4
 	sjmp forever
 	
 

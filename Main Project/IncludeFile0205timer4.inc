@@ -19,56 +19,6 @@ L0:
 	pop AR0
     ret
 
-;---------------------------------;
-; Wait 'R2' milliseconds          ;
-;---------------------------------;
-Wait_Milli_Seconds mac
-	push AR2
-	mov R2, %0
-	lcall ?Wait_Milli_Seconds
-	pop AR2
-endmac
-
-?Wait_Milli_Seconds:
-	push AR0
-	push AR1
-L3: mov R1, #50
-L2: mov R0, #223
-L1: djnz R0, L1 ; 3 cycles->3*30ns*250=20.07us
-    djnz R1, L2 ; 20.07us*50=1.004ms
-    djnz R2, L3 ; number of millisecons to wait passed in R2
-    pop AR1
-    pop AR0
-    ret
-
-
-
-SendNumber:
-	mov a, #'\r'
-	lcall putchar
-	mov a, R3
-	swap a
-	anl a, #0x0f
-	orl a, #'0'
-	lcall putchar
-	mov a, #'.'
-	lcall putchar
-	mov a, R3
-	anl a, #0x0f
-	orl a, #'0'
-	lcall putchar
-	mov a, R2
-	swap a
-	anl a, #0x0f
-	orl a, #'0'
-	lcall putchar
-	mov a, R2
-	anl a, #0x0f
-	orl a, #'0'
-	lcall putchar
-	ret
-
- 
 Display_BCD1:
 	mov dptr, #T_7seg
 	; Display the channel in HEX5
@@ -101,8 +51,6 @@ Display_BCD1:
 	mov HEX0, a
 	
 	ret 
- 
-
 hex2bcd16:
 	clr a
 	mov R4, a ; Initialize BCD to 00-00-00 
@@ -139,6 +87,35 @@ hex2bcd16_L1:
 
 	ret
 
+Initialize_Serial_Port:
+    ; Initialize serial port and baud rate using timer 2
+	mov T2CAPH, #high(TIMER2_RELOAD)
+	mov T2CAPL, #low(TIMER2_RELOAD)
+	mov T2CON, #0x34 ; #00110100B
+	mov SCON, #0x52 ; Serial port in mode 1, ren, txrdy, rxempty
+	ret
+
+
+	
+Initialize_LEDs:
+    ; Turn off LEDs
+	mov	LEDRA,#0x00
+	mov	LEDRB,#0x00
+	ret
+	
+Initialize_ADC:
+	; Initialize SPI pins connected to LTC2308
+	clr	LTC2308_MOSI
+	clr	LTC2308_SCLK
+	setb LTC2308_ENN
+	ret
+
+LTC2308_Toggle_Pins:
+    mov LTC2308_MOSI, c
+    setb LTC2308_SCLK
+    mov c, LTC2308_MISO
+    clr LTC2308_SCLK
+    ret
 
 LTC2308_RW:
     clr a 
@@ -201,7 +178,31 @@ LTC2308_RW:
 	setb LTC2308_ENN ; Disable ADC
 
 	ret	
-	
+SendNumber:
+	mov a, #'\r'
+	lcall putchar
+	mov a, R3
+	swap a
+	anl a, #0x0f
+	orl a, #'0'
+	lcall putchar
+	mov a, #'.'
+	lcall putchar
+	mov a, R3
+	anl a, #0x0f
+	orl a, #'0'
+	lcall putchar
+	mov a, R2
+	swap a
+	anl a, #0x0f
+	orl a, #'0'
+	lcall putchar
+	mov a, R2
+	anl a, #0x0f
+	orl a, #'0'
+	lcall putchar
+	ret
+
 putchar:
 	jbc	TI,putchar_L1
 	sjmp putchar
@@ -216,98 +217,28 @@ getchar_L1:
 	mov	a,SBUF
 	ret
 
-SendString:
-    clr a
-    movc a, @a+dptr
-    jz SendString_L1
-    lcall putchar
-    inc dptr
-    sjmp SendString  
-SendString_L1:
-	ret
-	
-Initialize_Serial_Port:
-    ; Initialize serial port and baud rate using timer 2
-	mov RCAP2H, #high(TIMER_2_RELOAD)
-	mov RCAP2L, #low(TIMER_2_RELOAD)
-	mov TCON, #0x34 ; #00110000B
-	mov SCON, #0x52 ; Serial port in mode 1, ren, txrdy, rxempty
-	ret
-
-
-	
-Initialize_LEDs:
-    ; Turn off LEDs
-	mov	LEDRA,#0x00
-	mov	LEDRB,#0x00
-	ret
-	
-Initialize_ADC:
-	; Initialize SPI pins connected to LTC2308
-	clr	LTC2308_MOSI
-	clr	LTC2308_SCLK
-	setb LTC2308_ENN
-	ret
-
-LTC2308_Toggle_Pins:
-    mov LTC2308_MOSI, c
-    setb LTC2308_SCLK
-    mov c, LTC2308_MISO
-    clr LTC2308_SCLK
-    ret
-
-INIT_SPI: ;Copy pasted whack
-	setb MY_MISO ; Make MISO an input pin
-	clr MY_SCLK ; For mode (0,0) SCLK is zero
-	ret
-DO_SPI_G:;Copy pasted whack
-	push acc
-	mov R1, #0 ; Received byte stored in R1
-	mov R2, #8 ; Loop counter (8-bits)
-DO_SPI_G_LOOP:;Copy pasted whack
-	mov a, R0 ; Byte to write is in R0
-	rlc a ; Carry flag has bit to write
-	mov R0, a
-	mov MY_MOSI, c
-	setb MY_SCLK ; Transmit
-	mov c, MY_MISO ; Read received bit
-	mov a, R1 ; Save received bit in R1
-	rlc a
-	mov R1, a
-	clr MY_SCLK
-	djnz R2, DO_SPI_G_LOOP
-	pop acc
-	ret
-    
-Send_BCD mac ;sends two digits to puutty through serial port
-	push ar0
-	mov r0, %0
-	lcall ?Send_BCD
-	pop ar0
+;---------------------------------;
+; Wait 'R2' milliseconds          ;
+;---------------------------------;
+Wait_Milli_Seconds mac
+	push AR2
+	mov R2, %0
+	lcall ?Wait_Milli_Seconds
+	pop AR2
 endmac
 
-?Send_BCD: ;sends two digits to putty/through serial port
-	push acc
-	; Write most significant digit
-	mov a, r0
-	swap a
-	anl a, #0fh
-	orl a, #30h
-	lcall putchar
-	; write least significant digit
-	mov a, r0
-	anl a, #0fh
-	orl a, #30h
-	lcall putchar
-	pop acc
-	ret
-
-
-Delay:;waits one sec
-	Wait_Milli_Seconds(#250)
-	Wait_Milli_Seconds(#250)
-	Wait_Milli_Seconds(#250)
-	Wait_Milli_Seconds(#250)
+?Wait_Milli_Seconds:
+	push AR0
+	push AR1
+L3: mov R1, #50
+L2: mov R0, #223
+L1: djnz R0, L1 ; 3 cycles->3*30ns*250=20.07us
+    djnz R1, L2 ; 20.07us*50=1.004ms
+    djnz R2, L3 ; number of millisecons to wait passed in R2
+    pop AR1
+    pop AR0
+    ret
+	
 ;---------------------------------;
 ; Toggles the 'E' pin in the LCD  ;
 ;---------------------------------;
@@ -392,25 +323,6 @@ ELCD_4BIT:
 	Wait_Milli_Seconds(#2)
     ret
 
-Wait1ms:
-	clr	TR0
-	mov	a,#0xF0
-	anl	a,TMOD
-	orl	a,#0x01
-	mov	TMOD,a
-	mov	TH0, #high(TIMER_0_1ms)
-	mov	TL0, #low(TIMER_0_1ms)
-	clr	TF0
-	setb TR0
-	jnb	TF0,$
-	clr	TR0
-	ret
-	
-; Wait R2 milliseconds
-MyDelay:
-	lcall Wait1ms
-    djnz R2, MyDelay
-	ret
 ;---------------------------------;
 ; Send a constant string to LCD   ;
 ;---------------------------------;
@@ -450,7 +362,6 @@ endmac
 	orl a, #01000000B
 ?Set_Cursor_1:
 	orl a, #10000000B
-	cpl LEDRA.3
 	ljmp ?WriteCommand ; Select column and row
 
 ;---------------------------------;
