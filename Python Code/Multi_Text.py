@@ -6,7 +6,24 @@ import matplotlib.animation as animation
 import sys, time, math
 import threading
 from threading import Thread
+from gtts import gTTS
+import os
 
+
+language = 'en'
+# TTS strings
+welcome = 'This is our ree flow oven'
+enterState1 = 'begin stage 0'
+tempAbove70 = 'temperature above 70'
+
+welcomeTTS = gTTS(text=welcome, lang=language, slow=False)
+enterState1TTS = gTTS(text=enterState1, lang=language, slow=False)
+tempAbove70TTS = gTTS(text=tempAbove70, lang=language, slow=False)
+
+# save audio files
+welcomeTTS.save("welcome.mp3")
+enterState1TTS.save("enterState1.mp3")
+tempAbove70TTS.save("tempAbove70.mp3")
 
 lock = threading.Lock()
 
@@ -14,9 +31,12 @@ ser = serial.Serial(
     port='COM8',
     baudrate=115200,
     parity=serial.PARITY_NONE,
-    stopbits=serial.STOPBITS_TWO,
+    stopbits=serial.STOPBITS_ONE,
     bytesize=serial.EIGHTBITS
 )
+
+
+
 
 
 
@@ -64,8 +84,8 @@ def runPlotter():
     ani = animation.FuncAnimation(fig, run, data_gen, blit=False, interval=100, repeat=False)
     plt.show()
 
-            
-
+os.system('welcome.mp3')           
+os.system('enterState1.mp3')
 def runText():
     client = nexmo.Client(key='f7cc0105', secret='skbMFLX1yz0rGVZc')
     state = 0
@@ -74,13 +94,18 @@ def runText():
         result = ser.readline()
         val=float(result)
         lock.release()
+        
         if val > 40 and state == 0:
+            os.system('tempAbove70.mp3')
+            FinalTime = int(round(time.time()*1000))
+            Runtime = (FinalTime - InitialTime)/1000
             client.send_message({
                 'from': '12366000369',
                 'to': '17789980302',
-                'text': val
+                'text': 'REFLOW OVEN STATUS \n Runtime = '+ str(Runtime)
                 })
             state = 1
+            
         else:
             print('none')
          
@@ -94,3 +119,20 @@ if __name__ == "__main__":
     t2.start()
     while True:
         pass
+
+
+def messageControl(State, statemask):
+    State0 = 0
+    State1 = 1
+    State2 = 2
+    State3 = 3
+    State4 = 4
+
+
+    if State == state0 and statemask == 0:
+        client.send_message({
+                'from': '12366000369',
+                'to': '17789980302',
+                'text': 'REFLOW OVEN STATUS: \n \n Reflow stage 0: Completed,\n St 
+                })
+            state = 1
