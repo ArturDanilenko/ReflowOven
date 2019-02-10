@@ -6,7 +6,7 @@ JedecChain;
 	P ActionCode(Ign)
 		Device PartName(SOCVHPS) MfrSpec(OpMask(0));
 	P ActionCode(Cfg)
-		Device PartName(5CSEMA5F31) Path("C:/Users/jed32/Desktop/School/UBC 2018W2/ReflowOven/DE1-SoC/SOC_8052/SOC_8052/") File("CV_8052.sof") MfrSpec(OpMask(1) SEC_Device(EPCS128) Child_OpMask(1 1) SFLPath("C:/Source/SOC_8052/SOC_8052.jic"));
+		Device PartName(5CSEMA5F31) Path("C:/Users/danar/Desktop/UBC/ELEC291/Project 1/ReflowOven/DE1-SoC Stuff/SOC_8052/") File("CV_8052.sof") MfrSpec(OpMask(1) SEC_Device(EPCS128) Child_OpMask(1 1) SFLPath("C:/Source/SOC_8052/SOC_8052.jic"));
 
 ChainEnd;
 

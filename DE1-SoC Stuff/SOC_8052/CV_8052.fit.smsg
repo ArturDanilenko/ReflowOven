@@ -1,4 +1,3 @@
-Warning (20028): Parallel compilation is not licensed and has been disabled
 Warning (21300): LOCKED port on the PLL is not properly connected on instance "CV_PLL:pll_33_MHz|CV_PLL_0002:cv_pll_inst|altera_pll:altera_pll_i|general[0].gpll". The LOCKED port on the PLL should be connected when the FBOUTCLK port is connected. Although it is unnecessary to connect the LOCKED signal, any logic driven off of an output clock of the PLL will not know when the PLL is locked and ready.
 Warning (292013): Feature LogicLock is only available with a valid subscription license. You can purchase a software subscription to gain full access to this feature.
 Warning (16406): 2 global input pin(s) will use non-dedicated clock routing
