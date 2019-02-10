@@ -111,6 +111,7 @@ vResult:	ds 2
 cTemp:	ds 2
 hTemp:	ds 3
 tTemp: 	ds 3
+realTemp: ds 3
 ;FSM Variables
 temp_soak: ds 1
 time_soak: ds 1
@@ -402,10 +403,6 @@ ReadTemperature:
 	volt2ctemp(cTemp) 
 	Read_ADC_Channel(6)
 	volt2htemp(hTemp)
-	
-	mov a, hTemp
-	add a, cTemp
-	mov hTemp, a
 
 	Set_Cursor(2,1)
 	Display_BCD(hTemp+1)
