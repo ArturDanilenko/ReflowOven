@@ -88,15 +88,11 @@ hex2bcd16_L1:
 	ret
 
 Initialize_Serial_Port:
-	; Configure serial port and baud rate
-	clr TR1 ; Disable timer 1
-	anl TMOD, #0x0f ; Mask the bits for timer 1
-	orl TMOD, #0x20 ; Set timer 1 in 8-bit auto reload mode
-    orl PCON, #80H ; Set SMOD to 1
-	mov TH1, #low(TIMER_1_RELOAD)
-	mov TL1, #low(TIMER_1_RELOAD) 
-	setb TR1 ; Enable timer 1
-	mov SCON, #52H
+    ; Initialize serial port and baud rate using timer 2
+	mov T2CAPH, #high(TIMER2_RELOAD)
+	mov T2CAPL, #low(TIMER2_RELOAD)
+	mov T2CON, #0x34 ; #00110100B
+	mov SCON, #0x52 ; Serial port in mode 1, ren, txrdy, rxempty
 	ret
 
 
@@ -207,18 +203,13 @@ SendNumber:
 	lcall putchar
 	ret
 
-putchar_1:
+putchar:
 	jbc	TI,putchar_L1
 	sjmp putchar
 putchar_L1:
 	mov	SBUF,a
 	ret
 	
-putchar: ;Copy pasted whack
-    jnb TI, putchar
-    clr TI
-    mov SBUF, a
-    ret
 getchar:
 	jbc	RI,getchar_L1
 	sjmp getchar
@@ -409,88 +400,4 @@ Display_char mac
 	pop acc
 endmac
 
-Read_ADC_Channel MAC
-	mov b, #%0
-	lcall _Read_ADC_Channel
-ENDMAC
-
-_Read_ADC_Channel:
-	clr CE_ADC
-	mov R0, #00000001B ; Start bit:1
-	lcall DO_SPI_G
-	mov a, b
-	swap a
-	anl a, #0F0H
-	setb acc.7 ; Single mode (bit 7).
-	mov R0, a
-	lcall DO_SPI_G
-	mov a, R1 ; R1 contains bits 8 and 9
-	anl a, #00000011B ; We need only the two least significant bits
-	da a
-	mov vResult+1, a ; Save result high.
-	mov R0, #55H ; It doesn't matter what we transmit...
-	lcall DO_SPI_G
-	mov vResult, R1 ; R1 contains bits 0 to 7. Save result low.
-	setb CE_ADC
-	ret	
-
-
-;---------------------------------;
-; Send a BCD number to PuTTY      ;
-;---------------------------------;
-
-Send_BCD mac
-	push ar0
-	mov r0, %0
-	lcall ?Send_BCD
-	pop ar0
-	endmac
-?Send_BCD:
-	push acc
-	; Write most significant digit
-	mov a, r0
-	swap a
-	anl a, #0fh
-	orl a, #30h
-	lcall putchar
-	; write least significant digit
-	mov a, r0
-	anl a, #0fh
-	orl a, #30h
-	lcall putchar
-	pop acc
-	ret
-
-INIT_SPI: ;Copy pasted whack
-	setb MY_MISO ; Make MISO an input pin
-	clr MY_SCLK ; For mode (0,0) SCLK is zero
-	ret
-DO_SPI_G:;Copy pasted whack
-	push acc
-	mov R1, #0 ; Received byte stored in R1
-	mov R2, #8 ; Loop counter (8-bits)
-DO_SPI_G_LOOP:;Copy pasted whack
-	mov a, R0 ; Byte to write is in R0
-	rlc a ; Carry flag has bit to write
-	mov R0, a
-	mov MY_MOSI, c
-	setb MY_SCLK ; Transmit
-	mov c, MY_MISO ; Read received bit
-	mov a, R1 ; Save received bit in R1
-	rlc a
-	mov R1, a
-	clr MY_SCLK
-	djnz R2, DO_SPI_G_LOOP
-	pop acc
-	ret
-
-SendString: ;Copy pasted whack
-    clr A
-    movc A, @A+DPTR
-    jz SendStringDone
-    lcall putchar
-    inc DPTR
-    sjmp SendString
-SendStringDone: ;Copy pasted whack
-    ret
 	

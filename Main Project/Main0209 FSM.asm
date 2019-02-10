@@ -33,6 +33,20 @@ LTC2308_MOSI bit 0xF9 ; Write only bit
 LTC2308_SCLK bit 0xFA ; Write only bit
 LTC2308_ENN  bit 0xFB ; Write only bit
 
+;BUTTONS
+button1		equ P2.1
+button2		equ P2.2
+button3		equ P2.3
+button4		equ P2.4
+button5		equ P2.5
+;STATES
+Select 		equ 0
+RAMPTOSOAK	equ 1
+PREHEAT		equ 2
+RAMPTOPEAK	equ 3
+REFLOW		equ 4
+COOLING		equ 5
+
 CLK EQU 33333333
 BAUD EQU 57600
 TIMER_2_RELOAD EQU (65536-(CLK/(32*BAUD)))
@@ -97,6 +111,15 @@ vResult:	ds 2
 cTemp:	ds 2
 hTemp:	ds 3
 tTemp: 	ds 3
+;FSM Variables
+temp_soak: ds 1
+time_soak: ds 1
+temp_refl: ds 1
+time_refl: ds 1
+temp: ds 1
+timer: ds 1
+state: ds 1
+sec: ds 1
 ; In the 8051 we have variables that are 1-bit in size.  We can use the setb, clr, jb, and jnb
 ; instructions with these variables.  This is how you define a 1-bit variable:
 bseg
@@ -117,6 +140,8 @@ CE_ADC	EQU P0.2
 MY_MOSI EQU P0.0
 MY_MISO EQU P2.0
 MY_SCLK EQU P0.1
+
+PWM equ P0.3
 
 $NOLIST
 $include(IncludeFile0205.inc) ; A library of LCD related functions and utility macros
@@ -234,11 +259,20 @@ Inc_Done:
 	cpl TR0 ; Enable/disable timer/counter 0. This line creates a beep-silence-beep-silence sound.
 	; Reset to zero the milli-seconds counter, it is a 16-bit variable
 	clr a
+;	mov x+0, Temp_soak+0
+;	mov x+1, Temp_soak+1
+;	Load_Y(1)
+;	lcall mul32
+;	lcall hex2bcd
+;	Send_BCD(bcd+1)
+;	Send_BCD(bcd)
 	mov Count1ms+0, a
 	mov Count1ms+1, a
 	; Increment the BCD counter
-	mov a, Seconds
 	
+	
+
+	mov a, Seconds
 	lcall ReadTemperature
 	jb UPDOWN, Timer2_ISR_decrement
 	add a, #0x01
@@ -254,8 +288,7 @@ Timer2_ISR_done:
 	pop acc
 	reti
 
-
-MainProgram:
+MainProgram:;============================MAIN===========================================================
     mov sp, #0x7f
          lcall Timer0_Init
     lcall Timer2_Init
@@ -265,6 +298,17 @@ MainProgram:
     lcall Timer0_Init
     lcall Timer2_Init
     lcall INIT_SPI
+  ;FSM Variables  ==================
+    mov temp_soak, #230
+	mov time_soak, #60
+	mov temp_refl, #230
+	mov time_refl, #45
+	
+	mov temp, #25
+	mov timer, #0x00
+	mov state, #0x00
+	mov sec, #0x00
+;========================
   ;  lcall InitSerialPort
      	mov P0MOD, #11111111b ; P0.0 to P0.6 are outputs.  ('1' makes the pin output)
     ; We use pins P1.0 and P1.1 as outputs also.  Configure accordingly.
@@ -278,19 +322,24 @@ MainProgram:
 	cpl LEDRA.4
 	setb half_seconds_flag
 	mov Seconds, #0x5
-forever:
+forever:;============================FOREVER===========================================================
 	mov a, SWA ; read the channel to convert from the switches
 	anl a, #00000111B ; We need only the last three bits since there are only eight channels
 	mov b, a
 	lcall LTC2308_RW  ; Read the channel from the ADC
 	lcall hex2bcd16   ; Convert to bcd
-	lcall Display_BCD1 ; Display using the 7-segment displays
+;	lcall Display_BCD1 ; Display using the 7-segment displays
 ;	lcall SendNumber  ; Send to serial port
 ;	jnb BJTBase, pinpressed
 	mov R2, #250
 	;lcall MyDelay
-	Wait_Milli_Seconds(#250)
-	Wait_Milli_Seconds(#250)	
+	;Wait_Milli_Seconds(#25)
+	;Wait_Milli_Seconds(#250)
+	
+	jb KEY.1, loop_a  ; if the KEY1 button is not pressed skip
+	Wait_Milli_Seconds(#50)	; Debounce delay.  This macro is also in 'LCD_4bit_DE1SoC.inc'
+	jb KEY.1, loop_a  ; if the KEY1 button is not pressed skip
+	jnb KEY.1, $	
 	clr TR2 ; Stop timer 2
 	clr a
 	mov Count1ms+0, a
@@ -298,17 +347,65 @@ forever:
 	; Now clear the BCD counter
 	mov BCD_counter, a
 	setb TR2    ; Start timer 2
+	sjmp loop_b ; Display the new value
+loop_a:
+	jnb half_seconds_flag, forever
+loop_b:
 	clr half_seconds_flag ; We clear this flag in the main loop, but it is set in the ISR for timer 2
 ;	Set_Cursor(1, 14)     ; the place in the LCD where we want the BCD counter value
 ;	Display_BCD(Seconds)
 ;	cpl LEDRA.4
-	sjmp forever
+    mov a, state
+	cjne a, #select, SkipSetup
+	cpl LEDRA.5
+	jnb button1, nextstate
+	jnb button2, TempSoakAdjust
+;	jnb button3, TimeSoakAdjust
+;	jnb button4, TempReflowAdjust
+;	jnb button5, TimeRelfowAdjust
+	;Wait_Milli_Seconds(#50)
+		
 	
+SkipSetup:;=====================CHANGE  OF STATES==============================================
+	ljmp forever
+nextstate: ;=====================CHANGE  OF STATES==============================================
+	Wait_Milli_Seconds(#50)
+	mov a, state
+	add a, #1
+	cjne a, #6, NoStateReset
+	mov state, #0
+	cpl LEDRA.7
+	ljmp SkipSetup
+NoStateReset:;=====================STATE OVERFLOW==============================================
+	mov state, a
+	cpl LEDRA.7
+	ljmp SkipSetup	
+TempSoakAdjust:
+	Wait_Milli_Seconds(#50)
+	mov a, temp_soak
+	add a, #1
+	cpl LEDRA.6
+	cjne a, #240, TempSoakOverflow
+	mov temp_soak, #25
+	ljmp SkipSetup
+;TimeSoakAdjust:
+;	ljmp SkipSetup
+;TempReflowAdjust:
+;	ljmp SkipSetup
+;TimeReflowAdjust:
+;	ljmp SkipSetup
+TempSoakOverflow:
+	mov temp_soak, a
+	ljmp SkipSetup
 ReadTemperature: 
 	Read_ADC_Channel(0)
 	volt2ctemp(cTemp) 
 	Read_ADC_Channel(6)
 	volt2htemp(hTemp)
+	
+	mov a, hTemp
+	add a, cTemp
+	mov hTemp, a
 
 	Set_Cursor(2,1)
 	Display_BCD(hTemp+1)
@@ -325,4 +422,6 @@ ReadTemperature:
 	mov DPTR, #Hello_World
 	lcall SendString
 ret
+callnextstate: 
+	lcall nextstate
 end

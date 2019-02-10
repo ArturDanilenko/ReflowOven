@@ -34,7 +34,7 @@ LTC2308_SCLK bit 0xFA ; Write only bit
 LTC2308_ENN  bit 0xFB ; Write only bit
 
 CLK EQU 33333333
-BAUD EQU 57600
+BAUD EQU 115200
 TIMER_2_RELOAD EQU (65536-(CLK/(32*BAUD)))
 TIMER_0_1ms EQU (65536-(CLK/(12*1000)))
 
@@ -47,7 +47,6 @@ TIMER0_RATE   EQU 4096     ; 2048Hz squarewave (peak amplitude of CEM-1203 speak
 TIMER0_RELOAD EQU ((65536-(CLK/(12*TIMER0_RATE)))) ; The prescaler in the CV-8052 is 12 unlike the AT89LP51RC2 where is 1.
 TIMER2_RATE   EQU 1000     ; 1000Hz, for a timer tick of 1ms
 TIMER2_RELOAD EQU ((65536-(CLK/(12*TIMER2_RATE))))
-TIMER_1_RELOAD EQU (256-((2*CLK)/(12*32*BAUD)))
 
 
 ; Reset vector
@@ -88,15 +87,10 @@ UPDOWN        equ SWA.0
 dseg at 0x30
 Count1ms:     ds 2 ; Used to determine when half second has passed
 BCD_counter:  ds 1 ; The BCD counter incrememted in the ISR and displayed in the main loop
-Seconds:  ds 1
-x:   	ds 4
-y:   	ds 4
-bcd: 	ds 5
-buffer: ds 30
-vResult:	ds 2
-cTemp:	ds 2
-hTemp:	ds 3
-tTemp: 	ds 3
+Result: ds 2
+x: ds 4
+y: ds 4
+bcd: ds 5
 ; In the 8051 we have variables that are 1-bit in size.  We can use the setb, clr, jb, and jnb
 ; instructions with these variables.  This is how you define a 1-bit variable:
 bseg
@@ -104,7 +98,7 @@ half_seconds_flag: dbit 1 ; Set to one in the ISR every time 500 ms had passed
 mf: dbit 1
 
 cseg	
-BJTBase equ P0.0
+BJTBase equ P0.0;Reasign LATEER S:DGILSBGLISFGL:SFGLR!!!
 ELCD_RS equ P1.2
 ELCD_RW equ P1.3
 ELCD_E  equ P1.4
@@ -113,53 +107,34 @@ ELCD_D5 equ P1.6
 ELCD_D6 equ P1.7
 ELCD_D7 equ P0.6
 
-CE_ADC	EQU P0.2
-MY_MOSI EQU P0.0
-MY_MISO EQU P2.0
-MY_SCLK EQU P0.1
+CE_ADC EQU P0.2 ;out
+MY_MOSI EQU P0.0;out
+MY_MISO EQU P2.0;in
+MY_SCLK EQU P0.1;out
 
 $NOLIST
-$include(IncludeFile0205.inc) ; A library of LCD related functions and utility macros
+$include(LCD_4bit_DE1SoC.inc) ; A library of LCD related functions and utility macros
+$LIST
+
+$NOLIST
 $include(math32.inc)
 $LIST
 
 InitialString: db '\r\nLTC2308 test program\r\n', 0
-MyString: db 'Helo213qwq', 0
-Hello_World: ;indent to separate numbers in the putty
+MyString: db 'Hello213', 0
+indent: ;indent to separate numbers in the putty
     DB  '\r','\n', 0
+ret
 
 ; Look-up table for the 7-seg displays. (Segments are turn on with zero) 
 T_7seg:
     DB 40H, 79H, 24H, 30H, 19H, 12H, 02H, 78H, 00H, 10H
 
-; Display the 4-digit bcd stored in [R3,R2] using the 7-segment displays
 
-
-; Send a 4-digit BCD number stored in [R3,R2] to the serial port	
-
-	
 ; Wait 1 millisecond using Timer 0
-Wait1ms:
-	clr	TR0
-	mov	a,#0xF0
-	anl	a,TMOD
-	orl	a,#0x01
-	mov	TMOD,a
-	mov	TH0, #high(TIMER_0_1ms)
-	mov	TL0, #low(TIMER_0_1ms)
-	clr	TF0
-	setb TR0
-	jnb	TF0,$
-	clr	TR0
-	ret
-	
-; Wait R2 milliseconds
-MyDelay:
-	lcall Wait1ms
-    djnz R2, MyDelay
-	ret
 	
 Timer0_Init:
+	;cpl LEDRA.7
 	mov a, TMOD
 	anl a, #0xf0 ; Clear the bits for timer 0
 	orl a, #0x01 ; Configure timer 0 as 16-timer
@@ -177,10 +152,10 @@ Timer0_Init:
 ; 2048 Hz square wave at pin P3.7 ;
 ;---------------------------------;
 Timer0_ISR:
-;	clr TF0  ; According to the data sheet this is done for us already.
+	clr TF0  ; According to the data sheet this is done for us already.
 	mov TH0, #high(TIMER0_RELOAD) ; Timer 0 doesn't have autoreload in the CV-8052
 	mov TL0, #low(TIMER0_RELOAD)
-;	cpl SOUND_OUT ; Connect speaker to P3.7!
+	cpl SOUND_OUT ; Connect speaker to P3.7!
 	reti
 
 ;---------------------------------;
@@ -188,7 +163,8 @@ Timer0_ISR:
 ; for timer 2                     ;
 ;---------------------------------;
 Timer2_Init:
-	mov T2CON, #0 ; Stop timer/counter.  Autoreload mode.
+ 
+	mov T2CON, #0x0  ; Stop timer/counter.  Autoreload mode.
 	mov TH2, #high(TIMER2_RELOAD)
 	mov TL2, #low(TIMER2_RELOAD)
 	; Set the reload value
@@ -201,12 +177,14 @@ Timer2_Init:
 	; Enable the timer and interrupts
     setb ET2  ; Enable timer 2 interrupt
     setb TR2  ; Enable timer 2
+   	cpl LEDRA.0
 	ret
 
 ;---------------------------------;
 ; ISR for timer 2                 ;
 ;---------------------------------;
 Timer2_ISR:
+	
 	clr TF2  ; Timer 2 doesn't clear TF2 automatically. Do it in ISR
 ;	cpl P1.1 ; To check the interrupt rate with oscilloscope. It must be precisely a 1 ms pulse.
 	
@@ -237,9 +215,7 @@ Inc_Done:
 	mov Count1ms+0, a
 	mov Count1ms+1, a
 	; Increment the BCD counter
-	mov a, Seconds
-	
-	lcall ReadTemperature
+	mov a, BCD_counter
 	jb UPDOWN, Timer2_ISR_decrement
 	add a, #0x01
 	sjmp Timer2_ISR_da
@@ -247,7 +223,7 @@ Timer2_ISR_decrement:
 	add a, #0x99 ; Adding the 10-complement of -1 is like subtracting 1.
 Timer2_ISR_da:
 	da a ; Decimal adjust instruction.  Check datasheet for more details!
-	mov Seconds, a
+	mov BCD_counter, a
 	
 Timer2_ISR_done:
 	pop psw
@@ -257,40 +233,43 @@ Timer2_ISR_done:
 
 MainProgram:
     mov sp, #0x7f
-         lcall Timer0_Init
-    lcall Timer2_Init
+
     lcall Initialize_LEDs
-    lcall Initialize_Serial_Port
-    lcall Initialize_ADC
+
+   ; lcall Initialize_Serial_Port
+
+   ; lcall Initialize_ADC
     lcall Timer0_Init
     lcall Timer2_Init
-    lcall INIT_SPI
-  ;  lcall InitSerialPort
-     	mov P0MOD, #11111111b ; P0.0 to P0.6 are outputs.  ('1' makes the pin output)
+    setb EA
+    mov P0MOD, #11111111b ; P0.0 to P0.6 are outputs.  ('1' makes the pin output)
     ; We use pins P1.0 and P1.1 as outputs also.  Configure accordingly.
     mov P1MOD, #11111111b ; P1.0 and P1.0 are outputs
+
+ 
     lcall ELCD_4BIT
-  ;  clr EX1
-    setb EA
+    setb half_seconds_flag
+    mov BCD_counter, #0x00
+   ; mov dptr, #InitialString
+   ; lcall SendString
+    ;
+;	setb BJTBase
+;	cpl BJTBase 
 
 	Set_Cursor(1,1)
 	Send_Constant_String(#MyString)
-	cpl LEDRA.4
-	setb half_seconds_flag
-	mov Seconds, #0x5
+;	cpl LEDRA.4
+
+
 forever:
 	mov a, SWA ; read the channel to convert from the switches
 	anl a, #00000111B ; We need only the last three bits since there are only eight channels
 	mov b, a
-	lcall LTC2308_RW  ; Read the channel from the ADC
-	lcall hex2bcd16   ; Convert to bcd
-	lcall Display_BCD1 ; Display using the 7-segment displays
+;	lcall LTC2308_RW  ; Read the channel from the ADC
+;	lcall hex2bcd16   ; Convert to bcd
+;	lcall Display_BCD1 ; Display using the 7-segment displays
 ;	lcall SendNumber  ; Send to serial port
-;	jnb BJTBase, pinpressed
-	mov R2, #250
-	;lcall MyDelay
-	Wait_Milli_Seconds(#250)
-	Wait_Milli_Seconds(#250)	
+	
 	clr TR2 ; Stop timer 2
 	clr a
 	mov Count1ms+0, a
@@ -298,31 +277,21 @@ forever:
 	; Now clear the BCD counter
 	mov BCD_counter, a
 	setb TR2    ; Start timer 2
-	clr half_seconds_flag ; We clear this flag in the main loop, but it is set in the ISR for timer 2
-;	Set_Cursor(1, 14)     ; the place in the LCD where we want the BCD counter value
-;	Display_BCD(Seconds)
+	 clr half_seconds_flag ; We clear this flag in the main loop, but it is set in the ISR for timer 2
+  ;Send_Constant_String(#Initial_Message1)
+	Set_Cursor(1, 14)     ; the place in the LCD where we want the BCD counter value
+	Display_BCD(BCD_counter) ; This macro is also in 'LCD_4bit_DE1SoC.inc'
+;	lcall Display_BCD_7_Seg 
+;	jnb BJTBase, pinpressed
+	mov R2, #250
+	lcall MyDelay
+	
+	
+M0:
+
 ;	cpl LEDRA.4
 	sjmp forever
 	
-ReadTemperature: 
-	Read_ADC_Channel(0)
-	volt2ctemp(cTemp) 
-	Read_ADC_Channel(6)
-	volt2htemp(hTemp)
 
-	Set_Cursor(2,1)
-	Display_BCD(hTemp+1)
-	Set_Cursor(2,3)
-	Display_BCD(hTemp)
-	Set_Cursor(2,5)
-	Display_BCD(cTemp)
-	Send_BCD(cTemp+1)
-	Send_BCD(cTemp)
-	mov DPTR, #Hello_World
-	lcall SendString
-	Send_BCD(hTemp+1)
-	Send_BCD(hTemp)
-	mov DPTR, #Hello_World
-	lcall SendString
-ret
+
 end

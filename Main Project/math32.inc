@@ -548,14 +548,14 @@ ENDMAC
 ;---------------------------------;
 ; Do some math with ADC calc      ;
 ;---------------------------------;
-volt2temp mac 
+volt2ctemp mac 
 	push aR0
 	mov R0, %0
-	lcall _volt2temp
+	lcall _volt2ctemp
 	pop aR0
 	endmac
 	
-_volt2temp:
+_volt2ctemp:
 	push acc
 	
 	mov x, vResult
@@ -568,13 +568,52 @@ _volt2temp:
 	lcall mul32	
 	Load_Y(1023)
 	lcall div32
-	lcall Bcd2Hex
 	
 	; Celsius
 	Load_Y(273)
 	lcall sub32
 	lcall Hex2bcd
-	mov ar0, bcd
+	mov cTemp, bcd
+	mov cTemp+1, bcd+1
+
+	
+	pop acc
+	ret	
+	
+;---------------------------------;
+; Do some math with hot ADC calc  ;
+;---------------------------------;
+volt2htemp mac 
+	push aR0
+	mov R0, %0
+	lcall _volt2htemp
+	pop aR0
+	endmac
+	
+_volt2htemp:
+	push acc
+	
+	mov x, vResult
+	mov x+1, vResult+1
+	mov x+2, #0
+	mov x+3, #0
+	
+	; To Difference
+	Load_Y(65853)
+	lcall mul32
+	Load_Y(4)
+	lcall mul32	
+	Load_Y(1000000)
+	lcall div32
+;	lcall div32
+	;Load_Y(25)
+;	mov bcd, cTemp+0
+;	mov bcd+1, cTemp+1
+;	lcall hex2bcd
+	
+	lcall Hex2bcd
+	mov hTemp, bcd
+	mov hTemp+1, bcd+1
 
 	
 	pop acc
