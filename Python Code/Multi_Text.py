@@ -28,7 +28,7 @@ tempAbove70TTS.save("tempAbove70.mp3")
 lock = threading.Lock()
 
 ser = serial.Serial(
-    port='COM7',
+    port='COM8',
     baudrate=115200,
     parity=serial.PARITY_NONE,
     stopbits=serial.STOPBITS_ONE,
@@ -97,10 +97,12 @@ def runText():
         
         if val > 40 and state == 0:
             os.system('tempAbove70.mp3')
+            FinalTime = int(round(time.time()*1000))
+            Runtime = (FinalTime - InitialTime)/1000
             client.send_message({
                 'from': '12366000369',
-                'to': '17782232122',
-                'text': val
+                'to': '17789980302',
+                'text': 'REFLOW OVEN STATUS \n Runtime = '+ str(Runtime)
                 })
             state = 1
             
@@ -117,3 +119,20 @@ if __name__ == "__main__":
     t2.start()
     while True:
         pass
+
+
+def messageControl(State, statemask):
+    State0 = 0
+    State1 = 1
+    State2 = 2
+    State3 = 3
+    State4 = 4
+
+
+    if State == state0 and statemask == 0:
+        client.send_message({
+                'from': '12366000369',
+                'to': '17789980302',
+                'text': 'REFLOW OVEN STATUS: \n \n Reflow stage 0: Completed,\n St 
+                })
+            state = 1
