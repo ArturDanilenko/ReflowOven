@@ -572,7 +572,7 @@ _volt2ctemp:
 	; Celsius
 	Load_Y(273)
 	lcall sub32
-	lcall Hex2bcd
+	lcall hex2bcd
 	mov cTemp, bcd
 	mov cTemp+1, bcd+1
 
@@ -599,14 +599,15 @@ _volt2htemp:
 	mov x+3, #0
 	
 	; To Difference
-	Load_Y(65853)
+	Load_Y(26085)
 	lcall mul32
-	Load_Y(4)
-	lcall mul32	
-	Load_Y(1000000)
+;	Load_Y(1)
+;	lcall mul32	
+	Load_Y(100000)
 	lcall div32
 ;	lcall div32
-	;Load_Y(25)
+;	Load_Y(22)
+;	lcall add32
 ;	mov bcd, cTemp+0
 ;	mov bcd+1, cTemp+1
 ;	lcall hex2bcd

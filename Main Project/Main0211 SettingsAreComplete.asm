@@ -103,6 +103,8 @@ dseg at 0x30
 Count1ms:     ds 2 ; Used to determine when half second has passed
 BCD_counter:  ds 1 ; The BCD counter incrememted in the ISR and displayed in the main loop
 Seconds:  ds 1
+Minutes: ds 1
+pwm: ds 1
 x:   	ds 4
 y:   	ds 4
 bcd: 	ds 5
@@ -141,7 +143,7 @@ MY_MOSI EQU P0.0
 MY_MISO EQU P2.0
 MY_SCLK EQU P0.1
 
-PWM equ P0.3
+PWMout equ P0.3
 
 $NOLIST
 $include(IncludeFile0205.inc) ; A library of LCD related functions and utility macros
@@ -256,7 +258,7 @@ Inc_Done:;===========================================ISR MAIN===================
 	setb half_seconds_flag ; Let the main program know half second had passed
 	; Toggle LEDR0 so it blinks
 	;=====================Timer 0 controls============================================
-	cpl LEDRA.0
+	;cpl LEDRA.0
 	cpl TR0 ; Enable/disable timer/counter 0. This line creates a beep-silence-beep-silence sound.
 	; Reset to zero the milli-seconds counter, it is a 16-bit variable
 	;==================================================================================================
@@ -272,10 +274,10 @@ Inc_Done:;===========================================ISR MAIN===================
 ;	lcall hex2bcd
 ;	Send_BCD(bcd+1)
 	Set_cursor(2,1)
-	Display_BCD(seconds+1)
-	Set_cursor(2,3)
+	Display_BCD(minutes)
+	Set_cursor(2,4)
 ;	Send_BCD(bcd)
-	Display_BCD(seconds+0)
+	Display_BCD(seconds)
 ;	mov DPTR, #Hello_World
 ;	lcall SendString
 ;==============================================================================================
@@ -285,21 +287,33 @@ Inc_Done:;===========================================ISR MAIN===================
 	
 	
 
-	mov a, Seconds
+	
 	lcall ReadTemperature
-	jb UPDOWN, Timer2_ISR_decrement
+	mov a, Seconds
+;	jb UPDOWN, Timer2_ISR_decrement
 	add a, #0x01
-	sjmp Timer2_ISR_da
-Timer2_ISR_decrement:;=====================ISR DECREMENT=============================================
-	add a, #0x99 ; Adding the 10-complement of -1 is like subtracting 1.
+	;sjmp Timer2_ISR_da
+;Timer2_ISR_decrement:;=====================ISR DECREMENT=============================================
+;	add a, #0x99 ; Adding the 10-complement of -1 is like subtracting 1.	
+	
+	
 Timer2_ISR_da:
-	da a ; Decimal adjust instruction.  Check datasheet for more details!
-	mov Seconds, a
+	da a ; Decimal adjust instruction.  Check datasheet for more details!	
+	mov seconds, a
+
+	cjne a, #0x60, Timer2_ISR_done ;if seconds are not 60, go to ISR_done
+	mov Seconds, #0x0 ;reset seconds to 0
+	mov a, Minutes ; set a to previous minutes
+	add a, #0x01 ;add one to obtain current minutes
+	da a ;makes formatting nice 
+	mov Minutes, a ;put updated minutes into the counter
+;	sjmp Timer2_ISR_M_aadjust
 	
 Timer2_ISR_done:
 	pop psw
 	pop acc
 	reti
+	
 
 MainProgram:;============================MAIN===========================================================
     mov sp, #0x7f
@@ -323,6 +337,7 @@ MainProgram:;============================MAIN===================================
 	mov timer, #0x00
 	mov state, #0x00
 	mov sec, #0x00
+	mov minutes, #0
 ;========================
   ;  lcall InitSerialPort
      	mov P0MOD, #11111111b ; P0.0 to P0.6 are outputs.  ('1' makes the pin output)
@@ -336,7 +351,7 @@ MainProgram:;============================MAIN===================================
 	Send_Constant_String(#MyString)
 	cpl LEDRA.4
 	setb half_seconds_flag
-	mov Seconds, #0x5
+	mov Seconds, #0x50
 forever:;======================================================FOREVER===========================================================
 	mov a, SWA ; read the channel to convert from the switches
 	anl a, #00000111B ; We need only the last three bits since there are only eight channels
@@ -368,14 +383,47 @@ loop_b:;======================================================FOREVER===========
 ;	Display_BCD(Seconds)
 ;	cpl LEDRA.4
     mov a, state
-	cjne a, #select, SkipSetup
+	cjne a, #select, RampToSoakState
 	cpl LEDRA.5
 	jnb button1, nextstate
 	jnb button2, TempSoakAdjust
 	jnb button3, TimeSoakAdjust
 	jnb button4, TempReflowAdjust
-	jnb button5, TimeReflowAdjust
-		
+	jnb button5, Path ; TimeReflowAdjust jump
+	mov Seconds, #0x00
+RampToSoakState:	
+	cjne a, #RampToSoak, PreHeatState
+	mov pwm, #100
+    mov sec, #0
+    mov a, Seconds
+    cjne a, #0x60, cont ;-----
+;	mov x, current_temp
+;	mov x+1, current_temp+1
+;	mov x+2, 0#
+;	mov x+3, #0
+
+;	mov y, temp_soak
+;	mov y+1, temp_soak+1
+;	mov y+2, #0
+;	mov y+3, #0
+;	lcall x_lt_y
+
+;	jnb	mf, cont	    
+;	mov 
+   
+   
+cont:
+
+
+
+    mov a, temp_soak ;-----
+    clr c
+    subb a, temp ;----
+    jnc state1_done
+    mov state, #2
+state1_done:
+    ljmp forever
+PreHeatState:
 	
 SkipSetup:;=====================CHANGE  OF STATES==============================================
 	ljmp forever
@@ -399,6 +447,8 @@ TempSoakAdjust:;=====================Soak Temperature adjustment================
 	cjne a, #171, TempSoakNotOverflow
 	mov temp_soak, #130
 	ljmp SkipSetup
+Path: 
+	ljmp TimeReflowAdjust
 TimeSoakAdjust:;=====================Soak time Adjustment==============================================
 	Wait_Milli_Seconds(#50)
 	mov a, Time_Soak
@@ -435,25 +485,35 @@ TimeReflowNotOverflow:;=====================Soak time no overflow===============
 ReadTemperature: 
 	Read_ADC_Channel(0)
 	volt2ctemp(cTemp) 
+;	mov cTemp, bcd
 	Read_ADC_Channel(6)
 	volt2htemp(hTemp)
-	
-;	mov a, hTemp
-;	add a, cTemp
-;	mov hTemp, a
-
-	Set_Cursor(2,1)
+;	mov hTemp, bcd
+;======Adding cold junction temp=======================================================	
+	mov a, hTemp
+	add a, cTemp
+	mov hTemp, a
+;======Since its in hex got to adjust to convert it to decimal=======================================================	
+ 	mov a, hTemp
+ 	da a
+ 	mov hTemp, a
+ ;======Display=====================================================================================	
+	Set_Cursor(2,9)
 	Display_BCD(hTemp+1)
-	Set_Cursor(2,3)
+	Set_Cursor(2,11)
 	Display_BCD(hTemp)
-	Set_Cursor(2,5)
-	Display_BCD(cTemp)
+;	Set_Cursor(2,5)
+;	Display_BCD(cTemp)
 	Send_BCD(cTemp+1)
 	Send_BCD(cTemp)
 	mov DPTR, #Hello_World
 	lcall SendString
 	Send_BCD(hTemp+1)
 	Send_BCD(hTemp)
+	mov DPTR, #Hello_World
+	lcall SendString
+	Send_BCD(bcd+1)
+	Send_BCD(bcd)
 	mov DPTR, #Hello_World
 	lcall SendString
 ret

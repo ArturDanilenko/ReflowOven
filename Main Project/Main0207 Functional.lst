@@ -116,7 +116,7 @@
 002E            118   MY_MISO EQU P2.0
 002E            119   MY_SCLK EQU P0.1
 002E            120   
-                616   $LIST
+                621   $LIST
                 123   $LIST
 0550            125   
 0550 0D0A4C54   126   InitialString: db '\r\nLTC2308 test program\r\n', 0

@@ -103,6 +103,8 @@ dseg at 0x30
 Count1ms:     ds 2 ; Used to determine when half second has passed
 BCD_counter:  ds 1 ; The BCD counter incrememted in the ISR and displayed in the main loop
 Seconds:  ds 1
+Minutes: ds 1
+pwm: ds 1
 x:   	ds 4
 y:   	ds 4
 bcd: 	ds 5
@@ -120,6 +122,8 @@ temp: ds 1
 timer: ds 1
 state: ds 1
 sec: ds 1
+MyHope: ds 1
+MyHope2: ds 1
 ; In the 8051 we have variables that are 1-bit in size.  We can use the setb, clr, jb, and jnb
 ; instructions with these variables.  This is how you define a 1-bit variable:
 bseg
@@ -141,7 +145,7 @@ MY_MOSI EQU P0.0
 MY_MISO EQU P2.0
 MY_SCLK EQU P0.1
 
-PWM equ P0.3
+PWMout equ P0.3
 
 $NOLIST
 $include(IncludeFile0205.inc) ; A library of LCD related functions and utility macros
@@ -256,7 +260,7 @@ Inc_Done:;===========================================ISR MAIN===================
 	setb half_seconds_flag ; Let the main program know half second had passed
 	; Toggle LEDR0 so it blinks
 	;=====================Timer 0 controls============================================
-	cpl LEDRA.0
+	;cpl LEDRA.0
 	cpl TR0 ; Enable/disable timer/counter 0. This line creates a beep-silence-beep-silence sound.
 	; Reset to zero the milli-seconds counter, it is a 16-bit variable
 	;==================================================================================================
@@ -270,12 +274,14 @@ Inc_Done:;===========================================ISR MAIN===================
 ;	Load_Y(1)
 ;	lcall mul32
 ;	lcall hex2bcd
+
 ;	Send_BCD(bcd+1)
+	
 	Set_cursor(2,1)
-	Display_BCD(seconds+1)
-	Set_cursor(2,3)
+	Display_BCD(minutes)
+	Set_cursor(2,4)
 ;	Send_BCD(bcd)
-	Display_BCD(seconds+0)
+	Display_BCD(seconds)
 ;	mov DPTR, #Hello_World
 ;	lcall SendString
 ;==============================================================================================
@@ -283,27 +289,41 @@ Inc_Done:;===========================================ISR MAIN===================
 	mov Count1ms+1, a
 	; Increment the BCD counter
 	
-	
+	mov a, MyHope
+	add a, #1
+	mov MyHope, a
 
-	mov a, Seconds
+	
 	lcall ReadTemperature
-	jb UPDOWN, Timer2_ISR_decrement
+	mov a, Seconds
+;	jb UPDOWN, Timer2_ISR_decrement
 	add a, #0x01
-	sjmp Timer2_ISR_da
-Timer2_ISR_decrement:;=====================ISR DECREMENT=============================================
-	add a, #0x99 ; Adding the 10-complement of -1 is like subtracting 1.
+	;sjmp Timer2_ISR_da
+;Timer2_ISR_decrement:;=====================ISR DECREMENT=============================================
+;	add a, #0x99 ; Adding the 10-complement of -1 is like subtracting 1.	
+	
+	
 Timer2_ISR_da:
-	da a ; Decimal adjust instruction.  Check datasheet for more details!
-	mov Seconds, a
+	da a ; Decimal adjust instruction.  Check datasheet for more details!	
+	mov seconds, a
+
+	cjne a, #0x60, Timer2_ISR_done ;if seconds are not 60, go to ISR_done
+	mov Seconds, #0x0 ;reset seconds to 0
+	mov a, Minutes ; set a to previous minutes
+	add a, #0x01 ;add one to obtain current minutes
+	da a ;makes formatting nice 
+	mov Minutes, a ;put updated minutes into the counter
+;	sjmp Timer2_ISR_M_aadjust
 	
 Timer2_ISR_done:
 	pop psw
 	pop acc
 	reti
+	
 
 MainProgram:;============================MAIN===========================================================
     mov sp, #0x7f
-         lcall Timer0_Init
+    lcall Timer0_Init
     lcall Timer2_Init
     lcall Initialize_LEDs
     lcall Initialize_Serial_Port
@@ -311,32 +331,36 @@ MainProgram:;============================MAIN===================================
     lcall Timer0_Init
     lcall Timer2_Init
     lcall INIT_SPI
-  ;FSM Variables  ==================
+;FSM Variables  ==================
   	clr a
   	mov temp_soak, a
-    mov temp_soak, #150
-	mov time_soak, #110
-	mov temp_refl, #220
-	mov time_refl, #65
+    mov temp_soak, #0x1e ; Will remain in hex, 0x82 is orig value else is for debugging
+	mov time_soak, #0x3c	 ;HAS TO BE IN HEX only convert to bcd for display!
+	mov temp_refl, #0x23 ;230 0xdc is original, else debug
+	mov time_refl, #0x41 ;65
 	
 	mov temp, #25
 	mov timer, #0x00
 	mov state, #0x00
 	mov sec, #0x00
+	mov minutes, #0
+	mov mf, #0
+	mov MyHope, #0
 ;========================
   ;  lcall InitSerialPort
-     	mov P0MOD, #11111111b ; P0.0 to P0.6 are outputs.  ('1' makes the pin output)
+    mov P0MOD, #11111111b ; P0.0 to P0.6 are outputs.  ('1' makes the pin output)
     ; We use pins P1.0 and P1.1 as outputs also.  Configure accordingly.
     mov P1MOD, #11111111b ; P1.0 and P1.0 are outputs
     lcall ELCD_4BIT
   ;  clr EX1
     setb EA
 
-	Set_Cursor(1,1)
-	Send_Constant_String(#MyString)
+;	Set_Cursor(1,1)
+;	Send_Constant_String(#MyString)
 	cpl LEDRA.4
 	setb half_seconds_flag
-	mov Seconds, #0x5
+	mov Seconds, #0x50
+	lcall DisplayVariables
 forever:;======================================================FOREVER===========================================================
 	mov a, SWA ; read the channel to convert from the switches
 	anl a, #00000111B ; We need only the last three bits since there are only eight channels
@@ -364,99 +388,297 @@ loop_a:;======================================================FOREVER===========
 	jnb half_seconds_flag, forever
 loop_b:;======================================================FOREVER================================================
 	clr half_seconds_flag ; We clear this flag in the main loop, but it is set in the ISR for timer 2
-;	Set_Cursor(1, 14)     ; the place in the LCD where we want the BCD counter value
-;	Display_BCD(Seconds)
+	Set_Cursor(2, 15)     ; the place in the LCD where we want the BCD counter value
+	Display_BCD(state)
 ;	cpl LEDRA.4
+
     mov a, state
-	cjne a, #select, SkipSetup
-	cpl LEDRA.5
-	jnb button1, nextstate
-	jnb button2, TempSoakAdjust
-	jnb button3, TimeSoakAdjust
-	jnb button4, TempReflowAdjust
-	jnb button5, TimeReflowAdjust
-		
+ ;=======================================================STATE 0========================================
+ResetState:
+	cjne a, #select, RampToSoakState
+;Display Time Soak
+
+	
+	jnb button1, Pathnextstate
+	jnb button2, PathTempSoakAdjust
+	jnb button3, PathTimeSoakAdjust
+	jnb button4, PathTempReflowAdjust
+	jnb button5, PathTimeReflowAdjust ; TimeReflowAdjust jump
+	sjmp RampToSoakState
+PathTempSoakAdjust:
+	lcall TempSoakAdjust
+	sjmp SkipSetup1
+PathTimeSoakAdjust:
+	lcall TimeSoakAdjust
+	sjmp SkipSetup1
+PathTimeReflowAdjust: 
+	lcall TimeReflowAdjust
+	sjmp SkipSetup1
+PathTempReflowAdjust:
+	lcall TempReflowAdjust
+	sjmp SkipSetup1
+PathNextState:
+	ljmp nextstate
+SkipSetup1:;=====================CHANGE  OF STATES==============================================
+	ljmp forever
+
+	;mov Seconds, #0x00
+	;mov minutes, #0
+RampToSoakState:	;==============================STATE 1================================================
+	cjne a, #RampToSoak, PreHeatState
+	mov pwm, #100
+  ;  mov sec, #0
+ ;=============================Checking ih current temp has reaches soak temp==========================================   
+	mov x, hTemp
+	mov x+1, #0
+	mov x+2, #0
+	mov x+3, #0
+
+	mov y, temp_soak
+	mov y+1, #0
+	mov y+2, #0
+	mov y+3, #0
+	lcall x_lt_y
+;====================================If its reached, move on to the next state, if not abort if 60 seconds passed=============
+	jnb	mf, nextstate
+	mov a, Minutes
+    cjne a, #0x01, SkipSetup
+    sjmp abort
+
+PreHeatState:;====================================================STATE 2===========================================
+	cjne a, #PreHeat, RampToHeatState
+	mov a, MyHope
+	cjne a, Time_Soak, SkipSetup
+	lcall nextstate
+RampToHeatState:;====================================================STATE 3===========================================
+	cjne a, #RampToPeak, ReflowState
+
+	mov x, hTemp
+	mov x+1, #0
+	mov x+2, #0
+	mov x+3, #0
+
+	mov y, temp_refl
+	mov y+1, #0
+	mov y+2, #0
+	mov y+3, #0
+	lcall x_lt_y
+			
+	jnb	mf, nextstate
+	sjmp SkipSetup
+ReflowState:
+ 	cjne a, #Reflow, CoolingState
+	mov a, MyHope
+	cjne a, Time_Refl, SkipSetup
+	lcall nextstate
+CoolingState:
+	cjne a, #Cooling, SkipSetup
+	mov x, hTemp
+	mov x+1, #0
+	mov x+2, #0
+	mov x+3, #0
+
+	mov y, #0x20
+	mov y+1, #0
+	mov y+2, #0
+	mov y+3, #0
+	lcall x_lt_y
+			
+	jb	mf, nextstate
 	
 SkipSetup:;=====================CHANGE  OF STATES==============================================
 	ljmp forever
 nextstate: ;=====================CHANGE  OF STATES==============================================
 	Wait_Milli_Seconds(#50)
+	mov seconds, #0
+	mov minutes, #0
+	mov MyHope, #0
 	mov a, state
 	add a, #1
 	cjne a, #6, NoStateReset
 	mov state, #0
-	cpl LEDRA.7
+;	cpl LEDRA.7
+
 	ljmp SkipSetup
+abort: ;=================================ABORT1=====================================================
+	mov state, #0
+	ljmp SkipSetup
+;====================================================PATHS==(if ljmp is outside of bounds)==============================================
+
 NoStateReset:;=====================STATE OVERFLOW==============================================
 	mov state, a
 	;cpl LEDRA.7
 	ljmp SkipSetup	
-TempSoakAdjust:;=====================Soak Temperature adjustment==============================================
-	Wait_Milli_Seconds(#50)
-	mov a, temp_soak
-	add a, #1
-	;cpl LEDRA.6
-	cjne a, #171, TempSoakNotOverflow
-	mov temp_soak, #130
-	ljmp SkipSetup
-TimeSoakAdjust:;=====================Soak time Adjustment==============================================
-	Wait_Milli_Seconds(#50)
-	mov a, Time_Soak
-	add a, #1
-	cjne a, #121, TimeSoakNotOverflow
-	mov time_soak, #60
-	ljmp SkipSetup
-TempReflowAdjust:;=====================Reflow Temp adjusment=============================================
-	Wait_Milli_Seconds(#50)
-	mov a, Temp_Refl
-	add a, #1
-	cjne a, #230, TempReflowNotOverflow
-	mov Temp_Refl, #217
-	ljmp SkipSetup
-TimeReflowAdjust:;=====================Reflow TIME adjusment=============================================
-	Wait_Milli_Seconds(#50)
-	mov a, Time_Refl
-	add a, #1
-	cjne a, #76, TimeReflowNotOverflow
-	mov Time_Refl, #45
-	ljmp SkipSetup
-TimeSoakNotOverflow:;=====================Soak time no overflow==============================================
-	mov time_soak, a
-	ljmp SkipSetup
-TempSoakNotOverflow:;=====================Soak Temperature no overflow==============================================
-	mov temp_soak, a
-	ljmp SkipSetup
-TempReflowNotOverflow:
-	mov temp_refl, a
-	ljmp SkipSetup
-TimeReflowNotOverflow:;=====================Soak time no overflow==============================================
-	mov time_Refl, a
-	ljmp SkipSetup
+
 ReadTemperature: 
 	Read_ADC_Channel(0)
 	volt2ctemp(cTemp) 
+;	mov cTemp, bcd
 	Read_ADC_Channel(6)
 	volt2htemp(hTemp)
-	
-;	mov a, hTemp
-;	add a, cTemp
-;	mov hTemp, a
+;	So In order to keep stuff in hex, Got to convert cTemp back from bcd to hex. NOT CONVERTING TO BCD IN THE FIRST PLACE DIDNOT WORK. GAVE 0
+	mov bcd+0, cTemp+0
+	mov bcd+1, cTemp+1
+	mov bcd+2, #0
+	mov bcd+3, #0
+	mov bcd+4, #0
+	lcall bcd2hex
+	mov cTemp + 0, x + 0
+	mov cTemp + 1, x + 1
+;======Adding cold junction temp=======================================================	
+	mov a, hTemp
+	add a, cTemp
+	mov hTemp, a
+;======Since its in hex got to adjust to convert it to decimal=======(No longer interested in converting outside of display)================================================	
+; 	mov a, hTemp
+ ;	da a
+ ;	mov hTemp, a
+ ;======Display=====================================================================================
 
-	Set_Cursor(2,1)
-	Display_BCD(hTemp+1)
-	Set_Cursor(2,3)
-	Display_BCD(hTemp)
-	Set_Cursor(2,5)
-	Display_BCD(cTemp)
-	Send_BCD(cTemp+1)
-	Send_BCD(cTemp)
+	
+	mov x + 0, hTemp+ 0
+	mov x + 1, #0
+	mov x+2, #0
+	mov x+3, #0
+	lcall hex2bcd
 	mov DPTR, #Hello_World
 	lcall SendString
-	Send_BCD(hTemp+1)
-	Send_BCD(hTemp)
+	Send_BCD(bcd+1)
+	Send_BCD(bcd)
+	Set_Cursor(2, 9)
+	Display_BCD(bcd+1)
+	Set_Cursor(2, 11)
+	Display_BCD(bcd)
+	mov DPTR, #Hello_World
+	lcall SendString
+	;Send_BCD(bcd+1)
+	;Send_BCD(bcd)
 	mov DPTR, #Hello_World
 	lcall SendString
 ret
-callnextstate: 
-	lcall nextstate
+    
+DisplayVariables:
+	set_cursor(1,5)
+	mov x+0, Time_Soak + 0
+	mov x+1, #0
+	mov x+2, #0
+	mov x+3, #0
+	lcall hex2bcd
+	Display_bcd(bcd+1)
+	set_cursor(1,7)
+	Display_bcd(bcd)
+;Display Temp Soak	
+	set_cursor(1,0)
+	mov x+0, Temp_Soak + 0
+	lcall hex2bcd
+	Display_bcd(bcd+1)
+	set_cursor(1,2)
+	Display_bcd(bcd)
+;display time Reflow
+	mov x+0, Time_Refl + 0
+	lcall hex2bcd
+	set_cursor(1,15)
+	Display_bcd(bcd)
+;display temp reflow
+	set_cursor(1,10)
+	mov x+0, Temp_Refl + 0
+	lcall hex2bcd
+	Display_bcd(bcd+1)
+	set_cursor(1,12)
+	Display_bcd(bcd)
+	ret
+	
+TempSoakAdjust:;=====================Soak Temperature adjustment==============================================
+	Wait_Milli_Seconds(#50);
+	mov a, temp_soak
+	add a, #0x01
+	;cpl LEDRA.6
+	cjne a, #0xab, TempSoakNotOverflow ;0xab = 171
+	mov temp_soak, #0x82 ;0x82 = 130
+	set_cursor(1,0)
+	mov x+0, Temp_Soak + 0
+	lcall hex2bcd
+	Display_bcd(bcd+1)
+	set_cursor(1,2)
+	Display_bcd(bcd)
+	ret
+	;ljmp SkipSetup
+TempSoakNotOverflow:;=====================Soak Temperature no overflow==============================================
+	mov temp_soak, a
+	set_cursor(1,0)
+	mov x+0, Temp_Soak + 0
+	lcall hex2bcd
+	Display_bcd(bcd+1)
+	set_cursor(1,2)
+	Display_bcd(bcd)
+    ret
+TimeSoakAdjust:;=====================Soak time Adjustment==============================================
+	Wait_Milli_Seconds(#50)
+	mov a, Time_Soak
+	add a, #0x01
+	cjne a, #0x79, TimeSoakNotOverflow;0x79=121
+	mov time_soak, #0x3c ;0x3c=60
+		set_cursor(1,5)
+	mov x+0, Time_Soak + 0
+	mov x+1, #0
+	mov x+2, #0
+	mov x+3, #0
+	lcall hex2bcd
+	Display_bcd(bcd+1)
+	set_cursor(1,7)
+	Display_bcd(bcd)
+	ret
+TimeSoakNotOverflow:;=====================Soak time no overflow==============================================
+	mov time_soak, a
+	set_cursor(1,5)
+	mov x+0, Time_Soak + 0
+	mov x+1, #0
+	mov x+2, #0
+	mov x+3, #0
+	lcall hex2bcd
+	Display_bcd(bcd+1)
+	set_cursor(1,7)
+	Display_bcd(bcd)
+	ret
+TempReflowAdjust:;=====================Reflow Temp adjusment=============================================
+	Wait_Milli_Seconds(#50)
+	mov a, Temp_Refl
+	add a, #0x01
+	cjne a, #0xe6, TempReflowNotOverflow ;0xe6 = 230 TBC POSSIBLY
+	mov Temp_Refl, #0xd9 ;0xd9 = 217
+	set_cursor(1,10)
+	mov x+0, Temp_Refl + 0
+	lcall hex2bcd
+	Display_bcd(bcd+1)
+	set_cursor(1,12)
+	Display_bcd(bcd)
+	ret
+TempReflowNotOverflow:
+	mov temp_refl, a
+	set_cursor(1,10)
+	mov x+0, Temp_Refl + 0
+	lcall hex2bcd
+	Display_bcd(bcd+1)
+	set_cursor(1,12)
+	Display_bcd(bcd)
+	ret
+TimeReflowAdjust:;=====================Reflow TIME adjusment=============================================
+	Wait_Milli_Seconds(#50)
+	mov a, Time_Refl
+	add a, #0x01
+	cjne a, #0x4c, TimeReflowNotOverflow ; 0x4c=76
+	mov Time_Refl, #0x2d ;0x2d = 45
+	mov x+0, Time_Refl + 0
+	lcall hex2bcd
+	set_cursor(1,15)
+	Display_bcd(bcd)
+	ret
+TimeReflowNotOverflow:;=====================Soak time no overflow==============================================
+	mov time_Refl, a
+	mov x+0, Time_Refl + 0
+	lcall hex2bcd
+	set_cursor(1,15)
+	Display_bcd(bcd)
+	ret
+
 end
