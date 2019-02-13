@@ -1,5 +1,5 @@
 Assembler report for CV_8052
-Tue Feb 05 13:18:01 2019
+Mon Feb 11 19:05:14 2019
 Quartus II 64-Bit Version 15.0.0 Build 145 04/22/2015 SJ Web Edition
 
 
@@ -40,7 +40,7 @@ agreement for further details.
 +---------------------------------------------------------------+
 ; Assembler Summary                                             ;
 +-----------------------+---------------------------------------+
-; Assembler Status      ; Successful - Tue Feb 05 13:18:01 2019 ;
+; Assembler Status      ; Successful - Mon Feb 11 19:05:14 2019 ;
 ; Revision Name         ; CV_8052                               ;
 ; Top-level Entity Name ; CV_8052                               ;
 ; Family                ; Cyclone V                             ;
@@ -104,13 +104,13 @@ agreement for further details.
 Info: *******************************************************************
 Info: Running Quartus II 64-Bit Assembler
     Info: Version 15.0.0 Build 145 04/22/2015 SJ Web Edition
-    Info: Processing started: Tue Feb 05 13:17:37 2019
+    Info: Processing started: Mon Feb 11 19:04:50 2019
 Info: Command: quartus_asm --read_settings_files=off --write_settings_files=off CV_8052 -c CV_8052
 Info (115030): Assembler is generating device programming files
 Info: Quartus II 64-Bit Assembler was successful. 0 errors, 0 warnings
     Info: Peak virtual memory: 4970 megabytes
-    Info: Processing ended: Tue Feb 05 13:18:01 2019
-    Info: Elapsed time: 00:00:24
-    Info: Total CPU time (on all processors): 00:00:17
+    Info: Processing ended: Mon Feb 11 19:05:15 2019
+    Info: Elapsed time: 00:00:25
+    Info: Total CPU time (on all processors): 00:00:18
 
 

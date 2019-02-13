@@ -558,23 +558,26 @@ volt2ctemp mac
 _volt2ctemp:
 	push acc
 	
-	mov x, vResult
-	mov x+1, vResult+1
+;	mov x, vResult
+;	mov x+1, vResult+1
+	mov x, #0x18
+	mov x+1, #0
 	mov x+2, #0
 	mov x+3, #0
 	
 	; Kelvin
-	Load_Y(410)
-	lcall mul32	
-	Load_Y(1023)
-	lcall div32
+;	Load_Y(410)
+;	lcall mul32	
+;	Load_Y(1023)
+;	lcall div32
 	
 	; Celsius
-	Load_Y(273)
-	lcall sub32
+;	Load_Y(273)
+;	lcall sub32
 	lcall hex2bcd
 	mov cTemp, bcd
 	mov cTemp+1, bcd+1
+	
 
 	
 	pop acc
@@ -606,7 +609,7 @@ _volt2htemp:
 	Load_Y(100000)
 	lcall div32
 ;	lcall div32
-;	Load_Y(22)
+;	Load_Y(19)
 ;	lcall add32
 ;	mov bcd, cTemp+0
 ;	mov bcd+1, cTemp+1

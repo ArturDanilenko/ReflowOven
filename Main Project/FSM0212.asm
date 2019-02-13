@@ -123,11 +123,12 @@ timer: ds 1
 state: ds 1
 sec: ds 1
 MyHope: ds 1
-MyHope2: ds 1
+WorkingTime: ds 1
 ; In the 8051 we have variables that are 1-bit in size.  We can use the setb, clr, jb, and jnb
 ; instructions with these variables.  This is how you define a 1-bit variable:
 bseg
 half_seconds_flag: dbit 1 ; Set to one in the ISR every time 500 ms had passed
+PwmFlag: dbit 1
 mf: dbit 1
 
 cseg	
@@ -209,13 +210,15 @@ Timer0_ISR:
 ;	clr TF0  ; According to the data sheet this is done for us already.
 	mov TH0, #high(TIMER0_RELOAD) ; Timer 0 doesn't have autoreload in the CV-8052
 	mov TL0, #low(TIMER0_RELOAD)
-;	cpl SOUND_OUT ; Connect speaker to P3.7!
+
+	
 	reti
 
 ;---------------------------------;
 ; Routine to initialize the ISR   ;
 ; for timer 2                     ;
 ;---------------------------------;
+
 Timer2_Init:
 	mov T2CON, #0 ; Stop timer/counter.  Autoreload mode.
 	mov TH2, #high(TIMER2_RELOAD)
@@ -223,6 +226,7 @@ Timer2_Init:
 	; Set the reload value
 	mov RCAP2H, #high(TIMER2_RELOAD)
 	mov RCAP2L, #low(TIMER2_RELOAD)
+	cpl LEDRA.1
 	; Init One millisecond interrupt counter.  It is a 16-bit variable made with two 8-bit parts
 	clr a
 	mov Count1ms+0, a
@@ -261,7 +265,7 @@ Inc_Done:;===========================================ISR MAIN===================
 	; Toggle LEDR0 so it blinks
 	;=====================Timer 0 controls============================================
 	;cpl LEDRA.0
-	cpl TR0 ; Enable/disable timer/counter 0. This line creates a beep-silence-beep-silence sound.
+;	cpl TR0 ; Enable/disable timer/counter 0. This line creates a beep-silence-beep-silence sound.
 	; Reset to zero the milli-seconds counter, it is a 16-bit variable
 	;==================================================================================================
 	clr a
@@ -293,6 +297,20 @@ Inc_Done:;===========================================ISR MAIN===================
 	add a, #1
 	mov MyHope, a
 
+	mov x + 0, WorkingTime + 0
+	mov x + 1, #0
+	mov x + 2, #0
+	mov x + 3, #0
+	
+	mov y + 0, pwm + 0
+	mov y + 1, pwm + 1
+	mov y + 2, #0
+	mov y + 3, #0
+	
+	lcall mul32
+	Load_Y(100)
+	lcall div32
+	mov	Workingtime + 0, x + 0
 	
 	lcall ReadTemperature
 	mov a, Seconds
@@ -346,8 +364,10 @@ MainProgram:;============================MAIN===================================
 	mov minutes, #0
 	mov mf, #0
 	mov MyHope, #0
+	mov WorkingTime, #0x05
 ;========================
   ;  lcall InitSerialPort
+  	;clr TR0
     mov P0MOD, #11111111b ; P0.0 to P0.6 are outputs.  ('1' makes the pin output)
     ; We use pins P1.0 and P1.1 as outputs also.  Configure accordingly.
     mov P1MOD, #11111111b ; P1.0 and P1.0 are outputs
@@ -426,7 +446,7 @@ SkipSetup1:;=====================CHANGE  OF STATES==============================
 	;mov minutes, #0
 RampToSoakState:	;==============================STATE 1================================================
 	cjne a, #RampToSoak, PreHeatState
-	mov pwm, #100
+	mov pwm, #0x64
   ;  mov sec, #0
  ;=============================Checking ih current temp has reaches soak temp==========================================   
 	mov x, hTemp
@@ -443,16 +463,17 @@ RampToSoakState:	;==============================STATE 1=========================
 	jnb	mf, nextstate
 	mov a, Minutes
     cjne a, #0x01, SkipSetup
-    sjmp abort
+    ljmp abort
 
 PreHeatState:;====================================================STATE 2===========================================
 	cjne a, #PreHeat, RampToHeatState
+	mov pwm, #0x14
 	mov a, MyHope
 	cjne a, Time_Soak, SkipSetup
 	lcall nextstate
 RampToHeatState:;====================================================STATE 3===========================================
 	cjne a, #RampToPeak, ReflowState
-
+	mov pwm, #0x64
 	mov x, hTemp
 	mov x+1, #0
 	mov x+2, #0
@@ -468,11 +489,13 @@ RampToHeatState:;====================================================STATE 3====
 	sjmp SkipSetup
 ReflowState:
  	cjne a, #Reflow, CoolingState
+ 	mov pwm, #0x14
 	mov a, MyHope
 	cjne a, Time_Refl, SkipSetup
 	lcall nextstate
 CoolingState:
 	cjne a, #Cooling, SkipSetup
+	mov pwm, #0
 	mov x, hTemp
 	mov x+1, #0
 	mov x+2, #0
@@ -502,6 +525,7 @@ nextstate: ;=====================CHANGE  OF STATES==============================
 	ljmp SkipSetup
 abort: ;=================================ABORT1=====================================================
 	mov state, #0
+	mov pwm, #0
 	ljmp SkipSetup
 ;====================================================PATHS==(if ljmp is outside of bounds)==============================================
 
@@ -682,3 +706,32 @@ TimeReflowNotOverflow:;=====================Soak time no overflow===============
 	ret
 
 end
+;	mov a, sec
+;	add a, #1
+;	cjne a, #6, DontReset
+;	mov sec, #1
+;BackUp:	
+;	mov a, sec
+;	cjne a, WorkingTime, SetPwmFlagOff
+;	setb PWMFlag
+;	
+;	cpl SOUND_OUT ; Connect speaker to P3.7!
+;	sjmp Power
+;SetPwmFlagOff:
+;	clr a
+;	mov PWMFlag, a
+;	
+;Power: 	
+;	mov a, PWMFlag
+;	cjne a, #0, TurnITON
+;	clr PWMout
+;
+;	reti
+;	
+;TurnItOn:
+;	setb PWMout
+;	reti
+;	
+;DontReset:
+;	mov sec, a
+;	sjmp BackUp

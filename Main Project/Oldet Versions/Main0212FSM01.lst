@@ -1,0 +1,656 @@
+0000              1   ; This program tests the LTC2308 avaliable in the newer version of the DE1-SoC board.
+0000              2   ; Access to the input pins of the ADC is avalible at connector J15. Here is the top
+0000              3   ; view of the connector:
+0000              4   ;
+0000              5   ; +--+
+0000              6   ; |  | <-- Red power button
+0000              7   ; +--+
+0000              8   ;
+0000              9   ; +-----+-----+
+0000             10   ; + GND | IN7 |
+0000             11   ; +-----+-----+
+0000             12   ; + IN6 | IN5 |
+0000             13   ; +-----+-----+
+0000             14   ; + IN4 | IN3 |
+0000             15   ; +-----+-----+
+0000             16   ; + IN2 | IN1 |
+0000             17   ; ------+-----+
+0000             18   ; + IN0 | 5V  |
+0000             19   ; +-----+-----+
+0000             20   ;      J15
+0000             21   ; 
+0000             22   ; Displays the result using the 7-segment displays and also sends it via the serial port to PUTTy.
+0000             23   ;
+0000             24   ; (c) Jesus Calvino-Fraga 2019
+0000             25   ;
+                 27   $LIST
+0000             29   
+0000             30   ; Bits used to access the LTC2308
+0000             31   LTC2308_MISO bit 0xF8 ; Read only bit
+0000             32   LTC2308_MOSI bit 0xF9 ; Write only bit
+0000             33   LTC2308_SCLK bit 0xFA ; Write only bit
+0000             34   LTC2308_ENN  bit 0xFB ; Write only bit
+0000             35   
+0000             36   ;BUTTONS
+0000             37   button1          equ P2.1
+0000             38   button2          equ P2.2
+0000             39   button3          equ P2.3
+0000             40   button4          equ P2.4
+0000             41   button5          equ P2.5
+0000             42   ;STATES
+0000             43   Select           equ 0
+0000             44   RAMPTOSOAK       equ 1
+0000             45   PREHEAT          equ 2
+0000             46   RAMPTOPEAK       equ 3
+0000             47   REFLOW           equ 4
+0000             48   COOLING          equ 5
+0000             49   
+0000             50   CLK EQU 33333333
+0000             51   BAUD EQU 57600
+0000             52   TIMER_2_RELOAD EQU (65536-(CLK/(32*BAUD)))
+0000             53   TIMER_0_1ms EQU (65536-(CLK/(12*1000)))
+0000             54   
+0000             55   ;;
+0000             56   ;;
+0000             57   ;; PUSH BUTTON DEFINITIONS
+0000             58   ;;
+0000             59   ;;
+0000             60   TIMER0_RATE   EQU 4096     ; 2048Hz squarewave (peak amplitude of CEM-1203 speaker)
+0000             61   TIMER0_RELOAD EQU ((65536-(CLK/(12*TIMER0_RATE)))) ; The prescaler in the CV-8052 is 12 unlike the AT89LP51RC2 where is 1.
+0000             62   TIMER2_RATE   EQU 1000     ; 1000Hz, for a timer tick of 1ms
+0000             63   TIMER2_RELOAD EQU ((65536-(CLK/(12*TIMER2_RATE))))
+0000             64   TIMER_1_RELOAD EQU (256-((2*CLK)/(12*32*BAUD)))
+0000             65   
+0000             66   
+0000             67   ; Reset vector
+0000             68   org 0x0000
+0000 02062E      69       ljmp MainProgram
+0003             70   
+0003             71   ; External interrupt 0 vector (not used in this code)
+0003             72   org 0x0003
+0003 32          73            reti
+0004             74   
+0004             75   ; Timer/Counter 0 overflow interrupt vector
+000B             76   org 0x000B
+000B 0205A5      77            ljmp Timer0_ISR
+000E             78   
+000E             79   ; External interrupt 1 vector (not used in this code)
+0013             80   org 0x0013
+0013 32          81            reti
+0014             82   
+0014             83   ; Timer/Counter 1 overflow interrupt vector (not used in this code)
+001B             84   org 0x001B
+001B 32          85            reti
+001C             86   
+001C             87   ; Serial port receive/transmit interrupt vector (not used in this code)
+0023             88   org 0x0023 
+0023 32          89            reti
+0024             90            
+0024             91   ; Timer/Counter 2 overflow interrupt vector
+002B             92   org 0x002B
+002B 0205C5      93            ljmp Timer2_ISR
+002E             94            
+002E             95   SOUND_OUT     equ P1.0
+002E             96   UPDOWN        equ SWA.0
+002E             97   
+002E             98   ; Reset vector
+002E             99   
+002E            100   
+002E            101   ; In the 8051 we can define direct access variables starting at location 0x30 up to location 0x7F
+0030            102   dseg at 0x30
+0030            103   Count1ms:     ds 2 ; Used to determine when half second has passed
+0032            104   BCD_counter:  ds 1 ; The BCD counter incrememted in the ISR and displayed in the main loop
+0033            105   Seconds:  ds 1
+0034            106   Minutes: ds 1
+0035            107   pwm: ds 1
+0036            108   x:       ds 4
+003A            109   y:       ds 4
+003E            110   bcd:     ds 5
+0043            111   buffer: ds 30
+0061            112   vResult:         ds 2
+0063            113   cTemp:   ds 2
+0065            114   hTemp:   ds 3
+0068            115   tTemp:   ds 3
+006B            116   ;FSM Variables
+006B            117   temp_soak: ds 1
+006C            118   time_soak: ds 1
+006D            119   temp_refl: ds 1
+006E            120   time_refl: ds 1
+006F            121   temp: ds 1
+0070            122   timer: ds 1
+0071            123   state: ds 1
+0072            124   sec: ds 1
+0073            125   MyHope: ds 1
+0074            126   MyHope2: ds 1
+0075            127   ; In the 8051 we have variables that are 1-bit in size.  We can use the setb, clr, jb, and jnb
+0075            128   ; instructions with these variables.  This is how you define a 1-bit variable:
+0000            129   bseg
+0000            130   half_seconds_flag: dbit 1 ; Set to one in the ISR every time 500 ms had passed
+0001            131   mf: dbit 1
+0002            132   
+002E            133   cseg     
+002E            134   BJTBase equ P0.0
+002E            135   ELCD_RS equ P1.2
+002E            136   ELCD_RW equ P1.3
+002E            137   ELCD_E  equ P1.4
+002E            138   ELCD_D4 equ P1.5
+002E            139   ELCD_D5 equ P1.6
+002E            140   ELCD_D6 equ P1.7
+002E            141   ELCD_D7 equ P0.6
+002E            142   
+002E            143   CE_ADC   EQU P0.2
+002E            144   MY_MOSI EQU P0.0
+002E            145   MY_MISO EQU P2.0
+002E            146   MY_SCLK EQU P0.1
+002E            147   
+002E            148   PWMout equ P0.3
+002E            149   
+                622   $LIST
+                152   $LIST
+0541            154   
+0541 0D0A4C54   155   InitialString: db '\r\nLTC2308 test program\r\n', 0
+     43323330
+     38207465
+     73742070
+     726F6772
+     616D0D0A
+     00
+055A 48656C6F   156   MyString: db 'Helo213qwq', 0
+     32313371
+     777100
+0565            157   Hello_World: ;indent to separate numbers in the putty
+0565 0D0A00     158       DB  '\r','\n', 0
+0568            159   
+0568            160   ; Look-up table for the 7-seg displays. (Segments are turn on with zero) 
+0568            161   T_7seg:
+0568 40792430   162       DB 40H, 79H, 24H, 30H, 19H, 12H, 02H, 78H, 00H, 10H
+     19120278
+     0010
+0572            163   
+0572            164   ; Display the 4-digit bcd stored in [R3,R2] using the 7-segment displays
+0572            165   
+0572            166   
+0572            167   ; Send a 4-digit BCD number stored in [R3,R2] to the serial port         
+0572            168   
+0572            169            
+0572            170   ; Wait 1 millisecond using Timer 0
+0572            171   Wait1ms:
+0572 C28C       172            clr     TR0
+0574 74F0       173            mov     a,#0xF0
+0576 5589       174            anl     a,TMOD
+0578 4401       175            orl     a,#0x01
+057A F589       176            mov     TMOD,a
+057C 758CF5     177            mov     TH0, #high(TIMER_0_1ms)
+057F 758A27     178            mov     TL0, #low(TIMER_0_1ms)
+0582 C28D       179            clr     TF0
+0584 D28C       180            setb TR0
+0586 308DFD     181            jnb     TF0,$
+0589 C28C       182            clr     TR0
+058B 22         183            ret
+058C            184            
+058C            185   ; Wait R2 milliseconds
+058C            186   MyDelay:
+058C 120572     187            lcall Wait1ms
+058F DAFB       188       djnz R2, MyDelay
+0591 22         189            ret
+0592            190            
+0592            191   Timer0_Init:
+0592 E589       192            mov a, TMOD
+0594 54F0       193            anl a, #0xf0 ; Clear the bits for timer 0
+0596 4401       194            orl a, #0x01 ; Configure timer 0 as 16-timer
+0598 F589       195            mov TMOD, a
+059A 758CFD     196            mov TH0, #high(TIMER0_RELOAD)
+059D 758A5A     197            mov TL0, #low(TIMER0_RELOAD)
+05A0            198            ; Enable the timer and interrupts
+05A0 D2A9       199       setb ET0  ; Enable timer 0 interrupt
+05A2 D28C       200       setb TR0  ; Start timer 0
+05A4 22         201            ret
+05A5            202   
+05A5            203   ;---------------------------------;
+05A5            204   ; ISR for timer 0.  Set to execute;
+05A5            205   ; every 1/4096Hz to generate a    ;
+05A5            206   ; 2048 Hz square wave at pin P3.7 ;
+05A5            207   ;---------------------------------;
+05A5            208   Timer0_ISR:
+05A5            209   ;        clr TF0  ; According to the data sheet this is done for us already.
+05A5 758CFD     210            mov TH0, #high(TIMER0_RELOAD) ; Timer 0 doesn't have autoreload in the CV-8052
+05A8 758A5A     211            mov TL0, #low(TIMER0_RELOAD)
+05AB            212   ;        cpl SOUND_OUT ; Connect speaker to P3.7!
+05AB 32         213            reti
+05AC            214   
+05AC            215   ;---------------------------------;
+05AC            216   ; Routine to initialize the ISR   ;
+05AC            217   ; for timer 2                     ;
+05AC            218   ;---------------------------------;
+05AC            219   Timer2_Init:
+05AC 75C800     220            mov T2CON, #0 ; Stop timer/counter.  Autoreload mode.
+05AF 75CDF5     221            mov TH2, #high(TIMER2_RELOAD)
+05B2 75CC27     222            mov TL2, #low(TIMER2_RELOAD)
+05B5            223            ; Set the reload value
+05B5 75CBF5     224            mov RCAP2H, #high(TIMER2_RELOAD)
+05B8 75CA27     225            mov RCAP2L, #low(TIMER2_RELOAD)
+05BB            226            ; Init One millisecond interrupt counter.  It is a 16-bit variable made with two 8-bit parts
+05BB E4         227            clr a
+05BC F530       228            mov Count1ms+0, a
+05BE F531       229            mov Count1ms+1, a
+05C0            230            ; Enable the timer and interrupts
+05C0 D2AD       231       setb ET2  ; Enable timer 2 interrupt
+05C2 D2CA       232       setb TR2  ; Enable timer 2
+05C4 22         233            ret
+05C5            234   
+05C5            235   ;---------------------------------;
+05C5            236   ; ISR for timer 2                 ;
+05C5            237   ;---------------------------------;
+05C5            238   Timer2_ISR:
+05C5 C2CF       239            clr TF2  ; Timer 2 doesn't clear TF2 automatically. Do it in ISR
+05C7            240   ;        cpl P1.1 ; To check the interrupt rate with oscilloscope. It must be precisely a 1 ms pulse.
+05C7            241            
+05C7            242            ; The two registers used in the ISR must be saved in the stack
+05C7 C0E0       243            push acc
+05C9 C0D0       244            push psw
+05CB            245            
+05CB            246            ; Increment the 16-bit one mili second counter
+05CB 0530       247            inc Count1ms+0    ; Increment the low 8-bits first
+05CD E530       248            mov a, Count1ms+0 ; If the low 8-bits overflow, then increment high 8-bits
+05CF 7002       249            jnz Inc_Done
+05D1 0531       250            inc Count1ms+1
+05D3            251   
+05D3            252   Inc_Done:;===========================================ISR MAIN=============================================
+05D3            253            ; Check if half second has passed
+05D3 E530       254            mov a, Count1ms+0
+05D5 B4F451     255            cjne a, #low(500), Timer2_ISR_done ; Warning: this instruction changes the carry flag!
+05D8 E531       256            mov a, Count1ms+1
+05DA B4014C     257            cjne a, #high(500), Timer2_ISR_done
+05DD            258            
+05DD            259            ; 500 milliseconds have passed.  Set a flag so the main program knows
+05DD D200       260            setb half_seconds_flag ; Let the main program know half second had passed
+05DF            261            ; Toggle LEDR0 so it blinks
+05DF            262            ;=====================Timer 0 controls============================================
+05DF            263            ;cpl LEDRA.0
+05DF B28C       264            cpl TR0 ; Enable/disable timer/counter 0. This line creates a beep-silence-beep-silence sound.
+05E1            265            ; Reset to zero the milli-seconds counter, it is a 16-bit variable
+05E1            266            ;==================================================================================================
+05E1 E4         267            clr a
+05E2            268            ;=====================Display=============================================
+05E2            269   ;        mov x+0, Temp_soak+0
+05E2            270   ;        mov x+1, #0
+05E2            271   ;        mov x+2, #0
+05E2            272   ;        mov x+3, #0
+05E2            273   ;
+05E2            274   ;        Load_Y(1)
+05E2            275   ;        lcall mul32
+05E2            276   ;        lcall hex2bcd
+05E2            277   
+05E2            278   ;        Send_BCD(bcd+1)
+05E2            279            
+05E2 C0E0       280            push acc
+05E4 7401       280            mov a, #1
+05E6 14         280            dec a
+05E7 1201D4     280            lcall ?Set_Cursor_2 ; Select column and row
+05EA D0E0       280            pop acc
+05EC C000       281            push ar0
+05EE A834       281            mov r0, minutes
+05F0 1201DB     281            lcall ?Display_BCD
+05F3 D000       281            pop ar0
+05F5 C0E0       282            push acc
+05F7 7404       282            mov a, #4
+05F9 14         282            dec a
+05FA 1201D4     282            lcall ?Set_Cursor_2 ; Select column and row
+05FD D0E0       282            pop acc
+05FF            283   ;        Send_BCD(bcd)
+05FF C000       284            push ar0
+0601 A833       284            mov r0, seconds
+0603 1201DB     284            lcall ?Display_BCD
+0606 D000       284            pop ar0
+0608            285   ;        mov DPTR, #Hello_World
+0608            286   ;        lcall SendString
+0608            287   ;==============================================================================================
+0608 F530       288            mov Count1ms+0, a
+060A F531       289            mov Count1ms+1, a
+060C            290            ; Increment the BCD counter
+060C            291            
+060C E573       292            mov a, MyHope
+060E 2401       293            add a, #1
+0610 F573       294            mov MyHope, a
+0612            295   
+0612            296            
+0612 1207F7     297            lcall ReadTemperature
+0615 E533       298            mov a, Seconds
+0617            299   ;        jb UPDOWN, Timer2_ISR_decrement
+0617 2401       300            add a, #0x01
+0619            301            ;sjmp Timer2_ISR_da
+0619            302   ;Timer2_ISR_decrement:;=====================ISR DECREMENT=============================================
+0619            303   ;        add a, #0x99 ; Adding the 10-complement of -1 is like subtracting 1.    
+0619            304            
+0619            305            
+0619            306   Timer2_ISR_da:
+0619 D4         307            da a ; Decimal adjust instruction.  Check datasheet for more details!   
+061A F533       308            mov seconds, a
+061C            309   
+061C B4600A     310            cjne a, #0x60, Timer2_ISR_done ;if seconds are not 60, go to ISR_done
+061F 753300     311            mov Seconds, #0x0 ;reset seconds to 0
+0622 E534       312            mov a, Minutes ; set a to previous minutes
+0624 2401       313            add a, #0x01 ;add one to obtain current minutes
+0626 D4         314            da a ;makes formatting nice 
+0627 F534       315            mov Minutes, a ;put updated minutes into the counter
+0629            316   ;        sjmp Timer2_ISR_M_aadjust
+0629            317            
+0629            318   Timer2_ISR_done:
+0629 D0D0       319            pop psw
+062B D0E0       320            pop acc
+062D 32         321            reti
+062E            322            
+062E            323   
+062E            324   MainProgram:;============================MAIN===========================================================
+062E 75817F     325       mov sp, #0x7f
+0631 120592     326            lcall Timer0_Init
+0634 1205AC     327       lcall Timer2_Init
+0637 120095     328       lcall Initialize_LEDs
+063A 12007E     329       lcall Initialize_Serial_Port
+063D 12009C     330       lcall Initialize_ADC
+0640 120592     331       lcall Timer0_Init
+0643 1205AC     332       lcall Timer2_Init
+0646 120229     333       lcall INIT_SPI
+0649            334     ;FSM Variables  ==================
+0649 E4         335            clr a
+064A F56B       336            mov temp_soak, a
+064C 756B30     337       mov temp_soak, #0x30 ;TO BE CHANGED| Will remain in hex although
+064F 756C3B     338            mov time_soak, #0x3b     ;HAS TO BE IN HEX only convert to bcd for display!
+0652 756DDC     339            mov temp_refl, #220
+0655 756E41     340            mov time_refl, #65
+0658            341            
+0658 756F19     342            mov temp, #25
+065B 757000     343            mov timer, #0x00
+065E 757100     344            mov state, #0x00
+0661 757200     345            mov sec, #0x00
+0664 753400     346            mov minutes, #0
+0667 750100     347            mov mf, #0
+066A 757300     348            mov MyHope, #0
+066D            349   ;========================
+066D            350     ;  lcall InitSerialPort
+066D 759AFF     351            mov P0MOD, #11111111b ; P0.0 to P0.6 are outputs.  ('1' makes the pin output)
+0670            352       ; We use pins P1.0 and P1.1 as outputs also.  Configure accordingly.
+0670 759BFF     353       mov P1MOD, #11111111b ; P1.0 and P1.0 are outputs
+0673 120194     354       lcall ELCD_4BIT
+0676            355     ;  clr EX1
+0676 D2AF       356       setb EA
+0678            357   
+0678 C0E0       358            push acc
+067A 7401       358            mov a, #1
+067C 14         358            dec a
+067D 1201D6     358            lcall ?Set_Cursor_1 ; Select column and row
+0680 D0E0       358            pop acc
+0682 C083       359            push dph
+0684 C082       359            push dpl
+0686 C0E0       359            push acc
+0688 90055A     359            mov dptr, #MyString
+068B 1201C9     359            lcall ?Send_Constant_String
+068E D0E0       359            pop acc
+0690 D082       359            pop dpl
+0692 D083       359            pop dph
+0694 B2EC       360            cpl LEDRA.4
+0696 D200       361            setb half_seconds_flag
+0698 753350     362            mov Seconds, #0x50
+069B            363   forever:;======================================================FOREVER===========================================================
+069B E5E8       364            mov a, SWA ; read the channel to convert from the switches
+069D 5407       365            anl a, #00000111B ; We need only the last three bits since there are only eight channels
+069F F5F0       366            mov b, a
+06A1 1200AC     367            lcall LTC2308_RW  ; Read the channel from the ADC
+06A4 120060     368            lcall hex2bcd16   ; Convert to bcd
+06A7            369   ;        lcall Display_BCD1 ; Display using the 7-segment displays
+06A7            370   ;        lcall SendNumber  ; Send to serial port
+06A7            371   ;        jnb BJTBase, pinpressed
+06A7 7AFA       372            mov R2, #250
+06A9            373            
+06A9 20F91C     374            jb KEY.1, loop_a  ; if the KEY1 button is not pressed skip
+06AC C002       375            push AR2
+06AE 7A32       375            mov R2, #50
+06B0 120145     375            lcall ?Wait_Milli_Seconds
+06B3 D002       375            pop AR2         ; Debounce delay.  This macro is also in 'LCD_4bit_DE1SoC.inc'
+06B5 20F910     376            jb KEY.1, loop_a  ; if the KEY1 button is not pressed skip
+06B8 30F9FD     377            jnb KEY.1, $    
+06BB C2CA       378            clr TR2 ; Stop timer 2
+06BD E4         379            clr a
+06BE F530       380            mov Count1ms+0, a
+06C0 F531       381            mov Count1ms+1, a
+06C2            382            ; Now clear the BCD counter
+06C2 F532       383            mov BCD_counter, a
+06C4 D2CA       384            setb TR2    ; Start timer 2
+06C6 8003       385            sjmp loop_b ; Display the new value
+06C8            386   loop_a:;======================================================FOREVER================================================
+06C8 3000D0     387            jnb half_seconds_flag, forever
+06CB            388   loop_b:;======================================================FOREVER================================================
+06CB C200       389            clr half_seconds_flag ; We clear this flag in the main loop, but it is set in the ISR for timer 2
+06CD C0E0       390            push acc
+06CF 740C       390            mov a, #12
+06D1 14         390            dec a
+06D2 1201D6     390            lcall ?Set_Cursor_1 ; Select column and row
+06D5 D0E0       390            pop acc     ; the place in the LCD where we want the BCD counter value
+06D7 C000       391            push ar0
+06D9 A874       391            mov r0, MyHope+1
+06DB 1201DB     391            lcall ?Display_BCD
+06DE D000       391            pop ar0
+06E0 C0E0       392            push acc
+06E2 740E       392            mov a, #14
+06E4 14         392            dec a
+06E5 1201D6     392            lcall ?Set_Cursor_1 ; Select column and row
+06E8 D0E0       392            pop acc     ; the place in the LCD where we want the BCD counter value
+06EA C000       393            push ar0
+06EC A873       393            mov r0, Myhope
+06EE 1201DB     393            lcall ?Display_BCD
+06F1 D000       393            pop ar0
+06F3 C0E0       394            push acc
+06F5 740F       394            mov a, #15
+06F7 14         394            dec a
+06F8 1201D4     394            lcall ?Set_Cursor_2 ; Select column and row
+06FB D0E0       394            pop acc     ; the place in the LCD where we want the BCD counter value
+06FD C000       395            push ar0
+06FF A871       395            mov r0, state
+0701 1201DB     395            lcall ?Display_BCD
+0704 D000       395            pop ar0
+0706            396   ;        cpl LEDRA.4
+0706            397   
+0706 E571       398       mov a, state
+0708            399    ;=======================================================STATE 0========================================
+0708 B40011     400            cjne a, #select, RampToSoakState
+070B B2ED       401            cpl LEDRA.5
+070D 30A148     402            jnb button1, nextstate
+0710 30A278     403            jnb button2, TempSoakAdjust
+0713 30A367     404            jnb button3, PathTimeSoakAdjust
+0716 30A46A     405            jnb button4, PathTempReflowAdjust
+0719 30A564     406            jnb button5, PathTimeReflowAdjust ; TimeReflowAdjust jump
+071C            407            ;mov Seconds, #0x00
+071C            408            ;mov minutes, #0
+071C            409   RampToSoakState:         ;==============================STATE 1================================================
+071C B4012B     410            cjne a, #RampToSoak, PreHeatState
+071F 753564     411            mov pwm, #100
+0722 757200     412       mov sec, #0
+0725            413        ;-----
+0725            414       
+0725            415     ;  lcall nextstate
+0725            416    ;=============================Checking ih current temp has reaches soak temp==========================================   
+0725 856536     417            mov x, hTemp
+0728 753700     418            mov x+1, #0
+072B 753800     419            mov x+2, #0
+072E 753900     420            mov x+3, #0
+0731            421   
+0731 856B3A     422            mov y, temp_soak
+0734 753B00     423            mov y+1, #0
+0737 753C00     424            mov y+2, #0
+073A 753D00     425            mov y+3, #0
+073D 12035A     426            lcall x_lt_y
+0740            427   ;====================================If its reached, move on to the next state, if not abort if 60 seconds passed=============
+0740 300115     428            jnb     mf, nextstate
+0743 E534       429            mov a, Minutes
+0745            430   ;        cpl LEDRA.2
+0745 B4010D     431       cjne a, #0x01, SkipSetup
+0748 802D       432       sjmp abort
+074A            433   
+074A            434   PreHeatState:;====================================================STATE 2===========================================
+074A B40208     435            cjne a, #PreHeat, RampToHeatState
+074D E573       436            mov a, MyHope
+074F B56C03     437            cjne a, Time_Soak, SkipSetup
+0752 120758     438            lcall nextstate
+0755            439   RampToHeatState:
+0755            440   SkipSetup:;=====================CHANGE  OF STATES==============================================
+0755 02069B     441            ljmp forever
+0758            442   nextstate: ;=====================CHANGE  OF STATES==============================================
+0758 C002       443            push AR2
+075A 7A32       443            mov R2, #50
+075C 120145     443            lcall ?Wait_Milli_Seconds
+075F D002       443            pop AR2
+0761 753300     444            mov seconds, #0
+0764 753400     445            mov minutes, #0
+0767 757300     446            mov MyHope, #0
+076A E571       447            mov a, state
+076C 2401       448            add a, #1
+076E B40615     449            cjne a, #6, NoStateReset
+0771 757100     450            mov state, #0
+0774            451   ;        cpl LEDRA.7
+0774            452   
+0774 020755     453            ljmp SkipSetup
+0777            454   abort: 
+0777 757100     455            mov state, #0
+077A 020755     456            ljmp SkipSetup
+077D            457   PathTimeSoakAdjust:
+077D 0207A1     458            ljmp TimeSoakAdjust
+0780            459   PathTimeReflowAdjust: 
+0780 0207CD     460            ljmp TimeReflowAdjust
+0783            461   PathTempReflowAdjust:
+0783 0207B7     462            ljmp TempReflowAdjust
+0786            463   NoStateReset:;=====================STATE OVERFLOW==============================================
+0786 F571       464            mov state, a
+0788            465            ;cpl LEDRA.7
+0788 020755     466            ljmp SkipSetup  
+078B            467   TempSoakAdjust:;=====================Soak Temperature adjustment==============================================
+078B C002       468            push AR2
+078D 7A32       468            mov R2, #50
+078F 120145     468            lcall ?Wait_Milli_Seconds
+0792 D002       468            pop AR2
+0794 E56B       469            mov a, temp_soak
+0796 2401       470            add a, #1
+0798            471            ;cpl LEDRA.6
+0798 B4AB4D     472            cjne a, #171, TempSoakNotOverflow
+079B 756B82     473            mov temp_soak, #130
+079E 020755     474            ljmp SkipSetup
+07A1            475   
+07A1            476   TimeSoakAdjust:;=====================Soak time Adjustment==============================================
+07A1 C002       477            push AR2
+07A3 7A32       477            mov R2, #50
+07A5 120145     477            lcall ?Wait_Milli_Seconds
+07A8 D002       477            pop AR2
+07AA E56C       478            mov a, Time_Soak
+07AC 2401       479            add a, #1
+07AE B47932     480            cjne a, #121, TimeSoakNotOverflow
+07B1 756C3C     481            mov time_soak, #60
+07B4 020755     482            ljmp SkipSetup
+07B7            483   TempReflowAdjust:;=====================Reflow Temp adjusment=============================================
+07B7 C002       484            push AR2
+07B9 7A32       484            mov R2, #50
+07BB 120145     484            lcall ?Wait_Milli_Seconds
+07BE D002       484            pop AR2
+07C0 E56D       485            mov a, Temp_Refl
+07C2 2401       486            add a, #1
+07C4 B4E626     487            cjne a, #230, TempReflowNotOverflow
+07C7 756DD9     488            mov Temp_Refl, #217
+07CA 020755     489            ljmp SkipSetup
+07CD            490   TimeReflowAdjust:;=====================Reflow TIME adjusment=============================================
+07CD C002       491            push AR2
+07CF 7A32       491            mov R2, #50
+07D1 120145     491            lcall ?Wait_Milli_Seconds
+07D4 D002       491            pop AR2
+07D6 E56E       492            mov a, Time_Refl
+07D8 2401       493            add a, #1
+07DA B44C15     494            cjne a, #76, TimeReflowNotOverflow
+07DD 756E2D     495            mov Time_Refl, #45
+07E0 020755     496            ljmp SkipSetup
+07E3            497   TimeSoakNotOverflow:;=====================Soak time no overflow==============================================
+07E3 F56C       498            mov time_soak, a
+07E5 020755     499            ljmp SkipSetup
+07E8            500   TempSoakNotOverflow:;=====================Soak Temperature no overflow==============================================
+07E8 F56B       501            mov temp_soak, a
+07EA 020755     502            ljmp SkipSetup
+07ED            503   TempReflowNotOverflow:
+07ED F56D       504            mov temp_refl, a
+07EF 020755     505            ljmp SkipSetup
+07F2            506   TimeReflowNotOverflow:;=====================Soak time no overflow==============================================
+07F2 F56E       507            mov time_Refl, a
+07F4 020755     508            ljmp SkipSetup
+07F7            509   ReadTemperature: 
+07F7 75F000     510            mov b, #0
+07FA 1201F1     510            lcall _Read_ADC_Channel
+07FD C000       511            push aR0
+07FF A863       511            mov R0, cTemp
+0801 1204C2     511            lcall _volt2ctemp
+0804 D000       511            pop aR0 
+0806            512   ;        mov cTemp, bcd
+0806 75F006     513            mov b, #6
+0809 1201F1     513            lcall _Read_ADC_Channel
+080C C000       514            push aR0
+080E A865       514            mov R0, hTemp
+0810 120509     514            lcall _volt2htemp
+0813 D000       514            pop aR0
+0815            515   ;        mov hTemp, bcd
+0815            516   ;======Adding cold junction temp=======================================================  
+0815 E565       517            mov a, hTemp
+0817 2563       518            add a, cTemp
+0819 F565       519            mov hTemp, a
+081B            520   ;======Since its in hex got to adjust to convert it to decimal=======================================================    
+081B E565       521            mov a, hTemp
+081D D4         522            da a
+081E F565       523            mov hTemp, a
+0820            524    ;======Display=====================================================================================     
+0820 C0E0       525            push acc
+0822 7409       525            mov a, #9
+0824 14         525            dec a
+0825 1201D4     525            lcall ?Set_Cursor_2 ; Select column and row
+0828 D0E0       525            pop acc
+082A C000       526            push ar0
+082C A866       526            mov r0, hTemp+1
+082E 1201DB     526            lcall ?Display_BCD
+0831 D000       526            pop ar0
+0833 C0E0       527            push acc
+0835 740B       527            mov a, #11
+0837 14         527            dec a
+0838 1201D4     527            lcall ?Set_Cursor_2 ; Select column and row
+083B D0E0       527            pop acc
+083D C000       528            push ar0
+083F A865       528            mov r0, hTemp
+0841 1201DB     528            lcall ?Display_BCD
+0844 D000       528            pop ar0
+0846            529   ;        Set_Cursor(2,5)
+0846            530   ;        Display_BCD(cTemp)
+0846 C000       531            push ar0
+0848 A864       531            mov r0, cTemp+1
+084A 120213     531            lcall ?Send_BCD
+084D D000       531            pop ar0
+084F C000       532            push ar0
+0851 A863       532            mov r0, cTemp
+0853 120213     532            lcall ?Send_BCD
+0856 D000       532            pop ar0
+0858 900565     533            mov DPTR, #Hello_World
+085B 120247     534            lcall SendString
+085E C000       535            push ar0
+0860 A866       535            mov r0, hTemp+1
+0862 120213     535            lcall ?Send_BCD
+0865 D000       535            pop ar0
+0867 C000       536            push ar0
+0869 A865       536            mov r0, hTemp
+086B 120213     536            lcall ?Send_BCD
+086E D000       536            pop ar0
+0870 900565     537            mov DPTR, #Hello_World
+0873 120247     538            lcall SendString
+0876 C000       539            push ar0
+0878 A83F       539            mov r0, bcd+1
+087A 120213     539            lcall ?Send_BCD
+087D D000       539            pop ar0
+087F C000       540            push ar0
+0881 A83E       540            mov r0, bcd
+0883 120213     540            lcall ?Send_BCD
+0886 D000       540            pop ar0
+0888 900565     541            mov DPTR, #Hello_World
+088B 120247     542            lcall SendString
+088E 22         543   ret
+088F            544   callnextstate: 
+088F 120758     545            lcall nextstate
+0892            546   end
