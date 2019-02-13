@@ -426,7 +426,7 @@ _Read_ADC_Channel:
 	lcall DO_SPI_G
 	mov a, R1 ; R1 contains bits 8 and 9
 	anl a, #00000011B ; We need only the two least significant bits
-	da a
+;	da a
 	mov vResult+1, a ; Save result high.
 	mov R0, #55H ; It doesn't matter what we transmit...
 	lcall DO_SPI_G
@@ -493,4 +493,5 @@ SendString: ;Copy pasted whack
     sjmp SendString
 SendStringDone: ;Copy pasted whack
     ret
+
 	

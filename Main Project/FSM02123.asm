@@ -266,7 +266,7 @@ Inc_Done:;===========================================ISR MAIN===================
 	; Toggle LEDR0 so it blinks
 	;=====================Timer 0 controls============================================
 	;cpl LEDRA.0
-	lcall pwmmodule
+	;lcall pwmmodule
 ;	cpl TR0 ; Enable/disable timer/counter 0. This line creates a beep-silence-beep-silence sound.
 	; Reset to zero the milli-seconds counter, it is a 16-bit variable
 	;==================================================================================================
@@ -299,20 +299,20 @@ Inc_Done:;===========================================ISR MAIN===================
 	add a, #1
 	mov MyHope, a
 
-	mov x + 0, WorkingTime + 0
-	mov x + 1, #0
-	mov x + 2, #0
-	mov x + 3, #0
+	;mov x + 0, WorkingTime + 0
+	;mov x + 1, #0
+	;mov x + 2, #0
+	;mov x + 3, #0
 	
-	mov y + 0, pwm + 0
-	mov y + 1, pwm + 1
-	mov y + 2, #0
-	mov y + 3, #0
+	;mov y + 0, pwm + 0
+	;mov y + 1, pwm + 1
+	;mov y + 2, #0
+	;mov y + 3, #0
 	
-	lcall mul32
-	Load_Y(100)
-	lcall div32
-	mov	Workingtime + 0, x + 0
+	;lcall mul32
+	;Load_Y(100)
+	;lcall div32
+	;mov	Workingtime + 0, x + 0
 	
 	lcall ReadTemperature
 	mov a, Seconds
@@ -550,13 +550,14 @@ NoStateReset:;=====================STATE OVERFLOW===============================
 	ljmp SkipSetup	
 
 ReadTemperature: 
-	Read_ADC_Channel(0)
-	volt2ctemp(cTemp) 
-;	mov cTemp, bcd
+;	Read_ADC_Channel(0)
+;	volt2ctemp(cTemp) 
+;	mov cTemp, #25
 	Read_ADC_Channel(3)
 	volt2htemp(hTemp)
 ;	So In order to keep stuff in hex, Got to convert cTemp back from bcd to hex. NOT CONVERTING TO BCD IN THE FIRST PLACE DIDNOT WORK. GAVE 0
-	mov bcd+0, cTemp+0
+;	mov bcd+0, cTemp+0
+	mov bcd, #0
 	mov bcd+1, #0
 	mov bcd+2, #0
 	mov bcd+3, #0
@@ -569,9 +570,9 @@ ReadTemperature:
 ;	add a, cTemp
 	mov hTemp, a
 ;======Since its in hex got to adjust to convert it to decimal=======(No longer interested in converting outside of display)================================================	
-; 	mov a, hTemp
- ;	da a
- ;	mov hTemp, a
+ 	mov a, hTemp
+ 	da a
+ 	mov hTemp, a
  ;======Display=====================================================================================
 
 	
