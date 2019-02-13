@@ -621,12 +621,24 @@ _volt2htemp:
 ;	mov bcd+1, cTemp+1
 ;	lcall hex2bcd
 	
-;	lcall Hex2bcd
-	mov hTemp, x
-	mov hTemp+1, x + 1
+	lcall Hex2bcd
+	mov hTemp, bcd
+	mov hTemp+1, bcd + 1
 
 	
 	pop acc
 	ret	
+	
+addTemps:
+	mov bcd, hTemp
+	mov bcd+1, hTemp+1
+	lcall Bcd2hex
+	Load_Y(25)
+	lcall add32
+	lcall Hex2bcd
+	mov realTemp, bcd
+	mov realTemp+1, bcd+1
+	ret
+	
 	
 $LIST

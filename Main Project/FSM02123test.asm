@@ -113,6 +113,7 @@ vResult:	ds 2
 cTemp:	ds 2
 hTemp:	ds 3
 tTemp: 	ds 3
+realTemp: ds 3
 ;FSM Variables
 temp_soak: ds 1
 time_soak: ds 1
@@ -161,6 +162,32 @@ Hello_World: ;indent to separate numbers in the putty
 ; Look-up table for the 7-seg displays. (Segments are turn on with zero) 
 T_7seg:
     DB 40H, 79H, 24H, 30H, 19H, 12H, 02H, 78H, 00H, 10H
+    
+; Displays a BCD number in HEX1-HEX0
+Display_BCD_7_Seg:
+	
+	mov dptr, #T_7seg
+	
+	mov a, realTemp+1
+	anl a, #0FH
+	movc a, @a+dptr
+	mov HEX5, a
+
+	mov a, realTemp
+	swap a
+	anl a, #0FH
+	movc a, @a+dptr
+	mov HEX4, a
+	
+	mov a, realTemp
+	anl a, #0FH
+	movc a, @a+dptr
+	mov HEX3, a
+	
+	mov HEX1, #0b0011100
+	mov HEX0, #0b1000110
+	
+	ret
 
 ; Display the 4-digit bcd stored in [R3,R2] using the 7-segment displays
 
@@ -550,21 +577,21 @@ NoStateReset:;=====================STATE OVERFLOW===============================
 	ljmp SkipSetup	
 
 ReadTemperature: 
-;	Read_ADC_Channel(0)
-;	volt2ctemp(cTemp) 
+	Read_ADC_Channel(0)
+	volt2ctemp(cTemp) 
 ;	mov cTemp, #25
 	Read_ADC_Channel(3)
 	volt2htemp(hTemp)
 ;	So In order to keep stuff in hex, Got to convert cTemp back from bcd to hex. NOT CONVERTING TO BCD IN THE FIRST PLACE DIDNOT WORK. GAVE 0
 ;	mov bcd+0, cTemp+0
-	mov bcd, #0
-	mov bcd+1, #0
-	mov bcd+2, #0
-	mov bcd+3, #0
-	mov bcd+4, #0
-	lcall bcd2hex
-	mov cTemp + 0, x + 0
-	mov cTemp + 1, x + 1
+;	mov bcd, #0
+;	mov bcd+1, #0
+;	mov bcd+2, #0
+;	mov bcd+3, #0
+;	mov bcd+4, #0
+;	lcall bcd2hex
+;	mov cTemp + 0, x + 0
+;	mov cTemp + 1, x + 1
 ;======Adding cold junction temp=======================================================	
 	;mov a, hTemp
 ;	add a, cTemp
@@ -573,28 +600,38 @@ ReadTemperature:
  ;	mov a, hTemp
  ;	da a
  ;	mov hTemp, a
- ;======Display=====================================================================================
+ 
+ 
+ ;======Display PUTTY=====================================================================================
 
 	
-	mov x + 0, hTemp+ 0
-	mov x + 1, hTemp+1
-	mov x+2, #0
-	mov x+3, #0
-	lcall hex2bcd
-	mov DPTR, #Hello_World
-	lcall SendString
-	Send_BCD(bcd+1)
-	Send_BCD(bcd)
+;	mov x + 0, hTemp+ 0
+;	mov x + 1, hTemp+1
+;	mov x+2, #0
+;	mov x+3, #0
+;	lcall hex2bcd
+	; this is a new line
+;	mov DPTR, #Hello_World
+;	lcall SendString
+
+	lcall addTemps
+	; ============send oven temp to putty===============
+	Send_BCD(realTemp+1)
+	Send_BCD(realTemp)
+	; ==================display oven temp on LCD==============
 	Set_Cursor(2, 9)
-	Display_BCD(bcd+1)
+	Display_BCD(realTemp+1)
 	Set_Cursor(2, 11)
-	Display_BCD(bcd)
+	Display_BCD(realTemp)
 	mov DPTR, #Hello_World
 	lcall SendString
-	Send_BCD(cTemp+1)
-	Send_BCD(cTemp)
-	mov DPTR, #Hello_World
-	lcall SendString
+	lcall Display_BCD_7_Seg
+	
+	; ================== send "hot temp" to putty===========
+;	mov DPTR, #Hello_World
+;	lcall SendString
+;	Send_BCD(hTemp+1)
+;	Send_BCD(hTemp)
 ret
     
 DisplayVariables:
