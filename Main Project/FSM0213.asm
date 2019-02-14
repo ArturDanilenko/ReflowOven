@@ -39,8 +39,6 @@ button2		equ P2.2
 button3		equ P2.3
 button4		equ P2.4
 button5		equ P2.5
-
-FAN equ P0.4
 ;STATES
 Select 		equ 0
 RAMPTOSOAK	equ 1
@@ -62,7 +60,6 @@ TIMER_0_1ms EQU (65536-(CLK/(12*1000)))
 ;;
 TIMER0_RATE   EQU 4096     ; 2048Hz squarewave (peak amplitude of CEM-1203 speaker)
 TIMER0_RELOAD EQU ((65536-(CLK/(12*TIMER0_RATE)))) ; The prescaler in the CV-8052 is 12 unlike the AT89LP51RC2 where is 1.
-TIMER0_RELOADXL EQU (5*TIMER0_RELOAD)
 TIMER2_RATE   EQU 1000    ; 1000Hz, for a timer tick of 1ms
 TIMER2_RELOAD EQU ((65536-(CLK/(12*TIMER2_RATE))))
 TIMER_1_RELOAD EQU (256-((2*CLK)/(12*32*BAUD)))
@@ -134,7 +131,6 @@ SpeakerTimer: ds 1
 shortbeepflag: ds 1
 longbeepflag: ds 1
 actuallylongbeepflag: ds 1
-counter: ds 1
 ; In the 8051 we have variables that are 1-bit in size.  We can use the setb, clr, jb, and jnb
 ; instructions with these variables.  This is how you define a 1-bit variable:
 bseg
@@ -258,16 +254,9 @@ Timer0_Init:
 ;---------------------------------;
 Timer0_ISR:
 ;	clr TF0  ; According to the data sheet this is done for us already.
-
 	mov TH0, #high(TIMER0_RELOAD) ; Timer 0 doesn't have autoreload in the CV-8052
-	mov TL0, #low(TIMER0_RELOAD) 
-;	mov a, actuallylongbeepflag
-;	add a, #1
-;	cjne a, #2, LoadLongTimeReload
+	mov TL0, #low(TIMER0_RELOAD)
 	cpl SoundOut
-;	mov actuallylongbeepflag, a
-;	reti
-;LoadLongTimeReload:
 	
 	reti
 
@@ -331,12 +320,10 @@ DoPwm:
 	lcall pwmmodule
 DontDo:
 	Set_Cursor(2, 15)     ; the place in the LCD where we want the BCD counter value
-	Display_BCD(state)
-	;Display_BCD(speakertimer)
+	;Display_BCD(state)
+	Display_BCD(speakertimer)
 	mov a, shortbeepflag
 	cjne a, #0, Beep
-;	mov a, actuallylongbeepflag
-;	cjne a, #0, Beep
 ;	clr TR0
 	sjmp skiptheskip
 ISR_done:
@@ -353,74 +340,58 @@ Beep:
 	mov shortbeepflag, #0
 	clr TR0
 	;setb soundout
-;		cpl LEDRA.0
-	sjmp skiptheskip1
+		cpl LEDRA.0
+	sjmp skiptheskip
 KeepGoing: 
 	mov SpeakerTimer, a
 	sjmp skipbeep
+skiptheskip:
 ;	clr TR0 ; Enable/disable timer/counter 0. This line creates a beep-silence-beep-silence sound.
 	; Reset to zero the milli-seconds counter, it is a 16-bit variable
 cpl LEDRA.3
-skiptheskip1:
 	mov a, longbeepflag
 	cjne a, #0, LongBeep1
-	clr TR0
-	sjmp skiptheskip
+;	clr TR0
+	sjmp skipbeep
 LongBeep1:
 	setb TR0
 ;	clr soundout
 	mov a, SpeakerTimer
 	add a, #0x01
-	cjne a, #0x06, KeepGoing1
+	cjne a, #0x05, KeepGoing1
 	clr a
 	mov SpeakerTimer, a
-	mov longbeepflag, #0
-	clr TR0
-;	setb soundout
-;	cpl LEDRA.2
-	sjmp skiptheskip
-	;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%where tf do we jump
-KeepGoing1: 
-	mov SpeakerTimer, a
-	setb TR0
-	sjmp skipbeep
-skiptheskip:	
-	mov a, actuallylongbeepflag
-	cpl LEDRA.1
-	cjne a, #0, LongBeep2
-	clr TR0
-	sjmp skipbeep
-LongBeep2:
-	setb TR0
-;	clr soundout
-	mov a, SpeakerTimer
-	add a, #0x01
-	cjne a, #0x01, KeepOff
-	clr TR0
-KeepOff:
-	cjne a, #0x06, KeepGoing2
-	clr a
-	mov SpeakerTimer, a
-	mov a, counter
-	add a, #1
-	cjne a, #6, sigmabaulz
 	mov actuallylongbeepflag, #0
-	setb TR0
-sigmabaulz: 
-	mov a, counter
 	clr TR0
 ;	setb soundout
 	cpl LEDRA.2
-	;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%where tf do we jump
-KeepGoing2: 
-	cpl LEDRA.6
+KeepGoing1: 
 	mov SpeakerTimer, a
-;	setb TR0
-
+	cpl TR0
 ;	setb soundout
 	
 skipbeep:
 	
+ 	mov a, actuallylongbeepflag
+	cjne a, #0, Beep1
+;	clr TR0
+	sjmp skipmorebeeps
+Beep1:
+	setb TR0
+	;clr soundout
+;	cpl LEDRA.6
+	mov a, SpeakerTimer
+	add a, #0x01
+	cjne a, #0x20, KeepGoing2
+	clr a
+	mov SpeakerTimer, a
+	mov actuallylongbeepflag, #0
+	clr TR0
+;	setb soundout
+		cpl LEDRA.0
+	sjmp skipmorebeeps
+KeepGoing2: 
+	mov SpeakerTimer, a
 ;	sjmp skipbeep
 skipmorebeeps:
 	clr a
@@ -487,7 +458,6 @@ MainProgram:;============================MAIN===================================
     lcall Timer0_Init
     lcall Timer2_Init
     lcall INIT_SPI
-    setb Fan
     clr TR0
 ;FSM Variables  ==================
   	clr a
@@ -509,7 +479,6 @@ MainProgram:;============================MAIN===================================
 	mov longbeepflag, #0
 	mov actuallylongbeepflag, #0
 	mov speakertimer, #0
-	mov counter, #0
 ;========================
   ;  lcall InitSerialPort
   	;clr TR0
@@ -526,27 +495,7 @@ MainProgram:;============================MAIN===================================
 	setb half_seconds_flag
 	mov Seconds, #0x50
 	lcall DisplayVariables
-;	cpl TR0
 forever:;======================================================FOREVER===========================================================
-	jb KEY.3, startnormal
-	Wait_Milli_Seconds(#50)
-	jb KEY.3, startnormal
-	
-	mov WorkingTime, #0x00
-	mov shortbeepflag, #0
-	mov longbeepflag, #0
-	mov actuallylongbeepflag, #0
-	mov speakertimer, #0
-	mov state, #0x00
-	mov timer, #0x00
-	mov sec, #0x01
-	mov mf, #0
-	mov Aseconds, #0
-	clr pwmout
-	clr TR2
-	clr TR0
-	
-startnormal:	
 	mov a, SWA ; read the channel to convert from the switches
 	anl a, #00000111B ; We need only the last three bits since there are only eight channels
 	mov b, a
@@ -713,13 +662,14 @@ nextstate: ;=====================CHANGE  OF STATES==============================
 	mov a, state
 	add a, #1
 	cjne a, #6, NoStateReset
-;	lcall longbeep
+	lcall longbeep
 	mov state, #0
 	
 
 	ljmp SkipSetup
 abort: ;=================================ABORT1=====================================================
 	mov state, #0
+	mov pwm, #0
 	mov WorkingTime, #0x00
 	mov Aseconds, #0
 	clr Pwmout
@@ -730,13 +680,10 @@ NoStateReset:;=====================STATE OVERFLOW===============================
 	mov state, a
 	;cpl LEDRA.7
 	cjne a, #5, SWAG4DAYZ
-;	lcall actuallylongbeep
-;	lcall shortbeep
-	;
+	lcall actuallylongbeep
 	sjmp skipswag
 SWAG4DAYZ:
 ;	lcall shortbeep
-;	lcall longbeep
 	lcall actuallylongbeep
 skipswag:	
 	ljmp SkipSetup	
@@ -976,6 +923,6 @@ longbeep:
 	mov LongBeepFlag, #1
 	ret	
 actuallylongbeep:
-	mov actuallylongbeepflag, #1
+	;mov actuallylongbeepflag, #1
 	ret
 end
