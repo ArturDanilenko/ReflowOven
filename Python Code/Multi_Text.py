@@ -38,6 +38,16 @@ runTimes = {
     5: 5,
     }
 
+stateMasks = {
+    0: 0,
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+    6: 0,
+    }
+
 
 language = 'en'
 # TTS strings
@@ -57,7 +67,7 @@ tempAbove70 = 'temperature above 70'
 lock = threading.Lock()
 
 ser = serial.Serial(
-    port='COM10',
+    port='COM6',
     #baudrate=115200,
     baudrate = 57600,
     parity=serial.PARITY_NONE,
@@ -87,7 +97,7 @@ def SendMail(ImgFileName):
     s.starttls()
     s.ehlo()
     s.login('brandonbwanakocha@gmail.com', 'ycdrvakkwkbfpgji')
-    s.sendmail('brandonbwanakocha@gmail.com', 'brendonbk81@gmail.com', msg.as_string())
+    s.sendmail('brandonbwanakocha@gmail.com', 'brendonbk81@gmao;.com', msg.as_string())
     s.quit()
 
     
@@ -122,7 +132,7 @@ def messageControl(State, statemask):
                 'text': 'REFLOW OVEN: \nReflow process complete. Time to pick up your board.'
                 })
         SendMail('reflowprofile.png')
-        state = 1
+        stateMasks[6] = 2
         return 1
         
 
@@ -206,7 +216,7 @@ def messageControl(State, statemask):
 
    
 def runPlotter():
-    xsize=100
+    xsize=900
     ysize = 250
     def data_gen():
         t = data_gen.t
@@ -266,16 +276,6 @@ def runPlotter():
 def runText():
     InitialTime = int(round(time.time()*1000))
     client = nexmo.Client(key='f7cc0105', secret='skbMFLX1yz0rGVZc')
-
-    stateMasks = {
-            0: 0,
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-            5: 0,
-            6:0,
-            }
    
 
     
@@ -298,11 +298,11 @@ def runText():
         if state < 6 and state >=0 :
            stateMasks[state] = messageControl(state, stateMasks[state])
            if state == 5:
-               stateMasks[state] = 1
+               stateMasks[6] = 1
            
 
         else:
-            print('Invalid state:')
+            print(' ')
 
         
          

@@ -39,8 +39,7 @@ button2		equ P2.2
 button3		equ P2.3
 button4		equ P2.4
 button5		equ P2.5
-
-FAN equ P0.4
+FAN 		equ P2.7
 ;STATES
 Select 		equ 0
 RAMPTOSOAK	equ 1
@@ -127,7 +126,7 @@ temp: ds 1
 timer: ds 1
 state: ds 1
 sec: ds 1
-Aseconds: ds 1
+Aseconds: ds 3
 WorkingTime: ds 1
 Temperature: ds 1
 SpeakerTimer: ds 1
@@ -172,6 +171,10 @@ Hello_World: ;indent to separate numbers in the putty
     DB  '\r','\n', 0
 helpfulspace:
 	DB ' ', 0 
+_C:
+	DB 'C', 0
+_S: DB 's', 0
+_state: DB 'St',0
 
 ; Look-up table for the 7-seg displays. (Segments are turn on with zero) 
 T_7seg:
@@ -332,13 +335,15 @@ DoPwm:
 DontDo:
 	Set_Cursor(2, 15)     ; the place in the LCD where we want the BCD counter value
 	Display_BCD(state)
+	Set_Cursor(2,13)
+	Send_Constant_String(#_state)
 	;Display_BCD(speakertimer)
 	mov a, shortbeepflag
 	cjne a, #0, Beep
 ;	mov a, actuallylongbeepflag
 ;	cjne a, #0, Beep
 ;	clr TR0
-	sjmp skiptheskip
+	sjmp skiptheskip1
 ISR_done:
 	ljmp Timer2_ISR_done
 Beep:
@@ -367,6 +372,7 @@ skiptheskip1:
 	clr TR0
 	sjmp skiptheskip
 LongBeep1:
+	cpl LEDRA.2
 	setb TR0
 ;	clr soundout
 	mov a, SpeakerTimer
@@ -377,7 +383,7 @@ LongBeep1:
 	mov longbeepflag, #0
 	clr TR0
 ;	setb soundout
-;	cpl LEDRA.2
+	
 	sjmp skiptheskip
 	;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%where tf do we jump
 KeepGoing1: 
@@ -388,14 +394,23 @@ skiptheskip:
 	mov a, actuallylongbeepflag
 	cpl LEDRA.1
 	cjne a, #0, LongBeep2
-	clr TR0
+	;clr TR0
 	sjmp skipbeep
 LongBeep2:
 	setb TR0
 ;	clr soundout
 	mov a, SpeakerTimer
 	add a, #0x01
-	cjne a, #0x01, KeepOff
+	cjne a, #0x02, KeepOff1
+	clr TR0
+KeepOff1:
+	cjne a, #0x03, KeepOff2
+	clr TR0
+KeepOff2:
+	cjne a, #0x04, KeepOff3
+	clr TR0
+KeepOff3:
+	cjne a, #0x05, KeepOff
 	clr TR0
 KeepOff:
 	cjne a, #0x06, KeepGoing2
@@ -407,10 +422,11 @@ KeepOff:
 	mov actuallylongbeepflag, #0
 	setb TR0
 sigmabaulz: 
-	mov a, counter
+	mov counter, a
 	clr TR0
 ;	setb soundout
 	cpl LEDRA.2
+	sjmp skipbeep
 	;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%where tf do we jump
 KeepGoing2: 
 	cpl LEDRA.6
@@ -426,7 +442,7 @@ skipmorebeeps:
 	clr a
 	;=====================Display=============================================
 	mov x+0, Aseconds+0
-	mov x+1, #0
+	mov x+1, Aseconds+1
 	mov x+2, #0
 	mov x+3, #0
 ;
@@ -437,9 +453,11 @@ skipmorebeeps:
 	
 	Set_cursor(2,1)
 	Display_BCD(bcd+1)
-	Set_cursor(2,4)
+	Set_cursor(2,3)
 ;	Send_BCD(bcd)
 	Display_BCD(bcd)
+	set_cursor(2,5)
+	Send_Constant_String(#_S)
 ;	mov DPTR, #Hello_World
 ;	lcall SendString
 ;==============================================================================================
@@ -471,10 +489,32 @@ NoTReset:
 	mov seconds, a
 skipresethere:
 	
+	jb KEY.3, startnormal
+	Wait_Milli_Seconds(#50)
+;	jb KEY.3, startnormal
+	cpl LEDRA.3
+	mov WorkingTime, #0x00
+	mov shortbeepflag, #0
+	mov longbeepflag, #0
+	mov actuallylongbeepflag, #0
+	mov speakertimer, #0
+	mov seconds, #0
+	mov state, #0x00
+;	mov timer, #0x00
+;	mov sec, #0x01
+;	mov mf, #0
+	mov Aseconds, #0
+	clr pwmout
+;	clr TR2
+;	clr TR0
+	
+startnormal:
 Timer2_ISR_done:
 	pop psw
 	pop acc
 	reti
+
+
 	
 
 MainProgram:;============================MAIN===========================================================
@@ -487,7 +527,7 @@ MainProgram:;============================MAIN===================================
     lcall Timer0_Init
     lcall Timer2_Init
     lcall INIT_SPI
-    setb Fan
+   ; setb Fan
     clr TR0
 ;FSM Variables  ==================
   	clr a
@@ -510,6 +550,8 @@ MainProgram:;============================MAIN===================================
 	mov actuallylongbeepflag, #0
 	mov speakertimer, #0
 	mov counter, #0
+	; fan
+	setb FAN 
 ;========================
   ;  lcall InitSerialPort
   	;clr TR0
@@ -528,25 +570,8 @@ MainProgram:;============================MAIN===================================
 	lcall DisplayVariables
 ;	cpl TR0
 forever:;======================================================FOREVER===========================================================
-	jb KEY.3, startnormal
-	Wait_Milli_Seconds(#50)
-	jb KEY.3, startnormal
-	
-	mov WorkingTime, #0x00
-	mov shortbeepflag, #0
-	mov longbeepflag, #0
-	mov actuallylongbeepflag, #0
-	mov speakertimer, #0
-	mov state, #0x00
-	mov timer, #0x00
-	mov sec, #0x01
-	mov mf, #0
-	mov Aseconds, #0
-	clr pwmout
-	clr TR2
-	clr TR0
-	
-startnormal:	
+
+	cpl LEDRA.6
 	mov a, SWA ; read the channel to convert from the switches
 	anl a, #00000111B ; We need only the last three bits since there are only eight channels
 	mov b, a
@@ -576,13 +601,15 @@ loop_b:;======================================================FOREVER===========
 ;	Set_Cursor(2, 15)     ; the place in the LCD where we want the BCD counter value
 	;Display_BCD(state)
 ;	Display_BCD(sec)
-;	cpl LEDRA.4
-
+	cpl LEDRA.4
+;	set_cursor(2,6)
+;	display_bcd(state)
     mov a, state
  ;=======================================================STATE 0========================================
 ResetState:
 	cjne a, #select, RampToSoakState
 ;Display Time Soak
+
 	mov minutes, #0				;set timer to zero until state 1 is active
 	mov seconds, #0
 	jnb button1, Pathnextstate
@@ -614,7 +641,7 @@ SkipSetup1:;=====================CHANGE  OF STATES==============================
 RampToSoakState:	;==============================STATE 1================================================
 	cjne a, #RampToSoak, PreHeatState
 	mov WorkingTime, #0x28
-	
+
   ;  mov sec, #0
  ;=============================Checking ih current temp has reaches soak temp==========================================   
 	mov x, RealTemp
@@ -622,11 +649,11 @@ RampToSoakState:	;==============================STATE 1=========================
 	mov x+2, #0
 	mov x+3, #0
 
-	mov a, temp_soak
-	subb a, #0x0a
-	mov temperature, a
-	mov a, state
-	mov y, temperature
+	;mov a, temp_soak
+	;subb a, #0x0a
+	;mov temperature, a
+	;mov a, state
+	mov y, temp_soak
 	mov y+1, #0
 	mov y+2, #0
 	mov y+3, #0
@@ -644,7 +671,7 @@ RampToSoakState:	;==============================STATE 1=========================
 
 PreHeatState:;====================================================STATE 2===========================================
 	cjne a, #PreHeat, RampToHeatState
-	mov WorkingTime, #0x04
+	mov WorkingTime, #0x0a
 	mov a, Aseconds
 	cjne a, Time_Soak, SkipSetup
 	lcall nextstate
@@ -667,7 +694,7 @@ RampToHeatState:;====================================================STATE 3====
 ReflowState:
  	cjne a, #Reflow, CoolingState
 
- 	mov WorkingTime, #0x04
+ 	mov WorkingTime, #0x14
 	
 	;subb a, #0x0a
 	;	mov a, Aseconds
@@ -700,6 +727,8 @@ CoolingState:
 	mov y+2, #0
 	mov y+3, #0
 	lcall x_lt_y
+	
+	clr fan ; turn fan on
 			
 	jb	mf, nextstate
 	
@@ -713,7 +742,8 @@ nextstate: ;=====================CHANGE  OF STATES==============================
 	mov a, state
 	add a, #1
 	cjne a, #6, NoStateReset
-;	lcall longbeep
+	
+	lcall actuallylongbeep
 	mov state, #0
 	
 
@@ -730,14 +760,14 @@ NoStateReset:;=====================STATE OVERFLOW===============================
 	mov state, a
 	;cpl LEDRA.7
 	cjne a, #5, SWAG4DAYZ
-;	lcall actuallylongbeep
+	lcall longbeep
 ;	lcall shortbeep
 	;
 	sjmp skipswag
 SWAG4DAYZ:
-;	lcall shortbeep
+	lcall shortbeep
 ;	lcall longbeep
-	lcall actuallylongbeep
+;	lcall actuallylongbeep
 skipswag:	
 	ljmp SkipSetup	
 
@@ -769,10 +799,12 @@ ReadTemperature:
 ;	Send_BCD(bcd+1)
 ;	Send_BCD(bcd)
 	; ==================display oven temp on LCD==============
-	Set_Cursor(2, 9)
+	Set_Cursor(2, 7)
 	Display_BCD(realTemp+1)
-	Set_Cursor(2, 11)
+	Set_Cursor(2, 9)
 	Display_BCD(realTemp)
+	Set_Cursor(2, 11)
+	Send_constant_string(#_C)
 ;	Set_Cursor(2, 9)
 ;	Display_BCD(bcd+1)
 ;	Set_Cursor(2, 11)
@@ -798,6 +830,8 @@ ReadTemperature:
 	mov RealTemp+1,x+1
 ret
     
+    
+; DISP VAR
 DisplayVariables:
 	set_cursor(1,5)
 	mov x+0, Time_Soak + 0
