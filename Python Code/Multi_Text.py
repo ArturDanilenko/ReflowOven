@@ -71,14 +71,16 @@ client = nexmo.Client(key='f7cc0105', secret='skbMFLX1yz0rGVZc')
 def SendMail(ImgFileName):
     img_data = open(ImgFileName, 'rb').read()
     msg = MIMEMultipart()
-    msg['Subject'] = 'subject'
+    msg['Subject'] = 'Reflow Oven Profile - Summary'
     msg['From'] = 'brandonbwanakocha@gmail.com'
     msg['To'] = 'brendonbk81@gmail.com'
 
-    text = MIMEText("test")
+    text = MIMEText("Dear Customer, \n\n Here is a summary of your reflow soldering profile.")
     msg.attach(text)
     image = MIMEImage(img_data, name=os.path.basename(ImgFileName))
     msg.attach(image)
+    thankyou = MIMEText("Thank you for your business.")
+    msg.attach(thankyou)
 
     s = smtplib.SMTP("smtp.gmail.com", 587)
     s.ehlo()
@@ -108,16 +110,16 @@ def messageControl(State, statemask):
         client.send_message({
                 'from': '12366000369',
                 'to': '17789980302',
-                'text': 'REFLOW OVEN: \n Oven in Wait State: \n '
+                'text': 'REFLOW OVEN: \nOven in WAIT state.'
                 })
         state = 1
         return 1
     
-    elif State == state0 and statemask == 1:
+    elif State == state0 and statemask == 1 and stateMasks[6] == 1:
         client.send_message({
                 'from': '12366000369',
                 'to': '17789980302',
-                'text': 'REFLOW OVEN: \n Oven RETURNED TO WAIT STATE. Time to pick up your Board. \n '
+                'text': 'REFLOW OVEN: \nReflow process complete. Time to pick up your board.'
                 })
         SendMail('reflowprofile.png')
         state = 1
@@ -125,17 +127,10 @@ def messageControl(State, statemask):
         
 
     elif State == state1 and statemask == 0:
-        # calculating Runtime for each state:
-        
-        FinalTime = int(round(time.time()*1000))
-        Runtime = (FinalTime - InitialTime)/1000
-        runTimes[State] = Runtime
-        Runtime = Runtime -runTimes[State-1]
-        
         client.send_message({
             'from': '12366000369',
             'to': '17789980302',
-            'text': 'REFLOW OVEN: \n Oven now in RAMP TO SOAK stage \n Total time in WAIT state: ' + str( round(Runtime,2)) + ' seconds'
+            'text': 'REFLOW OVEN: \nOven now in RAMP TO SOAK stage.'
                 })
         state = 1
         
@@ -151,7 +146,7 @@ def messageControl(State, statemask):
         client.send_message({
             'from': '12366000369',
             'to': '17789980302',
-            'text': 'REFLOW OVEN: \n  \n RAMP TO SOAK Complete! \n Runtime:   ' + str( round(Runtime,2)) + ' seconds \n Oven now in PREHEAT/SOAK stage '
+            'text': 'REFLOW OVEN:\n\nRAMP TO SOAK complete!\n\nStage runtime:\n' + str(round(Runtime,2)) + 's\n\nOven now in PREHEAT/SOAK stage'
                 })
         state = 1
         return True
@@ -168,7 +163,7 @@ def messageControl(State, statemask):
         client.send_message({
             'from': '12366000369',
             'to': '17789980302',
-            'text': 'REFLOW OVEN: \n  \n PREHEAT/SOAK stage Complete! \n Runtime:   ' + str( round(Runtime,2)) + ' s \n Oven now in RAMP TO PEAK stage '
+            'text': 'REFLOW OVEN:\n\nPREHEAT/SOAK stage complete!\n\nStage runtime:\n' + str( round(Runtime,2)) + 's\n\nOven now in RAMP TO PEAK stage'
                 })
         state = 1
         return True
@@ -185,7 +180,7 @@ def messageControl(State, statemask):
         client.send_message({
             'from': '12366000369',
             'to': '17789980302',
-            'text': 'REFLOW OVEN: \n  \n RAMP TO PEAK Complete! \n Runtime:   ' + str( round(Runtime,2)) + ' s \n Oven now in PEAK REFLOW stage '
+            'text': 'REFLOW OVEN:\n\nRAMP TO PEAK complete!\n\nStage runtime:\n' + str( round(Runtime,2)) + 's\n\nOven now in PEAK REFLOW stage '
                 })
         state = 1
         return True
@@ -200,7 +195,7 @@ def messageControl(State, statemask):
         client.send_message({
             'from': '12366000369',
             'to': '17789980302',
-            'text': 'REFLOW OVEN: \n  \n PEAK REFLOW stage Complete! \n Runtime:   ' + str( round(Runtime,2)) + ' s \n Oven now COOLING stage '
+            'text': 'REFLOW OVEN:\n\nPEAK REFLOW stage complete!\n\nStage runtime:\n' + str( round(Runtime,2)) + 's\n\nOven now in COOLING stage '
                 })
         state = 1
         return True
@@ -279,6 +274,7 @@ def runText():
             3: 0,
             4: 0,
             5: 0,
+            6:0,
             }
    
 
@@ -297,10 +293,12 @@ def runText():
         
 
 
-        # Shenanigans to controm messages and shit!
+        # Shenanigans to control messages
 
         if state < 6 and state >=0 :
            stateMasks[state] = messageControl(state, stateMasks[state])
+           if state == 5:
+               stateMasks[state] = 1
            
 
         else:
