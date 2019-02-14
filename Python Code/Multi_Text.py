@@ -6,7 +6,7 @@ import matplotlib.animation as animation
 import sys, time, math
 import threading
 from threading import Thread
-from gtts import gTTS
+#from gtts import gTTS
 import os
 import smtplib
 from email.mime.text import MIMEText
@@ -45,20 +45,21 @@ welcome = 'This is our ree flow oven'
 enterState1 = 'begin stage 0'
 tempAbove70 = 'temperature above 70'
 
-welcomeTTS = gTTS(text=welcome, lang=language, slow=False)
-enterState1TTS = gTTS(text=enterState1, lang=language, slow=False)
-tempAbove70TTS = gTTS(text=tempAbove70, lang=language, slow=False)
+#welcomeTTS = gTTS(text=welcome, lang=language, slow=False)
+#enterState1TTS = gTTS(text=enterState1, lang=language, slow=False)
+#tempAbove70TTS = gTTS(text=tempAbove70, lang=language, slow=False)
 
 # save audio files
-welcomeTTS.save("welcome.mp3")
-enterState1TTS.save("enterState1.mp3")
-tempAbove70TTS.save("tempAbove70.mp3")
+#welcomeTTS.save("welcome.mp3")
+#enterState1TTS.save("enterState1.mp3")
+#tempAbove70TTS.save("tempAbove70.mp3")
 
 lock = threading.Lock()
 
 ser = serial.Serial(
-    port='COM8',
-    baudrate=115200,
+    port='COM10',
+    #baudrate=115200,
+    baudrate = 57600,
     parity=serial.PARITY_NONE,
     stopbits=serial.STOPBITS_ONE,
     bytesize=serial.EIGHTBITS
@@ -217,12 +218,13 @@ def runPlotter():
         while True:
             t+=1
             lock.acquire()
-            result = ser.readline()
-            lock.release()
-
+            data_raw = ser.readline().decode().strip()
+            while (not data_raw):
+                data_raw = ser.readline().decode().strip()
+            result = data_raw
             splitVal = result.split()
-            
             val=float(splitVal[0])
+            lock.release()
            
 
             
@@ -262,8 +264,8 @@ def runPlotter():
     plt.title('REFLOW OVEN PROFILE')
     plt.show()
 
-os.system('welcome.mp3')           
-os.system('enterState1.mp3')
+#os.system('welcome.mp3')           
+#os.system('enterState1.mp3')
 
 
 def runText():
@@ -283,18 +285,23 @@ def runText():
     
     while True:
         lock.acquire()
-        result = ser.readline()
+        data_raw = ser.readline().decode().strip()
+        if data_raw:
+            result = data_raw
+            splitVal = result.split()
+            state = float(splitVal[1])
+        else:
+            state = 8
+
         lock.release()
-        splitVal = result.split()
         
-        state = float(splitVal[1])
 
 
         # Shenanigans to controm messages and shit!
 
         if state < 6 and state >=0 :
            stateMasks[state] = messageControl(state, stateMasks[state])
-           print(runTimes[state])
+           
 
         else:
             print('Invalid state:')
