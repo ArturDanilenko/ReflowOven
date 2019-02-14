@@ -118,8 +118,9 @@ def messageControl(State, statemask):
                 'to': '17789980302',
                 'text': 'REFLOW OVEN: \n Oven RETURNED TO WAIT STATE. Time to pick up your Board. \n '
                 })
+        SendMail('reflowprofile.png')
         state = 1
-        return 2
+        return 1
         
 
     elif State == state1 and statemask == 0:
@@ -217,8 +218,14 @@ def runPlotter():
             t+=1
             lock.acquire()
             result = ser.readline()
-            val=float(result)
             lock.release()
+
+            splitVal = result.split()
+            
+            val=float(splitVal[0])
+           
+
+            
             yield t, val
            
         
@@ -257,10 +264,11 @@ def runPlotter():
 
 os.system('welcome.mp3')           
 os.system('enterState1.mp3')
+
+
 def runText():
     InitialTime = int(round(time.time()*1000))
     client = nexmo.Client(key='f7cc0105', secret='skbMFLX1yz0rGVZc')
-    state = 0
 
     stateMasks = {
             0: 0,
@@ -276,8 +284,11 @@ def runText():
     while True:
         lock.acquire()
         result = ser.readline()
-        val=float(result)
         lock.release()
+        splitVal = result.split()
+        
+        state = float(splitVal[1])
+
 
         # Shenanigans to controm messages and shit!
 
@@ -289,19 +300,6 @@ def runText():
             print('Invalid state:')
 
         
-        if val > 40 and state == 0:
-            os.system('tempAbove70.mp3')
-            FinalTime = int(round(time.time()*1000))
-            Runtime = (FinalTime - InitialTime)/1000
-            client.send_message({
-                'from': '12366000369',
-                'to': '17789980302',
-                'text': 'REFLOW OVEN STATUS \n Runtime = '+ str(Runtime)
-                })
-            state = 1
-            
-        else:
-            print('none')
          
 
 if __name__ == "__main__":
