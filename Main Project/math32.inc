@@ -558,22 +558,22 @@ volt2ctemp mac
 _volt2ctemp:
 	push acc
 	
-;	mov x, vResult
-;	mov x+1, vResult+1
-	mov x, #0x18
-	mov x+1, #0
+	mov x, vResult
+	mov x+1, vResult+1
+;	mov x, #0x18
+;	mov x+1, #0
 	mov x+2, #0
 	mov x+3, #0
 	
 	; Kelvin
-;	Load_Y(410)
-;	lcall mul32	
-;	Load_Y(1023)
-;	lcall div32
+	Load_Y(410)
+	lcall mul32	
+	Load_Y(1023)
+	lcall div32
 	
 	; Celsius
-;	Load_Y(273)
-;	lcall sub32
+	Load_Y(273)
+	lcall sub32
 	lcall hex2bcd
 	mov cTemp, bcd
 	mov cTemp+1, bcd+1
@@ -595,19 +595,25 @@ volt2htemp mac
 	
 _volt2htemp:
 	push acc
-	
+	clr a
+	mov x, a
 	mov x, vResult
-	mov x+1, vResult+1
+	mov x+1, vResult + 1
 	mov x+2, #0
 	mov x+3, #0
-	
+		clr a
+	mov y, a
 	; To Difference
 	Load_Y(26085)
 	lcall mul32
+	clr a
+	mov y, a
 ;	Load_Y(1)
 ;	lcall mul32	
 	Load_Y(100000)
 	lcall div32
+	clr a
+	mov y, a
 ;	lcall div32
 ;	Load_Y(19)
 ;	lcall add32
@@ -617,10 +623,22 @@ _volt2htemp:
 	
 	lcall Hex2bcd
 	mov hTemp, bcd
-	mov hTemp+1, bcd+1
+	mov hTemp+1, bcd + 1
 
 	
 	pop acc
 	ret	
+	
+addTemps:
+	mov bcd, hTemp
+	mov bcd+1, hTemp+1
+	lcall Bcd2hex
+	Load_Y(25)
+	lcall add32
+	lcall Hex2bcd
+	mov realTemp, bcd
+	mov realTemp+1, bcd+1
+	ret
+	
 	
 $LIST
