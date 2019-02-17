@@ -2,6 +2,7 @@
 ELEC291 Project 1 - Reflow Soldering Oven Controller
 
 Used interrupts, serial communication, and timers to design and build a reflow soldering oven controller in Assembly.
+
 Features:
   - LCD interface
   - Adjustable soldering profile parameters
