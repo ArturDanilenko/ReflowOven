@@ -1,0 +1,70 @@
+<PRJ>
+     `CV_8052.prj` `.CV_8052.prj`
+     `.\c51sm.bat` `ld  %pathne% %obj%`
+     `` ``
+     `` ``
+     10979108
+</PRJ>
+
+Source Files
+<C>
+`CV_8052.c` `.\CV_8052.c`
+   `.\c51sm.bat` `cc "%pathne%"`
+   `` ``
+   `` ``
+   0
+`d51.c` `.\d51.c`
+   `.\c51sm.bat` `cc "%pathne%"`
+   `` ``
+   `` ``
+   0
+`step.c` `.\step.c`
+   `.\c51sm.bat` `cc "%pathne%"`
+   `` ``
+   `` ``
+   0
+`cmon51.c` `.\cmon51.c`
+   `.\c51sm.bat` `cc "%pathne%"`
+   `` ``
+   `` ``
+   0
+</C>
+
+Header Files
+<H>
+`cmon51.h` `.\cmon51.h`
+   `` ``
+   `` ``
+   `` ``
+   0
+`d51.h` `.\d51.h`
+   `` ``
+   `` ``
+   `` ``
+   0
+`proto.h` `.\proto.h`
+   `` ``
+   `` ``
+   `` ``
+   0
+</H>
+
+Resource Files
+<R>
+`cmon51.asm` `.\cmon51.asm`
+   `` ``
+   `` ``
+   `` ``
+   0
+`c51sm.bat` `.\c51sm.bat`
+   `` ``
+   `` ``
+   `` ``
+   0
+`CV_8052.map` `.\CV_8052.map`
+   `` ``
+   `` ``
+   `` ``
+   0
+</R>
+

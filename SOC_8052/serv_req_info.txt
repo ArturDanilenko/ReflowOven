@@ -1,0 +1,16 @@
+<internal_error>
+	<executable>quartus_cdb.exe</executable>
+	<sub_system>QATM</sub_system>
+	<file>/quartus/atm/qatm/qatm_mif_update.cpp</file>
+	<line>576</line>
+	<callstack>
+	0x0041e9b2: quartus_cdb + 0x1e9b2 (Dbm_Uninit + 0x1a6c2)
+	0x03524ea6: db_cdb_mgr + 0x4ea6 (?get_voltage_at_pin@CDB_CHIP_DB_ENTRY@@QBI?AW4DEV_VOLTAGE_ENUM@@I@Z + 0x56)
+	</callstack>
+	<error>RAM/CAM MIF reconfig failed</error>
+	<date>Fri May 03 13:20:02 2013</date>
+	<version>Quartus II Version 9.0 Build 235 06/17/2009 Service Pack 2 SJ Web Edition</version>
+	<full_error>RAM/CAM MIF reconfig failed
+Quartus II Version 9.0 Build 235 06/17/2009 Service Pack 2 SJ Web Edition </full_error>
+</internal_error>
+

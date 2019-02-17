@@ -1,0 +1,14 @@
+ENABLE_QUAD_SPI_SUPPORT=1
+ENABLE_SHARED_ACCESS=ON
+ENHANCED_MODE=1
+INTENDED_DEVICE_FAMILY="Cyclone V"
+DEVICE_FAMILY="Cyclone V"
+CBX_AUTO_BLACKBOX=ALL
+asmi_access_granted
+data_in
+data_oe
+dclkin
+noe
+scein
+asmi_access_request
+data_out

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simPackage>
+ <file path="CV_PLL_sim/CV_PLL.vho" type="VHDL" />
+ <topLevel name="CV_PLL" />
+ <deviceFamily name="cyclonev" />
+</simPackage>

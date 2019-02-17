@@ -1,0 +1,278 @@
+Modules linked:
+   'CV_Boot_SPI' from 'CV_Boot_SPI.obj'
+   'gptrget' from 'C:\Source\call51\Bin\..\lib\small\libc51.lib'
+   'startup' from 'C:\Source\call51\Bin\..\lib\small\libc51.lib'
+
+Memory use per module linked:
+C:01861 D:017 I:064 B:001 X:00000 - CV_Boot_SPI
+C:00028 D:000 I:000 B:000 X:00000 - gptrget
+C:00004 D:000 I:000 B:000 X:00000 - startup
+C:00014 D:000 I:000 B:000 X:00000 - ABSOLUTE
+------------------------------------------------------
+C:01907 D:017 I:064 B:001 X:00000 - Totals
+
+INTERMAL RAM map (see legend below):
+00: 0 0 0 0 0 0 0 0 a a a a a a a a 
+10: a a a a a a b b b . . . . . . . 
+20: B c c c c c c c c c c c c c c c 
+30: c c c c c c c c c c c c c c c c 
+40: c c c c c c c c c c c c c c c c 
+50: c c c c c c c c c c c c c c c c 
+60: c . . . . . . . . . . . . . . . 
+70: . . . . . . . . . . . . . . . . 
+80: . . . . . . . . . . . . . . . . 
+90: . . . . . . . . . . . . . . . . 
+A0: . . . . . . . . . . . . . . . . 
+B0: . . . . . . . . . . . . . . . . 
+C0: . . . . . . . . . . . . . . . . 
+D0: . . . . . . . . . . . . . . . . 
+E0: . . . . . . . . . . . . . . . . 
+F0: . . . . . . . . . . . . . . . . 
+
+Legend:
+	0: Register bank 0
+	1: Register bank 1
+	2: Register bank 2
+	3: Register bank 3
+	B: bits (see 'BIT map' below)
+	a: CV_Boot_SPI:R_DSEG
+	b: R_OSEG
+	c: R_ISEG
+
+BIT map:
+00: U . . . . . . . . . . . . . . . 
+10: . . . . . . . . . . . . . . . . 
+20: . . . . . . . . . . . . . . . . 
+30: . . . . . . . . . . . . . . . . 
+40: . . . . . . . . . . . . . . . . 
+50: . . . . . . . . . . . . . . . . 
+60: . . . . . . . . . . . . . . . . 
+70: . . . . . . . . . . . . . . . . 
+
+CODE usage map:
+0000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+1000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+2000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+3000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+4000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+5000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+6000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+7000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+8000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+9000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+A000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+B000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+C000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+D000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+E000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+F000: 256 256 256 256 256 256 256 105 000 000 000 000 000 000 000 010 
+Total: 1907 bytes
+
+XDATA usage map:
+0000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+1000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+2000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+3000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+4000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+5000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+6000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+7000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+8000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+9000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+A000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+B000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+C000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+D000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+E000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+F000: 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 000 
+Total: 0 bytes
+
+Base Segments:
+   BIT_BANK=D:0000, size=0000
+   R_BSEG=B:0000, size=0001
+   R_CONST=C:F721, size=0025
+   R_CSEG=C:F749, size=0020
+   R_DINIT=C:F746, size=0002
+   R_DSEG=D:0000, size=000E
+   R_GSINIT=C:F003, size=071E
+   R_HOME=C:0000, size=0000
+   R_ISEG=I:0021, size=0040
+   R_IXSEG=X:0000, size=0000
+   R_OSEG=D:0016, size=0003
+   R_PSEG=X:0000, size=0000
+   R_XINIT=C:0000, size=0000
+   R_XSEG=X:0000, size=0000
+   rbank0=D:0000, size=0008
+
+Module Segments:
+   CSEG=C:0000, size=000E
+   CV_Boot_SPI:R_BSEG=B:0000, size=0001
+   CV_Boot_SPI:R_CONST=C:F721, size=0025
+   CV_Boot_SPI:R_DINIT=C:F746, size=0002
+   CV_Boot_SPI:R_DSEG=D:0008, size=000E
+   CV_Boot_SPI:R_GSINIT=C:F003, size=071E
+   CV_Boot_SPI:R_ISEG=I:0021, size=0040
+   CV_Boot_SPI:R_OSEG=D:0016, size=0003
+   gptrget:R_CSEG=C:F749, size=001C
+   startup:R_CSEG=C:F765, size=0004
+
+Public symbols:
+   _CV_Boot_SPI_R_DSEG_size=L:000E
+   _CV_Boot_SPI_R_DSEG_start=L:0008
+   _Check_WIP=C:F0BC
+   _Copy_Flash_to_RAM=C:F273
+   _DoSPI=C:F059
+   _EraseSector=C:F1A3
+   _FlashBuff=C:F213
+   _FlashBuff_PARM_2=D:000A
+   _FlashBuff_PARM_3=D:000D
+   _FlashByte=C:F1D4
+   _FlashByte_PARM_2=D:0009
+   _In_Byte_Flash=C:F170
+   _Load_Ram_Fast_and_Run=C:F2D5
+   _Load_Ram_Fast_and_Run_Debugger=C:F2F0
+   _Manual_Load=C:F4E4
+   _OutByte=C:F4AD
+   _OutWord=C:F4CC
+   _R_BSEG_size=L:0001
+   _R_BSEG_start=L:0000
+   _R_CONST_size=L:0025
+   _R_CONST_start=L:F721
+   _R_CSEG_size=L:0020
+   _R_CSEG_start=L:F749
+   _R_DINIT_size=L:0002
+   _R_DINIT_start=L:F746
+   _R_GSINIT_size=L:071E
+   _R_GSINIT_start=L:F003
+   _R_HOME_size=L:0000
+   _R_HOME_start=L:0000
+   _R_ISEG_size=L:0040
+   _R_ISEG_start=L:0000
+   _R_IXSEG_size=L:0000
+   _R_IXSEG_start=L:0000
+   _R_OSEG_size=L:0003
+   _R_OSEG_start=L:0016
+   _R_PSEG_size=L:0000
+   _R_PSEG_start=L:0000
+   _R_XINIT_size=L:0000
+   _R_XINIT_start=L:0000
+   _R_XSEG_size=L:0000
+   _R_XSEG_start=L:0000
+   _Read_XRAM=C:F1D0
+   _Write_XRAM=C:F1CC
+   _Write_XRAM_PARM_2=D:0016
+   __c51_external_startup=C:F765
+   __gptrget=C:F749
+   _buff=I:0021
+   _chartohex=C:F145
+   _crt0=C:F003
+   _de2_8052_crt0=C:F749
+   _dummy_switch=C:F721
+   _getbyte=C:F155
+   _getchar=C:F0F4
+   _getchar_echo=B:0000
+   _getchare=C:F10A
+   _hexval=C:F721
+   _inituart=C:F0D2
+   _loadintelhex=C:F311
+   _main=C:F633
+   _putchar=C:F0DF
+   _sends=C:F119
+   _seven_seg=C:F736
+   _stack_start=L:0061
+   _str2hex=C:F414
+
+Local symbols:
+   CV_Boot_SPI:L004001?=C:F0C4
+   CV_Boot_SPI:L006001?=C:F0E4
+   CV_Boot_SPI:L006006?=C:F0EC
+   CV_Boot_SPI:L006017?=C:F0E9
+   CV_Boot_SPI:L006018?=C:F0F1
+   CV_Boot_SPI:L007001?=C:F0F4
+   CV_Boot_SPI:L007005?=C:F107
+   CV_Boot_SPI:L007011?=C:F0F9
+   CV_Boot_SPI:L009001?=C:F11F
+   CV_Boot_SPI:L009004?=C:F144
+   CV_Boot_SPI:L010002?=C:F14F
+   CV_Boot_SPI:L017001?=C:F249
+   CV_Boot_SPI:L017004?=C:F26E
+   CV_Boot_SPI:L021002?=C:F387
+   CV_Boot_SPI:L021004?=C:F3A4
+   CV_Boot_SPI:L021006?=C:F3C3
+   CV_Boot_SPI:L021007?=C:F3DA
+   CV_Boot_SPI:L021008?=C:F3E5
+   CV_Boot_SPI:L021009?=C:F3E9
+   CV_Boot_SPI:L021012?=C:F3F0
+   CV_Boot_SPI:L021013?=C:F3F5
+   CV_Boot_SPI:L021017?=C:F3FE
+   CV_Boot_SPI:L021020?=C:F311
+   CV_Boot_SPI:L021022?=C:F36D
+   CV_Boot_SPI:L021025?=C:F391
+   CV_Boot_SPI:L021040?=C:F31E
+   CV_Boot_SPI:L021041?=C:F321
+   CV_Boot_SPI:L021046?=C:F3AF
+   CV_Boot_SPI:L021047?=C:F3B4
+   CV_Boot_SPI:L021048?=C:F3B9
+   CV_Boot_SPI:L021051?=C:F405
+   CV_Boot_SPI:L021052?=C:F408
+   CV_Boot_SPI:L022006?=C:F468
+   CV_Boot_SPI:L022010?=C:F446
+   CV_Boot_SPI:L022011?=C:F47F
+   CV_Boot_SPI:L022013?=C:F41E
+   CV_Boot_SPI:L022015?=C:F4A8
+   CV_Boot_SPI:L022027?=C:F42D
+   CV_Boot_SPI:L022034?=C:F4A5
+   CV_Boot_SPI:L025001?=C:F546
+   CV_Boot_SPI:L025007?=C:F596
+   CV_Boot_SPI:L025010?=C:F57B
+   CV_Boot_SPI:L025013?=C:F563
+   CV_Boot_SPI:L025015?=C:F5EF
+   CV_Boot_SPI:L025020?=C:F614
+   CV_Boot_SPI:L025028?=C:F60E
+   CV_Boot_SPI:L025031?=C:F5EC
+   CV_Boot_SPI:L025034?=C:F4F1
+   CV_Boot_SPI:L025036?=C:F5B4
+   CV_Boot_SPI:L025039?=C:F5E7
+   CV_Boot_SPI:L025058?=C:F546
+   CV_Boot_SPI:L025066?=C:F5A0
+   CV_Boot_SPI:L025067?=C:F5A3
+   CV_Boot_SPI:L025071?=C:F5FB
+   CV_Boot_SPI:L025072?=C:F607
+   CV_Boot_SPI:L025073?=C:F614
+   CV_Boot_SPI:L025075?=C:F620
+   CV_Boot_SPI:L025076?=C:F62C
+   CV_Boot_SPI:L026002?=C:F641
+   CV_Boot_SPI:L026005?=C:F656
+   CV_Boot_SPI:L026009?=C:F66E
+   CV_Boot_SPI:L026010?=C:F683
+   CV_Boot_SPI:L026014?=C:F689
+   CV_Boot_SPI:L026015?=C:F698
+   CV_Boot_SPI:L026021?=C:F6CF
+   CV_Boot_SPI:L026025?=C:F6BF
+   CV_Boot_SPI:L026026?=C:F71E
+   CV_Boot_SPI:L026027?=C:F6EF
+   CV_Boot_SPI:L026030?=C:F71A
+   CV_Boot_SPI:L026060?=C:F6CB
+   CV_Boot_SPI:SPIBIT=C:F003
+   CV_Boot_SPI:XClearLoop?done?=C:F051
+   CV_Boot_SPI:XClearLoop?repeat?=C:F043
+   CV_Boot_SPI:XInitLoop?done?=C:F036
+   CV_Boot_SPI:XInitLoop?repeat?=C:F020
+   CV_Boot_SPI:__c51_init_data=C:F010
+   CV_Boot_SPI:__c51_program_startup=C:F054
+   CV_Boot_SPI:__str_0=C:F732
+   CV_Boot_SPI:_getbyte_j_1_83=D:0008
+   CV_Boot_SPI:_loadintelhex_address_1_103=D:000E
+   CV_Boot_SPI:_loadintelhex_checksum_1_103=D:0013
+   CV_Boot_SPI:_loadintelhex_echo_1_103=D:0015
+   CV_Boot_SPI:_loadintelhex_j_1_103=D:0010
+   CV_Boot_SPI:_loadintelhex_n_1_103=D:0014
+   CV_Boot_SPI:_loadintelhex_size_1_103=D:0011
+   CV_Boot_SPI:_loadintelhex_type_1_103=D:0012
+   CV_Boot_SPI:_str2hex_sloc0_1_0=D:0017
+   CV_Boot_SPI:forever?home?=C:F057
+   CV_Boot_SPI:load_next_byte=C:F293
+   gptrget:codeptr?=C:F760
+   gptrget:dataptrrestore?=C:F757
+   gptrget:pdataptr?=C:F75D
+   gptrget:xdataptr?=C:F763
