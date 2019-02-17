@@ -1,7 +1,0 @@
-code_start=0xf000
-path=C:\Source\call51\Bin\..\lib\small
-lib=libc51.lib
-lib=libint.lib
-lib=liblong.lib
-lib=libfloat.lib
-obj=CV_Boot_SPI.obj

@@ -1,6 +1,0 @@
-path=C:\Source\call51\Bin\..\lib\small
-lib=libc51.lib
-lib=libint.lib
-lib=liblong.lib
-lib=libfloat.lib
-obj=LTC2308_test.obj
