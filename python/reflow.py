@@ -20,7 +20,7 @@ server = smtplib.SMTP( "smtp.gmail.com", 587 )
 
 server.starttls()
 
-server.login( 'brandonbwanakocha@gmail.com', 'ycdrvakkwkbfpgji' )
+server.login( 'brandonbwanakocha@gmail.com', 'some_password' )
 
 # End of email Shenanigans--------------------------------------------------------------------------------------------------------
 
@@ -75,7 +75,7 @@ ser = serial.Serial(
     bytesize=serial.EIGHTBITS
 )
 
-client = nexmo.Client(key='f7cc0105', secret='skbMFLX1yz0rGVZc')
+client = nexmo.Client(key='some_key', secret='some_secret')
 
 
 def SendMail(ImgFileName):
@@ -96,7 +96,7 @@ def SendMail(ImgFileName):
     s.ehlo()
     s.starttls()
     s.ehlo()
-    s.login('brandonbwanakocha@gmail.com', 'ycdrvakkwkbfpgji')
+    s.login('brandonbwanakocha@gmail.com', 'some_password')
     s.sendmail('brandonbwanakocha@gmail.com', 'brendonbk81@gmao;.com', msg.as_string())
     s.quit()
 
@@ -275,7 +275,7 @@ def runPlotter():
 
 def runText():
     InitialTime = int(round(time.time()*1000))
-    client = nexmo.Client(key='f7cc0105', secret='skbMFLX1yz0rGVZc')
+    client = nexmo.Client(key='pass_key', secret='some_secret')
    
 
     
