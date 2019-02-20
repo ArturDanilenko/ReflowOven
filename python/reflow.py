@@ -1,3 +1,6 @@
+
+#This code uses the Multithreading technique to run the plotter and a separate infinite loop at the same time.
+
 import serial
 import nexmo
 import numpy as np
@@ -28,7 +31,7 @@ server.login( 'brandonbwanakocha@gmail.com', 'some_password' )
 global InitialTime
 InitialTime = int(round(time.time()*1000))
 
-#Initialize the run times dict
+#Initialize the run times dict. 
 runTimes = {
     0: 0,
     1: 1,
@@ -37,7 +40,7 @@ runTimes = {
     4: 4,
     5: 5,
     }
-
+# This dict contains flags that tell us whether we have already sent texts for a state atleast once.
 stateMasks = {
     0: 0,
     1: 0,
@@ -45,7 +48,7 @@ stateMasks = {
     3: 0,
     4: 0,
     5: 0,
-    6: 0,
+    6: 0,    #This one is only one when we have entered state 5. this serves to tell us that we returned to state zero after a successful reflow process.
     }
 
 
@@ -100,7 +103,8 @@ def SendMail(ImgFileName):
     s.sendmail('brandonbwanakocha@gmail.com', 'brendonbk81@gmao;.com', msg.as_string())
     s.quit()
 
-    
+
+ # This function selects what messege to send depending on state and whether we have sent a text in that state before.
 def messageControl(State, statemask):
     state0 = 0
     state1 = 1
@@ -214,7 +218,7 @@ def messageControl(State, statemask):
         return True
 
 
-   
+#Thread in which we run matplot.   
 def runPlotter():
     xsize=900
     ysize = 250
@@ -235,7 +239,7 @@ def runPlotter():
             
             yield t, val
            
-        
+       
     def run(data):
         # update the data
         t,y = data
@@ -246,7 +250,7 @@ def runPlotter():
                 # Scroll to the left.
                 ax.set_xlim(t-xsize, t)
             line.set_data(xdata, ydata)
-            plt.savefig('reflowprofile.png')
+            plt.savefig('reflowprofile.png') # Save every update to the figure.
             
         return line,
 
@@ -272,7 +276,7 @@ def runPlotter():
 #os.system('welcome.mp3')           
 #os.system('enterState1.mp3')
 
-
+# This thread acquires the state from serial port and then sends a text message depending on what state we are in.
 def runText():
     InitialTime = int(round(time.time()*1000))
     client = nexmo.Client(key='pass_key', secret='some_secret')
@@ -280,8 +284,10 @@ def runText():
 
     
     while True:
-        lock.acquire()
+        # make sure only one thread is accessing serial at this given time to avoid conflict.
+        lock.acquire() 
         data_raw = ser.readline().decode().strip()
+        # ignore data if it is not an integer.
         if data_raw:
             result = data_raw
             splitVal = result.split()
