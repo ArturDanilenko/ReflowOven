@@ -126,7 +126,7 @@ temp: ds 1
 timer: ds 1
 state: ds 1
 sec: ds 1
-Aseconds: ds 3
+Seconds: ds 3
 WorkingTime: ds 1
 Temperature: ds 1
 SpeakerTimer: ds 1
@@ -340,16 +340,11 @@ DontDo:
 	;Display_BCD(speakertimer)
 	mov a, shortbeepflag
 	cjne a, #0, Beep
-;	mov a, actuallylongbeepflag
-;	cjne a, #0, Beep
-;	clr TR0
 	sjmp skiptheskip1
 ISR_done:
 	ljmp Timer2_ISR_done
 Beep:
 	setb TR0
-	;clr soundout
-;	cpl LEDRA.6
 	mov a, SpeakerTimer
 	add a, #0x01
 	cjne a, #0x02, KeepGoing
@@ -357,8 +352,6 @@ Beep:
 	mov SpeakerTimer, a
 	mov shortbeepflag, #0
 	clr TR0
-	;setb soundout
-;		cpl LEDRA.0
 	sjmp skiptheskip1
 KeepGoing: 
 	mov SpeakerTimer, a
@@ -374,7 +367,6 @@ skiptheskip1:
 LongBeep1:
 	cpl LEDRA.2
 	setb TR0
-;	clr soundout
 	mov a, SpeakerTimer
 	add a, #0x01
 	cjne a, #0x06, KeepGoing1
@@ -382,23 +374,18 @@ LongBeep1:
 	mov SpeakerTimer, a
 	mov longbeepflag, #0
 	clr TR0
-;	setb soundout
-	
 	sjmp skiptheskip
-	;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%where tf do we jump
 KeepGoing1: 
 	mov SpeakerTimer, a
 	setb TR0
 	sjmp skipbeep
 skiptheskip:	
-	mov a, actuallylongbeepflag
+	mov a, sixshortbeepsflag
 	cpl LEDRA.1
 	cjne a, #0, LongBeep2
-	;clr TR0
 	sjmp skipbeep
-LongBeep2:
+DoTheShortBeep:
 	setb TR0
-;	clr soundout
 	mov a, SpeakerTimer
 	add a, #0x01
 	cjne a, #0x02, KeepOff1
@@ -418,16 +405,15 @@ KeepOff:
 	mov SpeakerTimer, a
 	mov a, counter
 	add a, #1
-	cjne a, #6, sigmabaulz
-	mov actuallylongbeepflag, #0
+	cjne a, #6, resetthisthing
+	mov sixshortbeepsflag, #0
 	setb TR0
-sigmabaulz: 
+resetthisthing: 
 	mov counter, a
 	clr TR0
-;	setb soundout
 	cpl LEDRA.2
 	sjmp skipbeep
-	;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%where tf do we jump
+
 KeepGoing2: 
 	cpl LEDRA.6
 	mov SpeakerTimer, a
@@ -441,8 +427,8 @@ skipbeep:
 skipmorebeeps:
 	clr a
 	;=====================Display=============================================
-	mov x+0, Aseconds+0
-	mov x+1, Aseconds+1
+	mov x+0, Seconds+0
+	mov x+1, Seconds+1
 	mov x+2, #0
 	mov x+3, #0
 ;
@@ -477,36 +463,28 @@ skipmorebeeps:
 	
 	
 Timer2_ISR_da:
-	mov a, seconds
+	mov a, Quarters
 	add a, #1
 	cjne a, #PARAM, NoTReset
-	mov seconds, #0
-	mov a, Aseconds
+	mov Quarters, #0
+	mov a, Seconds
 	add a, #1
-	mov Aseconds, a
+	mov Seconds, a
 	sjmp skipresethere
 NoTReset:
-	mov seconds, a
+	mov Quarters, a
 skipresethere:
-	
 	jb KEY.3, startnormal
 	Wait_Milli_Seconds(#50)
-;	jb KEY.3, startnormal
-	cpl LEDRA.3
 	mov WorkingTime, #0x00
 	mov shortbeepflag, #0
 	mov longbeepflag, #0
-	mov actuallylongbeepflag, #0
+	mov sixshortbeepsflag, #0
 	mov speakertimer, #0
-	mov seconds, #0
+	mov Quarters, #0
 	mov state, #0x00
-;	mov timer, #0x00
-;	mov sec, #0x01
-;	mov mf, #0
-	mov Aseconds, #0
+	mov Seconds, #0
 	clr pwmout
-;	clr TR2
-;	clr TR0
 	
 startnormal:
 Timer2_ISR_done:
@@ -543,7 +521,7 @@ MainProgram:;============================MAIN===================================
 	mov sec, #0x01
 	mov minutes, #0
 	mov mf, #0
-	mov Aseconds, #0
+	mov Seconds, #0
 	mov WorkingTime, #0x00
 	mov shortbeepflag, #0
 	mov longbeepflag, #0
@@ -608,17 +586,16 @@ loop_b:;======================================================FOREVER===========
  ;=======================================================STATE 0========================================
 ResetState:
 	cjne a, #select, RampToSoakState
-;Display Time Soak
-
-	mov minutes, #0				;set timer to zero until state 1 is active
-	mov seconds, #0
+	mov minutes, #0
+	mov Quarters, #0
+	mov WorkingTime, #0
 	jnb button1, Pathnextstate
 	jnb button2, PathTempSoakAdjust
 	jnb button3, PathTimeSoakAdjust
 	jnb button4, PathTempReflowAdjust
-	jnb button5, PathTimeReflowAdjust ; TimeReflowAdjust jump
-
+	jnb button5, PathTimeReflowAdjust
 	sjmp RampToSoakState
+	
 PathTempSoakAdjust:
 	lcall TempSoakAdjust
 	sjmp SkipSetup1
@@ -636,80 +613,58 @@ PathNextState:
 SkipSetup1:;=====================CHANGE  OF STATES==============================================
 	ljmp forever
 
-	;mov Seconds, #0x00
-	;mov minutes, #0
-RampToSoakState:	;==============================STATE 1================================================
+RampToSoakState:
 	cjne a, #RampToSoak, PreHeatState
 	mov WorkingTime, #0x28
-
-  ;  mov sec, #0
- ;=============================Checking ih current temp has reaches soak temp==========================================   
 	mov x, RealTemp
 	mov x+1, #0
 	mov x+2, #0
 	mov x+3, #0
-
-	;mov a, temp_soak
-	;subb a, #0x0a
-	;mov temperature, a
-	;mov a, state
 	mov y, temp_soak
 	mov y+1, #0
 	mov y+2, #0
 	mov y+3, #0
 	lcall x_lt_y
-;====================================If its reached, move on to the next state, if not abort if 60 seconds passed=============
 	jnb	mf, nextstatepath
-	
-	mov a, Aseconds
+	mov a, Seconds
     cjne a, #0x3c, SkipSetup1
     mov y, #0x3c
 	lcall x_lt_y
 	jnb mf, skipsetup1
-	
     ljmp abort
 
-PreHeatState:;====================================================STATE 2===========================================
+PreHeatState:
 	cjne a, #PreHeat, RampToHeatState
 	mov WorkingTime, #0x0a
-	mov a, Aseconds
+	mov a, Seconds
 	cjne a, Time_Soak, SkipSetup
 	lcall nextstate
-RampToHeatState:;====================================================STATE 3===========================================
+RampToHeatState:
 	cjne a, #RampToPeak, ReflowState
 	mov WorkingTime, #0x28
 	mov x, RealTemp
 	mov x+1, #0
 	mov x+2, #0
 	mov x+3, #0
-	
 	mov y, temp_refl
 	mov y+1, #0
 	mov y+2, #0
 	mov y+3, #0
 	lcall x_lt_y
-			
 	jnb	mf, nextstate
 	sjmp SkipSetup
+	
 ReflowState:
  	cjne a, #Reflow, CoolingState
-
  	mov WorkingTime, #0x14
-	
-	;subb a, #0x0a
-	;	mov a, Aseconds
-   ; cjne a, #0x3c, nextstate
     mov y, RealTemp
     mov y + 1, #0
     mov y + 2, #0
     mov y + 3, #0
-    
     Load_Y(0xeb)
 	lcall x_lt_y
 	jnb mf, nextstate
-	
-   ; ljmp abort
-	mov a, Aseconds
+	mov a, Seconds
 	cjne a, Time_Refl, SkipSetup
 	lcall nextstate
 nextstatepath:
@@ -721,60 +676,46 @@ CoolingState:
 	mov x+1, #0
 	mov x+2, #0
 	mov x+3, #0
-
 	mov y, #0x3c
 	mov y+1, #0
 	mov y+2, #0
 	mov y+3, #0
 	lcall x_lt_y
-	
 	clr fan ; turn fan on
-			
 	jb	mf, nextstate
 	
 SkipSetup:;=====================CHANGE  OF STATES==============================================
 	
 	ljmp forever
-nextstate: ;=====================CHANGE  OF STATES==============================================
+nextstate:
 	Wait_Milli_Seconds(#50)
-	mov seconds, #0
-	mov Aseconds, #0
+	mov Quarters, #0
+	mov Seconds, #0
 	mov a, state
 	add a, #1
 	cjne a, #6, NoStateReset
-	
-	lcall actuallylongbeep
+	lcall sixshortbeepsflag
 	mov state, #0
-	
-
 	ljmp SkipSetup
-abort: ;=================================ABORT1=====================================================
+abort: 
 	mov state, #0
 	mov WorkingTime, #0x00
-	mov Aseconds, #0
+	mov Seconds, #0
 	clr Pwmout
 	ljmp SkipSetup
-;====================================================PATHS==(if ljmp is outside of bounds)==============================================
-
-NoStateReset:;=====================STATE OVERFLOW==============================================
+NoStateReset:
 	mov state, a
-	;cpl LEDRA.7
-	cjne a, #5, SWAG4DAYZ
+	cjne a, #5, shortbeepcall
 	lcall longbeep
-;	lcall shortbeep
-	;
-	sjmp skipswag
-SWAG4DAYZ:
+	sjmp skipcall
+shortbeepcall:
 	lcall shortbeep
-;	lcall longbeep
-;	lcall actuallylongbeep
-skipswag:	
+skipcall:	
 	ljmp SkipSetup	
 
 ReadTemperature: 
 	Read_ADC_Channel(0)
 	volt2ctemp(cTemp) 
-;	mov cTemp, #25
 	Read_ADC_Channel(3)
 	volt2htemp(hTemp)
  
@@ -959,11 +900,9 @@ TimeReflowNotOverflow:;=====================Soak time no overflow===============
 
 PWMmodule:
 	mov a, sec
-;	
 	cjne a, #40, DontReset
 	mov sec, #0
 BackUp:	
-;	mov a, sec
 	mov x, sec
 	mov x+1, #0
 	mov x+2, #0
@@ -974,34 +913,27 @@ BackUp:
 	mov y+2, #0
 	mov y+3, #0
 	lcall x_lteq_y
-;====================================If its reached, move on to the next state, if not abort if 60 seconds passed=============
 	jb	mf, SetPwmFlagOn
 	clr a
 	mov PWMFlag, a
-	
-;	cpl SOUND_OUT ; Connect speaker to P3.7!
 	sjmp Power
 SetPwmFlagOn:
-
 	setb PWMFlag
 Power: 	
 	mov a, sec
 	add a, #1
 	mov sec, a
-;	cpl LEDRA.3
 	mov a, PWMFlag
 	cjne a, #0, TurnITON
 	clr PWMout
-	
 	ret
-	
 TurnItOn:
 	setb PWMout
 	ret
-	
 DontReset:
 	mov sec, a
 	sjmp BackUp
+	
 shortbeep:
 	mov ShortBeepFlag, #1
 	cpl LEDRA.5
